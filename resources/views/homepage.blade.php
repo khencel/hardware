@@ -352,9 +352,19 @@
         $(document).ready(updateDateTime);
     </script>
     <script>
-        
+        document.getElementById('generate-barcode').addEventListener('click', function() {
+            var barcode = generateBarcode();
+            document.getElementById('food_barcode').value = barcode;
+        });
+    
+        function generateBarcode() {
+            var barcode = '';
+            for (var i = 0; i < 13; i++) {
+                barcode += Math.floor(Math.random() * 10); // Random digit
+            }
+            return barcode;
+        }
     </script>
-
 </body>
 
 </html>

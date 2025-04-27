@@ -23,7 +23,7 @@
         <form action="{{ route('foods.store') }}" method="POST">
             @csrf
 
-            <!-- Name -->
+            {{--  <!-- Name -->  --}}
             <div class="mb-3">
                 <label for="food_name" class="form-label">Item Name</label>
                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="food_name" name="name"
@@ -33,7 +33,7 @@
                 @enderror
             </div>
 
-            <!-- Category -->
+            {{--  <!-- Category -->  --}}
             <div class="mb-3">
                 <label for="food_category" class="form-label">Category</label>
                 <select class="form-select @error('category_id') is-invalid @enderror" id="food_category"
@@ -50,7 +50,7 @@
                 @enderror
             </div>
 
-            <!-- Price -->
+            {{--  <!-- Price -->  --}}
             <div class="mb-3">
                 <label for="food_price" class="form-label">Price</label>
                 <input type="number" class="form-control @error('price') is-invalid @enderror" id="food_price"
@@ -60,7 +60,29 @@
                 @enderror
             </div>
 
-            <!-- Availability -->
+            {{--  <!--qunatity --}}
+            <div class="mb-3">
+                <label for="food_quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control @error('quantity') is-invalid @enderror" id="food_quantity"
+                    name="quantity" value="{{ old('quantity') }}" step="1" min="0">
+                @error('quantity')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{--  <!-- barcode -->  --}}
+            <div class="mb-3">
+                <label for="food_barcode" class="form-label">Barcode</label>
+                <div class="input-group">
+                    <input type="text" class="form-control @error('barcode') is-invalid @enderror" id="food_barcode"
+                        name="barcode" value="{{ old('barcode', rand(1000000000000, 9999999999999)) }}" maxlength="13" placeholder="Enter barcode">
+                    <button class="btn btn-outline-secondary" type="button" id="generate-barcode">Generate</button>
+                </div>
+                @error('barcode')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+            {{--  <!-- Availability -->  --}}
             <div class="mb-3">
                 <label for="food_availability" class="form-label">Availability</label>
                 <select class="form-select @error('is_available') is-invalid @enderror" id="food_availability"
@@ -77,3 +99,5 @@
         </form>
     </div>
 @endsection
+
+

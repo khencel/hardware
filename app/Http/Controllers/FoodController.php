@@ -12,7 +12,7 @@ class FoodController extends Controller
     public function index(Request $request)
     {
         // Check if the user has the 'food' permission
-        $query = Food::with('category');
+        $query = Food::with('category')->latest();
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
@@ -33,14 +33,24 @@ class FoodController extends Controller
 
     public function store(Request $request)
     {
+        dd($request->all());
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:food_categories,id',
             'price' => 'required|numeric|min:0',
             'is_available' => 'required|boolean',
+            'quantity' => 'required|integer|min:0',
+            'barcode' => 'required|string|size:13|unique:foods,barcode',
         ]);
 
-        Food::create($request->all());
+        Food::create([
+            'name' => $request->name,
+            'category_id' => $request->category_id,
+            'price' => $request->price,
+            'is_available' => $request->is_available,
+            'quantity' => $request->quantity,
+            'barcode' => $request->barcode,
+        ]);
 
         return redirect()->route('foods.index')->with('success', 'Food added successfully.');
     }
@@ -58,9 +68,20 @@ class FoodController extends Controller
             'category_id' => 'required|exists:food_categories,id',
             'price' => 'required|numeric|min:0',
             'is_available' => 'required|boolean',
+            'quantity' => 'required|integer|min:0',
+            'barcode' => 'required|string|size:13|unique:foods,barcode,' . $food->id,
         ]);
 
-        $food->update($request->all());
+        // Update the food item with the validated data
+        $food->update([
+            'name' => $request->name,
+            'category_id' => $request->category_id,
+            'price' => $request->price,
+            'is_available' => $request->is_available,
+            'quantity' => $request->quantity,
+            'barcode' => $request->barcode,
+        ]);
+
 
         return redirect()->route('foods.index')->with('success', 'Food updated successfully.');
     }

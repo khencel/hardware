@@ -6,6 +6,7 @@ use App\Models\Food;
 use App\Models\FoodCategory;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Faker\Factory as Faker;
 
 class FoodSeeder extends Seeder
 {
@@ -14,6 +15,7 @@ class FoodSeeder extends Seeder
      */
     public function run(): void
     {
+        $faker = Faker::create();
         $foods = [
             ['name' => 'Cheeseburger', 'category' => 'Fast Food', 'price' => 150.00],
             ['name' => 'French Fries', 'category' => 'Fast Food', 'price' => 80.00],
@@ -31,6 +33,8 @@ class FoodSeeder extends Seeder
                     'category_id' => $category->id,
                     'price' => $food['price'],
                     'is_available' => true,
+                    'barcode' => $faker->unique()->numerify('480###########'),
+                    'quantity' => rand(1, 100) // Random quantity between 1 and 100
                 ]);
             }
         }

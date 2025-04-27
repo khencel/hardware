@@ -18,7 +18,7 @@
                 </a>
             </div>
             <div class="col-6">
-                <div class="row">
+                <div class="row justify-content-end right">
                     <form method="GET" action="{{ route('foods.index') }}" class="mb-3 d-flex align-items-center gap-2">
                     <div class="col-2">
                         <label for="category" class="form-label mb-0">Filter by:</label>
@@ -50,9 +50,9 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($foods as $food)
+                @forelse ($foods as $key => $food)
                     <tr>
-                        <td>{{ $food->id }}</td>
+                        <td>{{ $key + 1 + (($foods->currentPage() - 1) * $foods->perPage()) }}</td>
                         <td>{{ $food->name }}</td>
                         <td>{{ $food->category->name }}</td>
                         <td>₱{{ number_format($food->price, 2) }}</td>

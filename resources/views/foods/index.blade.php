@@ -11,9 +11,32 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <a href="{{ route('foods.create') }}" class="btn btn-primary mb-3">
-            <i class='bx bx-plus'></i> Add Item
-        </a>
+        <div class="row">
+            <div class="col-6">
+                <a href="{{ route('foods.create') }}" class="btn btn-primary mb-3">
+                    <i class='bx bx-plus'></i> Add Item
+                </a>
+            </div>
+            <div class="col-6">
+                <div class="row">
+                    <form method="GET" action="{{ route('foods.index') }}" class="mb-3 d-flex align-items-center gap-2">
+                    <div class="col-2">
+                        <label for="category" class="form-label mb-0">Filter by:</label>
+                    </div>
+                    <div class="col-10">
+                        <select name="category" id="category" class="form-select w-auto" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    </form
+                </div>
+            </div>
+        </div>
 
         <table class="table table-bordered">
             <thead class="table-dark">

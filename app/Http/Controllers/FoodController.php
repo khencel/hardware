@@ -9,10 +9,20 @@ use App\Models\FoodCategory;
 
 class FoodController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $foods = Food::with('category')->orderBy('id', 'desc')->paginate(5); 
-        return view('foods.index', compact('foods'));
+        // Check if the user has the 'food' permission
+        $query = Food::with('category');
+
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        $foods = $query->paginate(10)->withQueryString(); // keep query string on pagination
+
+        $categories = FoodCategory::all();
+
+        return view('foods.index', compact('foods', 'categories'));
     }
 
     public function create()
@@ -61,8 +71,9 @@ class FoodController extends Controller
         return redirect()->route('foods.index')->with('success', 'Food deleted successfully.');
     }
 
-    public function getItemByCategory($category_id){
-        $data = Food::where('category_id',$category_id)->get();
+    public function getItemByCategory($category_id)
+    {
+        $data = Food::where('category_id', $category_id)->get();
         return $data;
     }
 }

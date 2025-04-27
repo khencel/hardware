@@ -193,13 +193,17 @@ class UserController extends Controller
         }
     }
 
+    //edit profile view
+    public function edit()
+    {
+        return view('account.profile');
+    }
+
     public function updateProfile(UpdateProfileRequest $request)
     {
         try {
             $user = auth()->user(); // Get the currently authenticated user
-
             $userData = $request->only(['firstname', 'lastname', 'username', 'email', 'is_active']);
-
             // if ($request->filled('password')) {
             //     $userData['password'] = Hash::make($request->password);
             // }
@@ -217,21 +221,56 @@ class UserController extends Controller
                 $userData['image'] = $imagePath; // Store the relative path to the image
             }
 
-            if (!empty($request->void_password)) {
-                $userData['void_password'] = Hash::make($request->void_password);
-            }
-
-            if ($request->filled('role')) {
-                $role = $user->roles()->first();
-                $role->update([
-                    'role_id' => $request->role
-                ]);
-            }
 
             // Update user details
-            $user->update($userData);
+            if ($user instanceof User) {
+                $user->update($userData);
+            } else {
+                throw new Exception('Authenticated user is not a valid User instance.');
+            }
 
             return back()->with('success', 'Profile updated successfully!');
+        } catch (Exception $e) {
+            return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
+    }
+
+    public function editPassword()
+    {
+        return view('account.change_password');
+    }
+    public function updatePassword(Request $request)
+    {
+
+        // Validate the incoming request data
+        $request->validate([
+            'new_password' => 'required|string|min:8|confirmed', // Validate new password
+            'new_password_confirmation' => 'required|string|same:new_password', // Confirm new password
+        ], [
+            'new_password.confirmed' => 'The new password  and confirmation password does not match.',
+            'new_password_confirmation.same' => 'The confirmation password must match the new password.',
+        ]);
+
+        try {
+            // Get the currently authenticated user
+            $user = auth()->user();
+
+            // Check if the authenticated user is an instance of User
+            if ($user instanceof User) {
+                // Verify if the current password matches the one stored in the database
+                if (! Hash::check($request->current_password, $user->password)) {
+                    return back()->with('error', 'The current password is incorrect.');
+                }
+
+                $user->password = Hash::make($request->new_password);
+
+                $user->save();
+
+
+                return back()->with('success', 'Password updated successfully! You will be logged out shortly for security reasons.');
+            } else {
+                throw new Exception('Authenticated user is not a valid User instance.');
+            }
         } catch (Exception $e) {
             return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }

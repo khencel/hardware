@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/datepicker.css') }}" />
     <!-- Bootstrap Select CSS -->
     <link rel="stylesheet"
@@ -161,13 +161,9 @@
                     </div>
                 </div>
             </div>
-            <div class="profile-details">
-                <img src="{{ auth()->user()->image ? asset('storage/' . auth()->user()->image) : 'https://media.licdn.com/dms/image/v2/C5603AQF1WA6mvPPN7g/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1655827862331?e=2147483647&v=beta&t=A0HGyBn7tNazpYnwQoiEMf4K_-fa9AZXAOLuQ-wXg0A' }}"
-                    alt="">
-                <a href="/profile" class="admin_name">
-                    {{ auth()->check() ? auth()->user()->firstname . ' ' . auth()->user()->lastname : '' }}
-                </a>
-            </div>
+
+            {{--  profile details  --}}
+            <x-profile-details />
         </nav>
 
        
@@ -257,6 +253,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     @yield('js')
+    @yield('scripts')
     <script>
         $(document).ready(function() {
             // checkPassword();
@@ -353,6 +350,9 @@
         }
 
         $(document).ready(updateDateTime);
+    </script>
+    <script>
+        
     </script>
 
 </body>

@@ -12,23 +12,25 @@
     </style>
     <div class="container mt-5">
         <h2>Update Profile</h2>
-        @if (session()->has('success'))
-            <div class="alert alert-success">
-                {{ session()->get('success') }}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+
         <form id="updateProfileForm" action="{{ route('users.profile') }}" method="POST" enctype="multipart/form-data">
             @csrf
-
+            @method('PUT') 
             <div class="row">
                 <!-- First Name -->
                 <div class="col-md-6 mb-3">
                     <label for="firstname" class="form-label">First Name</label>
                     <input type="text" class="form-control @error('firstname') is-invalid @enderror" id="firstname"
                         name="firstname" value="{{ old('firstname', auth()->user()->firstname) }}">
-                    @error('firstname')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                        @error('firstname')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                 </div>
 
                 <!-- Last Name -->

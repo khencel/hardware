@@ -24,6 +24,13 @@
                             <span class="badge {{ $row[$column] ? 'bg-success' : 'bg-danger' }}">
                                 {!! $row[$column] ? '<i class="bx bx-check"></i>' : '<i class="bx bx-x"></i>' !!}
                             </span>
+                        @elseif ($column == 'created_at')
+                            {{ \Carbon\Carbon::parse($row[$column])->format('d M Y') }}
+                        @elseif ($column == 'status')
+                            <a href="javascript:void(0);" class="status-toggle" data-id="{{ $row->id }}" data-status="{{ $row->status }}"
+                                style="color: {{ $row->status == 'Active' ? 'green' : 'red' }};">
+                                {!! $row->status == 'Active' ? 'Active' : 'Inactive' !!}
+                            </a>
                         @else
                             {{ $row[$column] ?? '-' }}
                         @endif
@@ -31,8 +38,8 @@
                 @endforeach
                 <td>
                     @if (!empty($editRoute))
-                        <a href="{{ route($editRoute, $row->id) }}" class="btn btn-warning btn-sm">
-                            <i class="bx bx-pencil"></i> Edit
+                        <a href="{{ route($editRoute, $row->id) }}" class="btn btn-warning btn-sm d-flex align-items-center justify-content-center px-3 py-2 rounded-3 shadow-sm border-0 transition-all hover:bg-warning hover:text-white">
+                            <i class="bx bx-pencil me-2"></i> <span class="d-none d-sm-inline">Edit</span>
                         </a>
                     @endif
                     @if (!empty($deleteRoute))
@@ -58,3 +65,40 @@
 @if ($rows instanceof \Illuminate\Pagination\LengthAwarePaginator)
     {{ $rows->links() }}
 @endif
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const statusElements = document.querySelectorAll('.status-toggle');
+            statusElements.forEach(function (statusElement) {
+                statusElement.addEventListener('click', function () {
+                    const status = statusElement.dataset.status === 'Active' ? 'Inactive' : 'Active';
+                    const userId = statusElement.dataset.id;
+    
+                    statusElement.style.color = (status === 'Active') ? 'green' : 'red';
+                    statusElement.innerHTML = status;
+    
+                    fetch(`/user/${userId}/toggle-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            status: status
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                       alert(data.message);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Revert status if AJAX fails
+                        alert('Failed to toggle status!');
+                    });
+                });
+            });
+        });
+    </script>
+@endsection

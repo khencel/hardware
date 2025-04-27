@@ -101,12 +101,9 @@
             <div class="search-box">
                 <span>Current Date and Time: {{ \Carbon\Carbon::now()->format('F d, Y h:i A') }}</span>
             </div>
-            <div class="profile-details">
-                <img src="https://media.licdn.com/dms/image/v2/C5603AQF1WA6mvPPN7g/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1655827862331?e=2147483647&v=beta&t=A0HGyBn7tNazpYnwQoiEMf4K_-fa9AZXAOLuQ-wXg0A"
-                    alt="">
-                <span class="admin_name">{{ auth()->check() ? auth()->user()->firstname . ' ' . auth()->user()->lastname : '' }}</span>
-                <i class='bx bx-chevron-down'></i>
-            </div>
+
+            {{--  profile details  --}}
+            <x-profile-details />
         </nav>
 
         <div class="home-content">

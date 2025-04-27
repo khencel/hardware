@@ -48,6 +48,7 @@ Route::prefix('users')->group(function () {
     Route::post('/restore/{id}', [UserController::class, 'restore']); // Restore a soft-deleted user
 });
 
+
 Route::get('/roles', GetRoles::class)->name('role.index');
 
 Route::apiResource('room-categories', RoomCategoryController::class);

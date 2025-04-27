@@ -4,6 +4,14 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\FoodSeeder;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\RoomSeeder;
+use Database\Seeders\DiscountSeeder;
+use Database\Seeders\AdminUserSeeder;
+use Database\Seeders\InventorySeeder;
+use Database\Seeders\FoodCategorySeeder;
+use Database\Seeders\SupervisorUserSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +20,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $this->call([
+            AdminUserSeeder::class,
+            DiscountSeeder::class,
+            FoodCategorySeeder::class,
+            FoodSeeder::class,
+            InventorySeeder::class,
+            RoleSeeder::class,
+            // RoomSeeder::class,
+            SupervisorUserSeeder::class,
+            // Add your other seeders here
+        ]);
     }
 }

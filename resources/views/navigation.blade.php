@@ -82,6 +82,13 @@
                 'icon' => 'bx bx-calculator',
                 'roles' => [],
             ],
+            [
+                'url' => '/users',
+                'name' => 'user-management',
+                'label' => 'User Management',
+                'icon' => 'bx bx-user-circle',
+                'roles' => [],
+            ],
             // [
             //     'url' => '/payment-methods',
             //     'name' => 'payment-methods',

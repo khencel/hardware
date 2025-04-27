@@ -23,6 +23,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\FoodCategoryController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ReservationDetailsController;
 use App\Http\Controllers\Rooms\RoomCategoryController;
 use App\Http\Controllers\UserVerifyPasswordController;
@@ -48,6 +49,7 @@ Route::get('/', function () {
 Route::get('/roles', GetRoles::class)->name('role.index');
 Route::post('/login', Login::class)->name('auth.login');
 
+
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/pos', function () {
@@ -59,5 +61,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('foods', FoodController::class);
     Route::resource('food-categories', FoodCategoryController::class);
     Route::resource('customers', CustomerController::class);
+    Route::resource('users', UserManagementController::class);
     Route::resource('purchase-orders', PurchaseOrderController::class);
+
+    Route::get('/profile', [UserController::class, 'edit'])->name('profile.view'); //edit profile
+    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('users.profile');
+
+    Route::get('/change-password', [UserController::class, 'editPassword'])->name('password.change');
+    Route::post('/change/password', [UserController::class, 'updatePassword'])->name('password.update');
+    //toggle status
+    Route::post('user/{id}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('user.toggle-status');
 });

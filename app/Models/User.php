@@ -73,4 +73,29 @@ class User extends Authenticatable
     {
         return $query->where('is_active', true);
     }
+
+    /**
+     * Get the full name (firstname + lastname).
+     *
+     * @return string
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->firstname . ' ' . $this->lastname;
+    }
+
+    /**
+     * Get the user's role (you can modify this as per your needs).
+     *
+     * @return string
+     */
+    public function getRoleAttribute()
+    {
+        return $this->roles->isEmpty() ? 'No Role' : $this->roles->first()->role->name;
+    }
+
+    public function getStatusAttribute()
+    {
+        return $this->is_active == 1 ? 'Active' : 'Inactive';
+    }
 }

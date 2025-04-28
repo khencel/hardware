@@ -25,7 +25,6 @@
         <div class="row">
             <div class="col-7">
                 <div id="statusMessage" class="status-message"></div>
-        
                 <div class="products-section">
                     <div class="barcode-section">
                         <h2><img src="{{ asset('img/icon/barcode.png') }}" alt="Barcode Icon"  class="barcode-icon">Scan Barcode</h2>
@@ -59,39 +58,41 @@
                 </div>
             </div>
             <div class="col-5">
-                <div class="cart-section">
-                    <h2>Shopping Cart</h2>
-                    <table id="cartTable">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Price</th>
-                                <th>Qty</th>
-                                <th>Total</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="cartItems">
-                            <!-- Cart items will be added here -->
-                        </tbody>
-                    </table>
-                    
-                    <div class="cart-summary">
-                        <div class="summary-row">
-                            <span>Subtotal:</span>
-                            <span id="subtotal">$0.00</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Tax (7%):</span>
-                            <span id="tax">$0.00</span>
-                        </div>
-                        <div class="summary-row total-row">
-                            <span>Total:</span>
-                            <span id="total">$0.00</span>
-                        </div>
+                <div class="cart-table-container">
+                    <div class="cart-section">
+                        <h2>Shopping Cart</h2>
+                        <table id="cartTable">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartItems">
+                                <!-- Cart items will be added here -->
+                            </tbody>
+                        </table>
                         
-                        <button id="checkoutBtn" class="action-btn checkout-btn">Checkout</button>
-                        <button id="printReceiptBtn" class="action-btn print-btn" disabled>Print Receipt</button>
+                        <div class="cart-summary">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">$0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax (7%):</span>
+                                <span id="tax">$0.00</span>
+                            </div>
+                            <div class="summary-row total-row">
+                                <span>Total:</span>
+                                <span id="total">$0.00</span>
+                            </div>
+                            
+                            <button id="checkoutBtn" class="action-btn checkout-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Checkout</button>
+                            <button id="printReceiptBtn" class="action-btn print-btn" disabled> <img src="{{ asset('img/icon/printer.png') }}" alt="Barcode Icon" width="30" height="30">  Print Receipt</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,7 +107,7 @@
                 <!-- Receipt content will be dynamically generated -->
             </div>
             <div class="modal-actions">
-                <button id="actualPrintBtn" class="modal-btn print-receipt-btn">Print</button>
+                <button id="actualPrintBtn" class="modal-btn print-receipt-btn"><img src="{{ asset('img/icon/printing.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Print</button>
                 <button id="closeReceiptBtn" class="modal-btn close-receipt-btn">Close</button>
             </div>
         </div>

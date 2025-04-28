@@ -54,6 +54,9 @@ body.dark span {
     transition: all 0.3s ease;
 }
 
+.print-icon{
+    color:white;
+}
 .barcode-input {
     width: 100%;
     padding: 0.75rem;
@@ -147,6 +150,15 @@ body.dark span {
     background: #9ca3af;
     cursor: not-allowed;
 }
+.cart-table-container {
+    max-width: 600px;
+    overflow-y: auto;
+    margin-top: 1rem;
+}
+.cart-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
 .modal {
     display: none;
@@ -159,6 +171,8 @@ body.dark span {
 }
 
 .modal-content {
+    max-width: 500px;
+    margin: auto;
     background: white;
     padding: 2rem;
     border-radius: 1rem;
@@ -377,16 +391,16 @@ th {
 
 /* Button styling */
 .quantity-btn {
-    width: 40px; /* Set width and height to make the button a circle */
+    width: 15px; 
     height: 40px;
-    padding: 0; /* Remove inner padding */
-    font-size: 20px;
+    padding: 0; 
+    font-size: 15px;
     font-weight: bold;
     background-color: #fff;
     border: 2px solid #ccc;
     color: #333;
     cursor: pointer;
-    border-radius: 50%; /* Make the button circular */
+    border-radius: 50%; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -400,12 +414,12 @@ th {
 }
 
 .quantity-btn.minus::before {
-    font-size: 18px;
+    font-size: 10px;
     color: #333;
 }
 
 .quantity-btn.plus::before {
-    font-size: 18px;
+    font-size: 10px;
     color: #333;
 }
 
@@ -566,6 +580,7 @@ th {
 }
 
 .modal-content {
+    max-width:500px;
     background-color: white;
     margin: 5% auto;
     width: 350px;
@@ -653,6 +668,11 @@ th {
     color: white;
 }
 
+.close-receipt-btn {
+   color:white;
+   background-color: red;
+}
+
 .print-receipt-btn:hover {
     background-color: #0b7dda;
 }
@@ -682,6 +702,7 @@ th {
     
     .modal-content {
         width: 95%;
+        max-width: 500px;
     }
 }
 

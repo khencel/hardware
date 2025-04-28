@@ -171,7 +171,7 @@ body.dark span {
 }
 
 .modal-content {
-    max-width: 500px;
+    max-width: 500px !important;
     margin: auto;
     background: white;
     padding: 2rem;
@@ -720,6 +720,7 @@ th {
     }
     
     .modal-content {
+        max-width: 500px;
         position: absolute;
         left: 0;
         top: 0;

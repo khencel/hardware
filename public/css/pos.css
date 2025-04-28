@@ -1,0 +1,709 @@
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Import this Google font if not already */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* Light mode styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Dark mode styles */
+body.dark {
+    background-color: #525050eb;
+    color: white;
+}
+
+/* Optionally, style other elements for dark mode */
+body.dark .navbar {
+    background-color: #333;
+}
+
+body.dark h1 {
+    color: white !important;
+}
+
+body.dark h2 {
+    color: black !important;
+}
+
+body.dark th {
+    color: black !important;
+}
+
+body.dark span {
+    color: black !important;
+}
+
+.container-fluid {
+    padding: 2rem;
+}
+
+.products-section, .cart-section {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.barcode-input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.product-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+    background: #f0f4f8;
+}
+
+.cart-section table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+}
+
+.cart-section th,
+.cart-section td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cart-summary {
+    margin-top: 1.5rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.total-row {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.checkout-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.checkout-btn:hover {
+    background: #1d4ed8;
+}
+
+.print-btn {
+    background: #10b981;
+    color: white;
+}
+
+.print-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.modal-btn {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.print-receipt-btn {
+    background-color: #4ade80;
+    color: #fff;
+}
+
+.close-receipt-btn {
+    background-color: #f87171;
+    color: #fff;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+h1 {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    padding-left: 10px;
+    padding-bottom: 20px;
+    /* border-bottom: 1px solid #eee; */
+    color: #333;
+}
+
+.products-section {
+    padding-right: 20px;
+}
+
+/* General styles for the barcode section */
+.barcode-section {
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+.barcode-section .barcode-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    margin-bottom: 6px;
+}
+
+.barcode-section h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.barcode-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    outline: none;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.barcode-input:focus {
+    border-color: #4CAF50;
+    background-color: #f1fdf3;
+}
+
+.barcode-alert {
+    font-size: 14px;
+    color: red;
+    visibility: hidden;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+
+.barcode-alert.visible {
+    visibility: visible;
+}
+
+
+.barcode-input:focus {
+    border-color: #4CAF50;
+    background-color: #f1fdf3;
+}
+
+.barcode-input:hover {
+    border-color: #888;
+}
+
+.barcode-alert.error {
+    color: #e74c3c;
+}
+
+.barcode-alert.success {
+    color: #2ecc71;
+}
+
+.barcode-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.cart-section {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+}
+
+.product-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.product-card {
+    display: inline-block;
+    width: calc(33.33% - 10px);
+    margin: 5px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.product-card h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.product-card p {
+    margin: 0;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+/* General styles for the quantity cell */
+.quantity-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+/* Button styling */
+.quantity-btn {
+    width: 40px; /* Set width and height to make the button a circle */
+    height: 40px;
+    padding: 0; /* Remove inner padding */
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    color: #333;
+    cursor: pointer;
+    border-radius: 50%; /* Make the button circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Hover effect on buttons */
+.quantity-btn:hover {
+    background-color: #f1f1f1;
+    border-color: #888;
+}
+
+.quantity-btn.minus::before {
+    font-size: 18px;
+    color: #333;
+}
+
+.quantity-btn.plus::before {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Optional: Focus state for buttons (for accessibility) */
+.quantity-btn:focus {
+    outline: none;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+/* Optional: Disable the minus button when the quantity is 1 */
+.quantity-btn.minus:disabled {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Optional: Disable the plus button when quantity reaches a max limit */
+.quantity-btn.plus:disabled {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+
+
+
+.quantity-value {
+    margin: 0 8px;
+    width: 30px;
+    text-align: center;
+}
+
+.remove-btn {
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-btn:hover {
+    background-color: #ff0000;
+}
+
+.cart-summary {
+    margin-top: 20px;
+    border-top: 2px solid #ddd;
+    padding-top: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.total-row {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #333;
+}
+
+.checkout-btn {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    padding: 12px 25px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: auto;
+}
+
+.checkout-btn:hover {
+    background-color: #45a049;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 12px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.checkout-btn {
+    background-color: #4CAF50;
+}
+
+.checkout-btn:hover {
+    background-color: #45a049;
+}
+
+.print-btn {
+    background-color: #2196F3;
+}
+
+.print-btn:hover {
+    background-color: #0b7dda;
+}
+
+.status-message {
+    grid-column: 1 / -1;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    display: none;
+}
+
+.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    display: block;
+}
+
+.error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    display: block;
+}
+
+/* Alert styles */
+.barcode-alert {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+    display: none;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Receipt Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    width: 350px;
+    max-width: 95%;
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.receipt {
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.receipt-header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.receipt-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.receipt-header p {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.receipt-items {
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 10px;
+}
+
+.receipt-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-quantity {
+    margin-right: 10px;
+}
+
+.receipt-summary {
+    margin-bottom: 15px;
+}
+
+.receipt-total {
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+.receipt-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    border-top: 1px solid #eee;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.print-receipt-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.print-receipt-btn:hover {
+    background-color: #0b7dda;
+}
+
+.close-receipt-btn:hover {
+    background-color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    
+    .products-section {
+        padding-right: 0;
+    }
+    
+    .product-card {
+        width: calc(50% - 10px);
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .modal-content, .modal-content * {
+        visibility: visible;
+    }
+    
+    .modal-actions {
+        display: none;
+    }
+    
+    .modal-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none;
+        background-color: white;
+    }
+}

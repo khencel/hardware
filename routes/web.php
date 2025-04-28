@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Food;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,14 @@ Route::post('/login', Login::class)->name('auth.login');
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/pos', function () {
-        return view('pos.pos_order');
+        $products = Food::where('is_available', true)->get(); // Retrieve products where 'is_available' is true.
+
+        // Check if there are products available
+        if ($products->isEmpty()) {
+            return redirect()->back()->with('error', 'No products available.');
+        }
+
+        return view('pos.pos_order', compact('products'));
     });
 
     Route::post('/logout', Logout::class)->name('auth.logout');
@@ -71,4 +79,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/change/password', [UserController::class, 'updatePassword'])->name('password.update');
     //toggle status
     Route::post('user/{id}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('user.toggle-status');
+
+    //theme
+    Route::get('/set-theme/{theme}', function ($theme) {
+        session(['theme' => $theme]);
+        return redirect()->back();
+    });
 });

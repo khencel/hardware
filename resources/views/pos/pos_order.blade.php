@@ -4,438 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple POS System</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
-        }
-        
-        h1 {
-            grid-column: 1 / -1;
-            margin-top: 0;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-        
-        .products-section {
-            padding-right: 20px;
-        }
-        
-        .barcode-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .barcode-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        
-        .barcode-input:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
-        }
-        
-        .cart-section {
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            padding: 15px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        th {
-            background-color: #f2f2f2;
-            font-weight: 600;
-        }
-        
-        .product-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .product-card {
-            display: inline-block;
-            width: calc(33.33% - 10px);
-            margin: 5px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-color: white;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .product-card img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-        
-        .product-card h3 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
-            color: #333;
-        }
-        
-        .product-card p {
-            margin: 0;
-            font-weight: bold;
-            color: #4CAF50;
-        }
-        
-        .quantity-cell {
-            display: flex;
-            align-items: center;
-        }
-        
-        .quantity-btn {
-            background-color: #ddd;
-            border: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .quantity-btn:hover {
-            background-color: #ccc;
-        }
-        
-        .quantity-value {
-            margin: 0 8px;
-            width: 30px;
-            text-align: center;
-        }
-        
-        .remove-btn {
-            background-color: #ff5252;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .remove-btn:hover {
-            background-color: #ff0000;
-        }
-        
-        .cart-summary {
-            margin-top: 20px;
-            border-top: 2px solid #ddd;
-            padding-top: 15px;
-        }
-        
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .total-row {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 10px;
-            color: #333;
-        }
-        
-        .checkout-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background-color 0.2s;
-        }
-        
-        .checkout-btn:hover {
-            background-color: #45a049;
-        }
-        
-        .action-btn {
-            width: 100%;
-            padding: 12px;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.2s;
-        }
-        
-        .checkout-btn {
-            background-color: #4CAF50;
-        }
-        
-        .checkout-btn:hover {
-            background-color: #45a049;
-        }
-        
-        .print-btn {
-            background-color: #2196F3;
-        }
-        
-        .print-btn:hover {
-            background-color: #0b7dda;
-        }
-        
-        .status-message {
-            grid-column: 1 / -1;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            display: none;
-        }
-        
-        .success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            display: block;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            display: block;
-        }
-        
-        /* Alert styles */
-        .barcode-alert {
-            color: #721c24;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 10px;
-            display: none;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        /* Receipt Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            width: 350px;
-            max-width: 95%;
-            border-radius: 5px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-        
-        .receipt {
-            padding: 20px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        
-        .receipt-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        
-        .receipt-header h2 {
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .receipt-header p {
-            margin: 5px 0;
-            font-size: 12px;
-        }
-        
-        .receipt-items {
-            margin-bottom: 15px;
-            border-bottom: 1px dashed #ccc;
-            padding-bottom: 10px;
-        }
-        
-        .receipt-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .item-details {
-            flex: 1;
-        }
-        
-        .item-quantity {
-            margin-right: 10px;
-        }
-        
-        .receipt-summary {
-            margin-bottom: 15px;
-        }
-        
-        .receipt-total {
-            font-weight: bold;
-            font-size: 16px;
-            margin-top: 5px;
-        }
-        
-        .receipt-footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-        
-        .modal-actions {
-            display: flex;
-            border-top: 1px solid #eee;
-        }
-        
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background-color: #f5f5f5;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        
-        .print-receipt-btn {
-            background-color: #2196F3;
-            color: white;
-        }
-        
-        .print-receipt-btn:hover {
-            background-color: #0b7dda;
-        }
-        
-        .close-receipt-btn:hover {
-            background-color: #e0e0e0;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-            
-            .products-section {
-                padding-right: 0;
-            }
-            
-            .product-card {
-                width: calc(50% - 10px);
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .product-card {
-                width: 100%;
-            }
-            
-            .modal-content {
-                width: 95%;
-            }
-        }
-        
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            
-            .modal-content, .modal-content * {
-                visibility: visible;
-            }
-            
-            .modal-actions {
-                display: none;
-            }
-            
-            .modal-content {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                box-shadow: none;
-                background-color: white;
-            }
-        }
-    </style>
-
+    <link rel="stylesheet" href="{{ asset('css/pos.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </head>
-<body>
-    <div class="container-fluid">
-        <h1>Simple POS System</h1>
+<body class="{{ session('theme', 'light') }}">
+    <div class="container-fluid" style="padding: 50px">
+        <div class="row">
+            <div class="col-6">
+                <h1>Simple POS System</h1>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="theme-toggle">
+                    <label class="form-check-label" for="theme-toggle" id="theme-label">Dark Mode</label>
+                </div>
+            </div>
+        </div>
+     
         <div class="row">
             <div class="col-7">
                 <div id="statusMessage" class="status-message"></div>
         
                 <div class="products-section">
                     <div class="barcode-section">
-                        <h2>Scan Barcode</h2>
+                        <h2><img src="{{ asset('img/icon/barcode.png') }}" alt="Barcode Icon"  class="barcode-icon">Scan Barcode</h2>
                         <input type="text" id="barcodeInput" class="barcode-input" placeholder="Scan barcode or enter product code..." autofocus>
                         <div id="barcodeAlert" class="barcode-alert"></div>
                     </div>
@@ -448,6 +41,20 @@
                             <p>Search Product</p>
                         </div>
                         @include('modal.pos.search_item')
+                    </div>
+
+                    {{--  Product cards will be dynamically generated here  --}}
+                    <div id="hidden-products" style="display: none;">
+                        @foreach($products as $product)
+                            <div class="hidden-product"
+                                data-id="{{ $product->id }}"
+                                data-name="{{ $product->name }}"
+                                data-price="{{ $product->price }}"
+                                data-barcode="{{ $product->barcode }}"
+                                data-image="{{ $product->image }}">
+                                {{ $product->name }}
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -506,24 +113,20 @@
     </div>
 
     <script>
-        // Sample product database
-        const products = [
-            { id: "1001", name: "Coffee Mug", price: 9.99, barcode: "4803746880907", image: "/api/placeholder/80/80" },
-            { id: "1002", name: "Headphones", price: 49.99, barcode: "4800047862557", image: "/api/placeholder/80/80" },
-            { id: "1003", name: "Notebook", price: 4.99, barcode: "1003", image: "/api/placeholder/80/80" },
-            { id: "1004", name: "Water Bottle", price: 14.99, barcode: "1004", image: "/api/placeholder/80/80" },
-            { id: "1005", name: "Bluetooth Speaker", price: 39.99, barcode: "1005", image: "/api/placeholder/80/80" },
-            { id: "1006", name: "USB Cable", price: 7.99, barcode: "1006", image: "/api/placeholder/80/80" },
-            { id: "1007", name: "Phone Case", price: 19.99, barcode: "1007", image: "/api/placeholder/80/80" },
-            { id: "1008", name: "Mouse Pad", price: 6.99, barcode: "1008", image: "/api/placeholder/80/80" },
-            { id: "1009", name: "Keyboard", price: 29.99, barcode: "1009", image: "/api/placeholder/80/80" }
-        ];
 
         // Cart data
         let cart = [];
         let lastOrderDetails = null;
         
         // DOM Elements
+        const hiddenProducts = document.querySelectorAll('#hidden-products .hidden-product'); //fetching products
+        const products = Array.from(hiddenProducts).map(product => ({
+            id: product.dataset.id,
+            name: product.dataset.name,
+            price: parseFloat(product.dataset.price),
+            barcode: product.dataset.barcode,
+            image: product.dataset.image
+        })); // getting the data from the hidden div
         const productList = document.querySelector('.product-list');
         const barcodeInput = document.getElementById('barcodeInput');
         const barcodeAlert = document.getElementById('barcodeAlert');
@@ -538,10 +141,10 @@
         const receiptContent = document.getElementById('receiptContent');
         const actualPrintBtn = document.getElementById('actualPrintBtn');
         const closeReceiptBtn = document.getElementById('closeReceiptBtn');
-        
+        console.log(products); 
         // Initialize the page
         function init() {
-            renderProducts();
+            //renderProducts();
             setupBarcodeInput();
             setupCheckoutButton();
             setupReceiptFunctionality();
@@ -895,6 +498,35 @@
                     barcodeInput.focus();
                 }, 100);
             }
+        });
+
+        // Function to set the theme based on user preference or system setting
+        function setTheme(theme) {
+            const label = document.getElementById('theme-label');
+            if (theme === 'dark') {
+                label.textContent = 'Dark Mode';
+                document.body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                label.textContent = 'Light Mode';
+                document.body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Check for saved theme preference or system default
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else {
+            const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            setTheme(prefersDarkScheme ? 'dark' : 'light');
+        }
+
+        // Toggle theme when user clicks the button (if you want a toggle button)
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
         });
     </script>
 </body>

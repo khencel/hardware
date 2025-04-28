@@ -170,6 +170,7 @@ body.dark span {
     z-index: 9999;
 }
 
+
 .modal-content {
     max-width: 500px !important;
     margin: auto;
@@ -177,7 +178,6 @@ body.dark span {
     padding: 2rem;
     border-radius: 1rem;
     width: 90%;
-    max-width: 600px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     animation: fadeIn 0.3s ease;
 }

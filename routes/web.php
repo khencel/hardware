@@ -55,13 +55,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/pos', function () {
         $products = Food::where('is_available', true)->get(); // Retrieve products where 'is_available' is true.
+        $user = Auth::user();
 
         // Check if there are products available
         if ($products->isEmpty()) {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products'));
+        return view('pos.pos_order', compact('products', 'user'));
     });
 
     Route::post('/logout', Logout::class)->name('auth.logout');

@@ -12,7 +12,7 @@
     <div class="container-fluid" style="padding: 50px">
         <div class="row">
             <div class="col-6">
-                <h1>Simple POS System</h1>
+                <h1>Welcome {{ $user->firstname.' '.$user->lastname }}</h1>
             </div>
             <div class="col-6 d-flex justify-content-end">
                 <div class="form-check form-switch">

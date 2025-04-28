@@ -23,12 +23,15 @@
     @endforeach
 
 
-    @php $defaultPassword = old('password', Str::random(12)); @endphp
+
     <div class="mb-3">
-        <label for="password" class="form-label">New Password</label>
+        <label for="password" class="form-label"> {{ $user ? 'New Password' : 'Password'  }}</label>
+        @if($user)
+        <span>Leave it blank if you dont want to change the password</span>
+        @endif
         <div class="input-group">
-            <input type="text" class="form-control" id="password" name="password" value="{{ $defaultPassword }}">
-            <button class="btn btn-outline-secondary" type="button" id="generatePassword">Generate</button>
+            <input type="text" class="form-control" id="password" name="password" value="" >
+            <button class="btn btn-outline-secondary" type="button" id="generatePassword">Generate New Password</button>
         </div>
         @error('password')
             <div class="text-danger">{{ $message }}</div>

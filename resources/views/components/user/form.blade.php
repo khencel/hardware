@@ -22,20 +22,25 @@
         />
     @endforeach
 
-    {{--  <!-- Exclude password field if editing a user -->  --}}
-    @if (!isset($user))
-        @php $defaultPassword = old('password', Str::random(12)); @endphp
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="password" name="password" value="{{ $defaultPassword }}">
-                <button class="btn btn-outline-secondary" type="button" id="generatePassword">Generate</button>
-            </div>
-            @error('password')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
+
+    @php $defaultPassword = old('password', Str::random(12)); @endphp
+    <div class="mb-3">
+        <label for="password" class="form-label">New Password</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="password" name="password" value="{{ $defaultPassword }}">
+            <button class="btn btn-outline-secondary" type="button" id="generatePassword">Generate</button>
         </div>
-    @endif
+        @error('password')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
+    <script>
+        document.getElementById('generatePassword').addEventListener('click', function() {
+            const passwordField = document.getElementById('password');
+            const newPassword = Math.random().toString(36).slice(-8);
+            passwordField.value = newPassword;
+        });
+    </script>
 
     <x-form.select 
         name="role" 

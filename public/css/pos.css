@@ -309,11 +309,11 @@ h1 {
     color: #2ecc71;
 }
 
-.barcode-input:focus {
+/* .barcode-input:focus {
     outline: none;
     border-color: #4CAF50;
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
-}
+} */
 
 .cart-section {
     background-color: #f9f9f9;
@@ -525,7 +525,7 @@ th {
 }
 
 .print-btn {
-    background-color: #2196F3;
+    background-color: #4CAF50;
 }
 
 .print-btn:hover {
@@ -728,4 +728,20 @@ th {
         box-shadow: none;
         background-color: white;
     }
+}
+
+.category-button {
+    background-color: #2196F3;
+    color: white;
+    padding: 0.5rem;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.category-button:hover {
+    background-color: #FFC107 !important; 
+    color: white !important; 
+    transform: scale(1.05);  
 }

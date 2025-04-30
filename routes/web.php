@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Food;
+use App\Models\FoodCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
 use Illuminate\Support\Facades\Auth;
@@ -56,13 +57,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pos', function () {
         $products = Food::where('is_available', true)->get(); // Retrieve products where 'is_available' is true.
         $user = Auth::user();
-
+        $categories = FoodCategory::latest()->get();
         // Check if there are products available
         if ($products->isEmpty()) {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products', 'user'));
+        return view('pos.pos_order', compact('products', 'user', 'categories'));
     });
 
     Route::post('/logout', Logout::class)->name('auth.logout');

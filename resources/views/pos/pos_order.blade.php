@@ -25,24 +25,71 @@
         <div class="row">
             <div class="col-7">
                 <div id="statusMessage" class="status-message"></div>
-                <div class="products-section">
+                <div class="products-section" style="height: 100vh; display: flex; flex-direction: column;">
+                    <!-- Barcode Section -->
                     <div class="barcode-section">
-                        <h2><img src="{{ asset('img/icon/barcode.png') }}" alt="Barcode Icon"  class="barcode-icon">Scan Barcode</h2>
-                        <input type="text" id="barcodeInput" class="barcode-input" placeholder="Scan barcode or enter product code..." autofocus>
+                        <h2>
+                            <img src="{{ asset('img/icon/barcode.png') }}" alt="Barcode Icon" class="barcode-icon">
+                            Scan Barcode
+                        </h2>
+                        <input type="text" id="barcodeInput" class="barcode-input" placeholder="Scan barcode or enter product code...">
                         <div id="barcodeAlert" class="barcode-alert"></div>
                     </div>
-                    
-                    <h2>Products</h2>
-                    <div class="product-list">
-                        <div class="product-card" onclick="searchItem()">
-                            <strong>(F1)</strong>
-                            <h3>Search</h3>
-                            <p>Search Product</p>
+                
+                    <!-- Search Bar -->
+                    <input 
+                        type="text" 
+                        id="productSearch" 
+                        placeholder="Search by name or barcode..." 
+                        style="margin-bottom: 1rem; padding: 0.5rem; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 100%;"/>
+                
+                    {{--  Product list  --}}
+                    <div style="display: flex; gap: 2rem; font-family: sans-serif; flex: 1; overflow: hidden;">
+                        <!-- Categories -->
+                        <div style="flex: 1; overflow-x: hidden; overflow-y: auto; padding-right: 1rem; max-height: 100%;">
+                            <h2>Categories</h2>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                                @foreach($categories as $category)
+                                    <button 
+                                        class="category-button"
+                                        data-category-id="{{ $category->id }}"
+                                        style="background-color: #2196F3; color: white; padding: 0.5rem; font-size: 14px; border: none; border-radius: 4px; transition: all 0.3s ease;">
+                                        {{ $category->name }}
+                                    </button>
+                                @endforeach
+                            </div>
                         </div>
-                        @include('modal.pos.search_item')
+                    
+                        <!-- Product / Order List Panel -->
+                        <div style="flex: 3; display: flex; flex-direction: column; overflow: hidden;">
+                            <h2 style="flex-shrink: 0;">Products</h2>
+                        
+                            <div style="flex: 1; overflow-y: auto;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                                    {{-- Product cards --}}
+                                    @foreach($products as $product)
+                                        <div 
+                                            class="product-card"
+                                            data-category-id="{{ $product->category_id }}"
+                                            data-name="{{ $product->name }}" 
+                                            data-barcode="{{ $product->barcode }}"
+                                            data-id="{{ $product->id }}"
+                                            data-price="{{ $product->price }}"
+                                            style="flex: 1 1 calc(33.333% - 0.75rem); border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background-color: #fdfdfd; display: block; flex-direction: column; gap: 0.3rem; min-width: 180px; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                                            <h3 style="margin: 0; font-size: 16px;">{{ $product->name }}</h3>
+                                            <p style="margin: 0; font-size: 14px;"><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
+                                            <p style="margin: 0; font-size: 13px; color: #555;"><strong>Barcode:</strong> {{ $product->barcode }}</p>
+                                            <div style="margin-top: auto;">
+                                                {{-- Add image or whatever else --}}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    {{--  Product cards will be dynamically generated here  --}}
+                    
+                    {{-- Hidden Product Data --}}
                     <div id="hidden-products" style="display: none;">
                         @foreach($products as $product)
                             <div class="hidden-product"
@@ -56,6 +103,8 @@
                         @endforeach
                     </div>
                 </div>
+                
+                
             </div>
             <div class="col-5">
                 <div class="cart-table-container">
@@ -90,8 +139,8 @@
                                 <span id="total">$0.00</span>
                             </div>
                             
-                            <button id="checkoutBtn" class="action-btn checkout-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Checkout</button>
-                            <button id="printReceiptBtn" class="action-btn print-btn" disabled> <img src="{{ asset('img/icon/printer.png') }}" alt="Barcode Icon" width="30" height="30">  Print Receipt</button>
+                            {{--  <button id="checkoutBtn" class="action-btn checkout-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Checkout</button>  --}}
+                            <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Payout Receipt</button>
                         </div>
                     </div>
                 </div>
@@ -147,7 +196,7 @@
         function init() {
             //renderProducts();
             setupBarcodeInput();
-            setupCheckoutButton();
+            //setupCheckoutButton();
             setupReceiptFunctionality();
         }
         
@@ -181,6 +230,11 @@
             // Clear any alert when user starts typing again
             barcodeInput.addEventListener('focus', () => {
                 hideBarcodeAlert();
+            });
+            barcodeInput.addEventListener('blur', () => {
+                if (barcodeInput.value.trim() === '') {
+                    hideBarcodeAlert();
+                }
             });
         }
         
@@ -238,146 +292,156 @@
             return products.find(product => product.barcode === barcode);
         }
         
-        // Add product to cart
-        function addToCart(product) {
-            const existingItem = cart.find(item => item.id === product.id);
-            
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1
-                });
-            }
-            
-            updateCart();
-            // Disable print receipt button when cart changes
-            printReceiptBtn.disabled = true;
-        }
+       // 🔁 Attach event listener to each product card
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const product = {
+                id: card.getAttribute('data-id'),
+                name: card.getAttribute('data-name'),
+                price: parseFloat(card.getAttribute('data-price')),
+                barcode: card.getAttribute('data-barcode')
+            };
+
+            addToCart(product);
+        });
+    });
+
+    // ➕ Add product to cart
+    function addToCart(product) {
+        const existingItem = cart.find(item => item.id === product.id);
         
-        // Update cart display
-        function updateCart() {
-            cartItems.innerHTML = '';
-            
-            if (cart.length === 0) {
-                cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">Your cart is empty</td></tr>`;
-            } else {
-                cart.forEach(item => {
-                    const total = item.price * item.quantity;
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.name}</td>
-                        <td>$${item.price.toFixed(2)}</td>
-                        <td class="quantity-cell">
-                            <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                            <span class="quantity-value">${item.quantity}</span>
-                            <button class="quantity-btn plus" data-id="${item.id}">+</button>
-                        </td>
-                        <td>$${total.toFixed(2)}</td>
-                        <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
-                    `;
-                    
-                    cartItems.appendChild(row);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1
+            });
+        }
+
+        updateCart();
+        if (printReceiptBtn) printReceiptBtn.disabled = true;
+    }
+
+    // 🔄 Update cart display
+    function updateCart() {
+        cartItems.innerHTML = '';
+
+        if (cart.length === 0) {
+            cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">Your cart is empty</td></tr>`;
+        } else {
+            cart.forEach(item => {
+                const total = item.price * item.quantity;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td class="quantity-cell">
+                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                    </td>
+                    <td>$${total.toFixed(2)}</td>
+                    <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
+                `;
+
+                cartItems.appendChild(row);
+            });
+
+            document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    updateQuantity(btn.dataset.id, -1);
                 });
-                
-                // Add event listeners for quantity buttons
-                document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        updateQuantity(btn.dataset.id, -1);
-                    });
+            });
+
+            document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    updateQuantity(btn.dataset.id, 1);
                 });
-                
-                document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        updateQuantity(btn.dataset.id, 1);
-                    });
+            });
+
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    removeItem(btn.dataset.id);
                 });
-                
-                document.querySelectorAll('.remove-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        removeItem(btn.dataset.id);
-                    });
-                });
-            }
-            
+            });
+        }
+
             updateTotals();
         }
-        
-        // Update item quantity
+
+        // 🔧 Change item quantity
         function updateQuantity(itemId, change) {
             const item = cart.find(item => item.id === itemId);
-            
+
             if (item) {
                 item.quantity += change;
-                
+
                 if (item.quantity <= 0) {
                     removeItem(itemId);
                 } else {
                     updateCart();
                 }
             }
-            
-            // Disable print receipt button when cart changes
-            printReceiptBtn.disabled = true;
+
+            if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
-        
-        // Remove item from cart
+
+        // ❌ Remove item
         function removeItem(itemId) {
             cart = cart.filter(item => item.id !== itemId);
             updateCart();
-            
-            // Disable print receipt button when cart changes
-            printReceiptBtn.disabled = true;
+
+            if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
-        
-        // Update totals
+
+        // 💰 Calculate totals
         function updateTotals() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const tax = subtotal * 0.07;
             const total = subtotal + tax;
-            
+
             subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
             taxEl.textContent = `$${tax.toFixed(2)}`;
             totalEl.textContent = `$${total.toFixed(2)}`;
         }
         
         // Setup checkout button
-        function setupCheckoutButton() {
-            checkoutBtn.addEventListener('click', () => {
-                if (cart.length === 0) {
-                    showMessage('Your cart is empty', 'error');
-                    return;
-                }
+        //function setupCheckoutButton() {
+            //checkoutBtn.addEventListener('click', () => {
+                //if (cart.length === 0) {
+                   // showMessage('Your cart is empty', 'error');
+                    //return;
+                //}
                 
                 // Process checkout (in a real app, this would connect to payment processing)
-                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const tax = subtotal * 0.07;
-                const total = subtotal + tax;
+                //const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                //const tax = subtotal * 0.07;
+                //const total = subtotal + tax;
                 
                 // Store order details for receipt
-                lastOrderDetails = {
-                    orderNumber: generateOrderNumber(),
-                    date: new Date(),
-                    items: [...cart],
-                    subtotal: subtotal,
-                    tax: tax,
-                    total: total
-                };
+                //lastOrderDetails = {
+                  //  orderNumber: generateOrderNumber(),
+                   // date: new Date(),
+                   // items: [...cart],
+                   // subtotal: subtotal,
+                   // tax: tax,
+                   /// total: total
+               // };
                 
-                showMessage('Order processed successfully!', 'success');
+                //showMessage('Order processed successfully!', 'success');
                 
                 // Enable print receipt button after successful checkout
-                printReceiptBtn.disabled = false;
+               // printReceiptBtn.disabled = false;
                 
                 // Clear cart
-                cart = [];
-                updateCart();
-            });
-        }
+               // cart = [];
+               // updateCart();
+           // });
+       // }
         
         // Setup receipt functionality
         function setupReceiptFunctionality() {
@@ -528,6 +592,56 @@
         document.getElementById('theme-toggle')?.addEventListener('click', () => {
             const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
             setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryButtons = document.querySelectorAll('.category-button');
+            const productCards = document.querySelectorAll('.product-card');
+    
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const selectedCategory = this.dataset.categoryId;
+    
+                    productCards.forEach(card => {
+                        const cardCategory = card.dataset.categoryId;
+    
+                        if (cardCategory === selectedCategory) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+    
+            // Optional: Auto-click the first category on load
+            if (categoryButtons.length) {
+                categoryButtons[0].click();
+            }
+        });
+    </script>
+
+    <script>
+        // Function to filter products based on search input
+        const searchInput = document.getElementById('productSearch');
+        const productCards = document.querySelectorAll('.product-card');
+    
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase();
+    
+            productCards.forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                const barcode = card.getAttribute('data-barcode').toLowerCase();
+    
+                // Check if the query matches either the product name or barcode
+                if (name.includes(query) || barcode.includes(query)) {
+                    card.style.display = 'block'; // Show card
+                } else {
+                    card.style.display = 'none'; // Hide card
+                }
+            });
         });
     </script>
 </body>

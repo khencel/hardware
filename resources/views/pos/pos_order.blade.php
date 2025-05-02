@@ -23,8 +23,9 @@
         </div>
      
         <div class="row" style="display: flex; height: 100vh; gap: 1rem; margin: 0;">
+            <div id="statusMessage" class="status-message"></div>
             <div class="col-7" style="flex: 7; display: flex; flex-direction: column; ">
-                <div id="statusMessage" class="status-message"></div>
+              
                 <div class="products-section" style="height: 100vh; display: flex; flex-direction: column;">
                     <!-- Barcode Section -->
                     <div class="barcode-section">
@@ -173,7 +174,7 @@
 
     <div id="passwordModal" class="modal" style="display: none;">
         <div class="modal-content">
-          <h3>Enter Password to Remove Item</h3>
+          <h3>Enter Password to Void this Item</h3>
       
           <div style="position: relative; margin-bottom: 10px;">
             <input type="password" id="passwordInput" placeholder="Password"
@@ -263,6 +264,7 @@
             if (entered === password) {
               removeItem(itemToRemoveId);
               closePasswordModal();
+            showMessage('Product void successfully', 'success');
             } else {
               alert('Incorrect password.');
             }
@@ -702,7 +704,7 @@
             setTimeout(() => {
                 statusMessage.style.display = 'none';
                 statusMessage.className = 'status-message';
-            }, 3000);
+            }, 5000);
         }
         
         // Initialize the page

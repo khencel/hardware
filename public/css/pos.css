@@ -42,6 +42,14 @@ body.dark span {
     color: black !important;
 }
 
+.cart-section th, .cart-section td {
+    color: #333;
+    padding: 0rem;
+}
+body.dark .cart-section th, body.dark .cart-section td {
+    color: black !important;
+}
+
 .container-fluid {
     padding: 2rem;
 }
@@ -89,6 +97,7 @@ body.dark span {
     background: #f0f4f8;
 }
 
+
 .cart-section table {
     width: 100%;
     margin-top: 1rem;
@@ -97,7 +106,7 @@ body.dark span {
 
 .cart-section th,
 .cart-section td {
-    padding: 0.75rem;
+    padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
 }
@@ -154,6 +163,7 @@ body.dark span {
     max-width: 600px;
     overflow-y: auto;
     margin-top: 1rem;
+    overflow: hidden;
 }
 .cart-table-container table {
     width: 100%;
@@ -391,65 +401,40 @@ th {
 
 /* Button styling */
 .quantity-btn {
-    width: 15px; 
-    height: 40px;
-    padding: 0; 
-    font-size: 15px;
-    font-weight: bold;
-    background-color: #fff;
-    border: 2px solid #ccc;
-    color: #333;
+    background: none;
+    border: none;
+    color: #333; /* change this to match your theme */
+    font-size: 1.2rem; /* size of the + / - */
+    padding: 0.25rem 0.5rem;
     cursor: pointer;
-    border-radius: 50%; 
+    line-height: 1;
+    transition: color 0.2s ease;
+  }
+  
+  .quantity-btn:hover {
+    color: #000; /* darken on hover */
+  }
+
+  .quantity-btn.plus {
+    color: blue;
+    font-weight: bold;
+  }
+
+  .quantity-btn.minus {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .quantity-cell {
     display: flex;
-    justify-content: center;
     align-items: center;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Hover effect on buttons */
-.quantity-btn:hover {
-    background-color: #f1f1f1;
-    border-color: #888;
-}
-
-.quantity-btn.minus::before {
-    font-size: 10px;
-    color: #333;
-}
-
-.quantity-btn.plus::before {
-    font-size: 10px;
-    color: #333;
-}
-
-/* Optional: Focus state for buttons (for accessibility) */
-.quantity-btn:focus {
-    outline: none;
-    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
-}
-
-/* Optional: Disable the minus button when the quantity is 1 */
-.quantity-btn.minus:disabled {
-    background-color: #e0e0e0;
-    border-color: #ccc;
-    cursor: not-allowed;
-}
-
-/* Optional: Disable the plus button when quantity reaches a max limit */
-.quantity-btn.plus:disabled {
-    background-color: #e0e0e0;
-    border-color: #ccc;
-    cursor: not-allowed;
-}
-
-
-
-.quantity-value {
-    margin: 0 8px;
-    width: 30px;
+    gap: 0.5rem;
+  }
+  
+  .quantity-value {
+    min-width: 20px;
     text-align: center;
-}
+  }
 
 .remove-btn {
     background-color: #ff5252;
@@ -600,6 +585,7 @@ th {
 .receipt-header {
     text-align: center;
     margin-bottom: 15px;
+    color: #333;
 }
 
 .receipt-header h2 {
@@ -745,3 +731,64 @@ th {
     color: white !important; 
     transform: scale(1.05);  
 }
+
+#cartScrollWrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #aaa transparent;
+  }
+  
+  #cartScrollWrapper::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #cartScrollWrapper::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 10px;
+  }
+  .cart-scroll {
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .cart-scroll-body {
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+  }
+  
+  .cart-scroll-body table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  @media (max-width: 768px) {
+    #cartTable th,
+    #cartItems td {
+      font-size: 14px;
+      padding: 8px;
+    }
+  
+    .cart-summary {
+      font-size: 14px;
+    }
+  
+    .print-btn img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  .item-total{
+    color: #000;
+  }
+
+  #receiptContent {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }

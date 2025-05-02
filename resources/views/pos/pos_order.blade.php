@@ -22,8 +22,8 @@
             </div>
         </div>
      
-        <div class="row">
-            <div class="col-7">
+        <div class="row" style="display: flex; height: 100vh; gap: 1rem; margin: 0;">
+            <div class="col-7" style="flex: 7; display: flex; flex-direction: column; ">
                 <div id="statusMessage" class="status-message"></div>
                 <div class="products-section" style="height: 100vh; display: flex; flex-direction: column;">
                     <!-- Barcode Section -->
@@ -61,7 +61,7 @@
                         </div>
                     
                         <!-- Product / Order List Panel -->
-                        <div style="flex: 3; display: flex; flex-direction: column; overflow: hidden;">
+                        <div style="flex: 4; display: flex; flex-direction: column; overflow: hidden;">
                             <h2 style="flex-shrink: 0;">Products</h2>
                         
                             <div style="flex: 1; overflow-y: auto;">
@@ -75,10 +75,12 @@
                                             data-barcode="{{ $product->barcode }}"
                                             data-id="{{ $product->id }}"
                                             data-price="{{ $product->price }}"
+                                            data-quantity="{{ $product->quantity }}"
                                             style="flex: 1 1 calc(33.333% - 0.75rem); border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background-color: #fdfdfd; display: block; flex-direction: column; gap: 0.3rem; min-width: 180px; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-                                            <h3 style="margin: 0; font-size: 16px;">{{ $product->name }}</h3>
-                                            <p style="margin: 0; font-size: 14px;"><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
-                                            <p style="margin: 0; font-size: 13px; color: #555;"><strong>Barcode:</strong> {{ $product->barcode }}</p>
+                                            <h3 style="margin: 0; font-size: 14px;">{{ $product->name }}</h3>
+                                            <p style="margin: 0; font-size: 12px;"><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
+                                            <p style="margin: 0; font-size: 12px; color: #555;"><strong>Barcode:</strong> {{ $product->barcode }}</p>
+                                            <span style="margin: 0; font-size: 12px; color: #555;">QTY: {{ $product->quantity }}</span>
                                             <div style="margin-top: auto;">
                                                 {{-- Add image or whatever else --}}
                                             </div>
@@ -106,9 +108,9 @@
                 
                 
             </div>
-            <div class="col-5">
+            <div class="col-5" style="flex: 5; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
                 <div class="cart-table-container">
-                    <div class="cart-section">
+                    <div class="cart-section cart-scroll">
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
                         <table id="cartTable">
                             <thead class="table-header text-center">
@@ -120,9 +122,13 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody id="cartItems">
-                                <!-- Cart items will be added here -->
-                            </tbody>
+                            <div id="cartScrollWrapper" style="max-height: 300px; overflow-y: auto;">
+                                <table>
+                                  <tbody id="cartItems">
+                                    <!-- Cart items will be added here -->
+                                  </tbody>
+                                </table>
+                              </div>
                         </table>
                         
                         <div class="cart-summary">
@@ -140,7 +146,10 @@
                             </div>
                             
                             {{--  <button id="checkoutBtn" class="action-btn checkout-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Checkout</button>  --}}
-                            <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Payout Receipt</button>
+                            <div id="printWrapper" style="text-align: center; display: none;">
+                                <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Payout Receipt</button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -150,7 +159,7 @@
 
     
     <!-- Receipt Modal -->
-    <div id="receiptModal" class="modal">
+    <div id="receiptModal" class="modal" style="overflow: hidden;">
         <div class="modal-content">
             <div id="receiptContent" class="receipt">
                 <!-- Receipt content will be dynamically generated -->
@@ -194,43 +203,21 @@
         console.log(products); 
         // Initialize the page
         function init() {
-            //renderProducts();
             setupBarcodeInput();
-            //setupCheckoutButton();
             setupReceiptFunctionality();
         }
         
-        // Render product cards
-        // function renderProducts() {
-        //     productList.innerHTML = '';
-            
-        //     products.forEach(product => {
-        //         const productCard = document.createElement('div');
-        //         productCard.className = 'product-card';
-        //         productCard.dataset.barcode = product.barcode;
-                
-        //         productCard.innerHTML = `
-        //             <img src="${product.image}" alt="${product.name}">
-        //             <h3>${product.name}</h3>
-        //             <p>$${product.price.toFixed(2)}</p>
-        //         `;
-                
-        //         productCard.addEventListener('click', () => {
-        //             addToCart(product);
-        //         });
-                
-        //         productList.appendChild(productCard);
-        //     });
-        // }
-        
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCart();
+        });
+
         // Setup barcode input with auto-submit
         function setupBarcodeInput() {
             barcodeInput.addEventListener('input', handleBarcodeInput);
             
             // Clear any alert when user starts typing again
-            barcodeInput.addEventListener('focus', () => {
-                hideBarcodeAlert();
-            });
+            
             barcodeInput.addEventListener('blur', () => {
                 if (barcodeInput.value.trim() === '') {
                     hideBarcodeAlert();
@@ -292,88 +279,92 @@
             return products.find(product => product.barcode === barcode);
         }
         
-       // 🔁 Attach event listener to each product card
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const product = {
-                id: card.getAttribute('data-id'),
-                name: card.getAttribute('data-name'),
-                price: parseFloat(card.getAttribute('data-price')),
-                barcode: card.getAttribute('data-barcode')
-            };
+        // Setup product card click event
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const product = {
+                    id: card.getAttribute('data-id'),
+                    name: card.getAttribute('data-name'),
+                    price: parseFloat(card.getAttribute('data-price')),
+                    barcode: card.getAttribute('data-barcode')
+                };
 
-            addToCart(product);
+                addToCart(product);
+            });
         });
-    });
 
-    // ➕ Add product to cart
-    function addToCart(product) {
-        const existingItem = cart.find(item => item.id === product.id);
+        function addToCart(product) {
+            const existingItem = cart.find(item => item.id === product.id);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1
+                });
+            }
+
+            updateCart();
+        }
+
+        function updateCart() {
+            cartItems.innerHTML = '';
         
-        if (existingItem) {
-            existingItem.quantity++;
-        } else {
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                quantity: 1
-            });
-        }
-
-        updateCart();
-        if (printReceiptBtn) printReceiptBtn.disabled = true;
-    }
-
-    // 🔄 Update cart display
-    function updateCart() {
-        cartItems.innerHTML = '';
-
-        if (cart.length === 0) {
-            cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">Your cart is empty</td></tr>`;
-        } else {
-            cart.forEach(item => {
-                const total = item.price * item.quantity;
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>$${item.price.toFixed(2)}</td>
-                    <td class="quantity-cell">
-                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                        <span class="quantity-value">${item.quantity}</span>
-                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
-                    </td>
-                    <td>$${total.toFixed(2)}</td>
-                    <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
-                `;
-
-                cartItems.appendChild(row);
-            });
-
-            document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    updateQuantity(btn.dataset.id, -1);
+            const cartSummary = document.getElementById('cartSummary');
+            const printWrapper = document.getElementById('printWrapper');
+            const printBtn = document.getElementById('printReceiptBtn');
+        
+            if (cart.length === 0) {
+                cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">🛒 Your cart is empty</td></tr>`;
+        
+                if (cartSummary) cartSummary.style.display = 'none';
+                if (printWrapper) printWrapper.style.display = 'none';
+                if (printBtn) printBtn.disabled = true;
+        
+            } else {
+                if (cartSummary) cartSummary.style.display = 'block';
+                if (printWrapper) printWrapper.style.display = 'block';
+                if (printBtn) printBtn.disabled = false;
+        
+                cart.forEach(item => {
+                    const total = item.price * item.quantity;
+        
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td class="quantity-cell">
+                            <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                            <span class="quantity-value">${item.quantity}</span>
+                            <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                        </td>
+                        <td>$${total.toFixed(2)}</td>
+                        <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
+                    `;
+        
+                    cartItems.appendChild(row);
                 });
-            });
-
-            document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    updateQuantity(btn.dataset.id, 1);
+        
+                document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+                    btn.addEventListener('click', () => updateQuantity(btn.dataset.id, -1));
                 });
-            });
-
-            document.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    removeItem(btn.dataset.id);
+        
+                document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+                    btn.addEventListener('click', () => updateQuantity(btn.dataset.id, 1));
                 });
-            });
-        }
-
+        
+                document.querySelectorAll('.remove-btn').forEach(btn => {
+                    btn.addEventListener('click', () => removeItem(btn.dataset.id));
+                });
+            }
+        
             updateTotals();
         }
 
-        // 🔧 Change item quantity
+        // Update quantity of an item in the cart
         function updateQuantity(itemId, change) {
             const item = cart.find(item => item.id === itemId);
 
@@ -390,7 +381,7 @@
             if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
 
-        // ❌ Remove item
+        // Remove item from cart
         function removeItem(itemId) {
             cart = cart.filter(item => item.id !== itemId);
             updateCart();
@@ -398,7 +389,7 @@
             if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
 
-        // 💰 Calculate totals
+        // Update totals in the carts
         function updateTotals() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const tax = subtotal * 0.07;
@@ -409,60 +400,172 @@
             totalEl.textContent = `$${total.toFixed(2)}`;
         }
         
-        // Setup checkout button
-        //function setupCheckoutButton() {
-            //checkoutBtn.addEventListener('click', () => {
-                //if (cart.length === 0) {
-                   // showMessage('Your cart is empty', 'error');
-                    //return;
-                //}
-                
-                // Process checkout (in a real app, this would connect to payment processing)
-                //const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                //const tax = subtotal * 0.07;
-                //const total = subtotal + tax;
-                
-                // Store order details for receipt
-                //lastOrderDetails = {
-                  //  orderNumber: generateOrderNumber(),
-                   // date: new Date(),
-                   // items: [...cart],
-                   // subtotal: subtotal,
-                   // tax: tax,
-                   /// total: total
-               // };
-                
-                //showMessage('Order processed successfully!', 'success');
-                
-                // Enable print receipt button after successful checkout
-               // printReceiptBtn.disabled = false;
-                
-                // Clear cart
-               // cart = [];
-               // updateCart();
-           // });
-       // }
-        
         // Setup receipt functionality
         function setupReceiptFunctionality() {
             printReceiptBtn.addEventListener('click', () => {
-                if (lastOrderDetails) {
-                    generateReceipt(lastOrderDetails);
-                    receiptModal.style.display = 'block';
-                } else {
-                    showMessage('No recent order to print receipt for', 'error');
+                if (cart.length === 0) {
+                    showMessage('No items in cart to print receipt', 'error');
+                    return;
                 }
+        
+                const orderDetails = {
+                    orderNumber: generateOrderNumber(),
+                    date: new Date(),
+                    items: cart,
+                    subtotal: parseFloat(subtotalEl.textContent.replace('$', '')),
+                    tax: parseFloat(taxEl.textContent.replace('$', '')),
+                    total: parseFloat(totalEl.textContent.replace('$', ''))
+                };
+        
+                lastOrderDetails = orderDetails;
+        
+                generateReceipt(orderDetails);
+                receiptModal.style.display = 'block';
             });
-            
+        
             actualPrintBtn.addEventListener('click', () => {
-                window.print();
+                const receiptContent = document.getElementById('receiptContent');
+        
+                if (!receiptContent) {
+                    showMessage('No receipt content found', 'error');
+                    return;
+                }
+        
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                <html>
+                  <head>
+                    <title>Receipt</title>
+                    <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        padding: 20px;
+                        margin: 0;
+                        color: #000;
+                        background-color: #fff;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                        text-align: center;
+                    }
+                
+                    .receipt {
+                        width: 100%;
+                        max-width: 400px;
+                        margin: 0 auto;
+                    }
+                
+                    .receipt-header,
+                    .receipt-footer {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                
+                    .receipt-header h2 {
+                        margin: 0;
+                        font-size: 22px;
+                        font-weight: bold;
+                    }
+                
+                    .receipt-header p {
+                        margin: 4px 0;
+                        font-size: 13px;
+                    }
+                
+                    .order-info {
+                        margin: 10px 0;
+                        font-size: 13px;
+                        border-top: 1px dashed #000;
+                        border-bottom: 1px dashed #000;
+                        padding: 10px 0;
+                    }
+                
+                    .item-details {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-size: 14px;
+                    }
+                    .receipt-items {
+                        margin: 10px 0;
+                        border-top: 1px dashed #000;
+                        border-bottom: 1px dashed #000;
+                        padding: 10px 0;
+                        font-size: 14px;
+                    }
+                
+                    
+                    .receipt-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 5px 0;
+                    }
+                    .item-quantity{
+                        justify-content: space-between;
+                    }
+                    .item-name {
+                        flex-grow: 1;
+                    }
+                    .item-total {
+                        font-weight: bold;
+                        justify-content: space-between;
+                    }
+                    .receipt-summary {
+                        margin: 10px 0;
+                        justify-content: space-between;
+                        font-size: 14px;
+                    }
+                    .receipt-total {
+                        font-size: 16px;
+                        font-weight: bold;
+                        margin-top: 10px;
+                        justify-content: space-between;
+                    }
+                    .receipt-footer p {
+                        margin: 4px 0;
+                        font-size: 13px;
+                    }
+                    .summary-row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 5px 0;
+                    }
+                    @media print {
+                        button {
+                            display: none;
+                        }
+                
+                        body {
+                            font-size: 12pt;
+                        }
+                    }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="receipt">
+                      ${receiptContent.innerHTML}
+                    </div>
+                  </body>
+                </html>
+                                
+                `);
+                printWindow.document.close();
+        
+                printWindow.onload = () => {
+                    printWindow.focus();
+                    printWindow.print();
+                    printWindow.close();
+                };
             });
-            
+        
             closeReceiptBtn.addEventListener('click', () => {
                 receiptModal.style.display = 'none';
             });
-            
-            // Close modal if clicked outside
+        
+            // Optional: close when clicking outside modal
             window.addEventListener('click', (event) => {
                 if (event.target === receiptModal) {
                     receiptModal.style.display = 'none';
@@ -504,7 +607,7 @@
                             <span class="item-quantity">${item.quantity}x</span>
                             <span>${item.name}</span>
                         </div>
-                        <div class="item-total">$${itemTotal.toFixed(2)}</div>
+                        <div class="item-total text-black">$${itemTotal.toFixed(2)}</div>
                     </div>
                 `;
             });
@@ -555,16 +658,6 @@
             barcodeInput.focus();
         });
         
-        // Auto focus barcode input after clicking anywhere on the page
-        document.addEventListener('click', (event) => {
-            // Don't focus if clicking on the receipt modal
-            if (!event.target.closest('.modal-content') && !event.target.closest('.print-btn')) {
-                setTimeout(() => {
-                    barcodeInput.focus();
-                }, 100);
-            }
-        });
-
         // Function to set the theme based on user preference or system setting
         function setTheme(theme) {
             const label = document.getElementById('theme-label');

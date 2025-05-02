@@ -89,6 +89,13 @@
                 'icon' => 'bx bx-user-circle',
                 'roles' => [],
             ],
+            [
+                'url' => '/reports',
+                'name' => 'reports',
+                'label' => 'Reports',
+                'icon' => 'bx bxs-report',
+                'roles' => [],
+            ],
             // [
             //     'url' => '/payment-methods',
             //     'name' => 'payment-methods',

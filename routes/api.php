@@ -22,6 +22,7 @@ use App\Http\Controllers\Rooms\RoomCategoryController;
 
 use App\Http\Controllers\FoodCategoryController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -122,3 +123,6 @@ Route::get('/gel-all-category', [FoodCategoryController::class, 'get_all_categor
 
 
 Route::get('/get-all-item-per-category/{category_id}', [FoodController::class, 'getItemByCategory']);
+
+// save  orders
+Route::post('/orders', [OrderController::class, 'create']);

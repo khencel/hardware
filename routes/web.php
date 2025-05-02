@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Food;
+use App\Models\Customer;
 use App\Models\FoodCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeisureController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ReportsController;
@@ -58,12 +61,13 @@ Route::middleware(['auth'])->group(function () {
         $products = Food::where('is_available', true)->get(); // Retrieve products where 'is_available' is true.
         $user = Auth::user();
         $categories = FoodCategory::latest()->get();
+        $customers = Customer::latest()->get();
         // Check if there are products available
         if ($products->isEmpty()) {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products', 'user', 'categories'));
+        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers'));
     });
 
     Route::post('/logout', Logout::class)->name('auth.logout');
@@ -87,4 +91,7 @@ Route::middleware(['auth'])->group(function () {
         session(['theme' => $theme]);
         return redirect()->back();
     });
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export-csv', [ReportController::class, 'export'])->name('reports.export.csv');
 });

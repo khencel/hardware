@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple POS System</title>
     <link rel="stylesheet" href="{{ asset('css/pos.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </head>
@@ -77,11 +80,12 @@
                                             data-id="{{ $product->id }}"
                                             data-price="{{ $product->price }}"
                                             data-quantity="{{ $product->quantity }}"
+                                            
                                             style="flex: 1 1 calc(33.333% - 0.75rem); border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background-color: #fdfdfd; display: block; flex-direction: column; gap: 0.3rem; min-width: 180px; transition: transform 0.3s ease, box-shadow 0.3s ease;">
                                             <h3 style="margin: 0; font-size: 14px;">{{ $product->name }}</h3>
                                             <p style="margin: 0; font-size: 12px;"><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
                                             <p style="margin: 0; font-size: 12px; color: #555;"><strong>Barcode:</strong> {{ $product->barcode }}</p>
-                                            <span style="margin: 0; font-size: 12px; color: #555;">QTY: {{ $product->quantity }}</span>
+                                            <span style="margin: 0; font-size: 12px; color: #555;">{{  $product->quantity <= 0 ? 'Out of Stock'  : 'Stock:' }}  {{ $product->quantity <= 0 ?  '' : $product->quantity }}</span>
                                             <div style="margin-top: auto;">
                                                 {{-- Add image or whatever else --}}
                                             </div>
@@ -109,9 +113,19 @@
                 
                 
             </div>
-            <div class="col-5" style="flex: 5; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <div class="col-5" style="flex: 5; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">            
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
+                        <div class="mb-3">
+                            <h2 for="customerSelect" class="form-label text-dark"><img src="{{ asset('img/icon/profile.png') }}" alt="Barcode Icon" width="30" height="30"> Customer</h2>
+                            <select id="customerSelect" class="form-select" style="width: 100%;">
+                                <option value="">Choose a Customer</option>
+                                @foreach($customers as $customer)
+                                    <option value="{{ $customer->id }}" data-name="{{ $customer->name }}">{{ $customer->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
                         <table id="cartTable">
                             <thead class="table-header text-center">
@@ -167,14 +181,14 @@
             </div>
             <div class="modal-actions">
                 <button id="actualPrintBtn" class="modal-btn print-receipt-btn"><img src="{{ asset('img/icon/printing.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Print</button>
-                <button id="closeReceiptBtn" class="modal-btn close-receipt-btn">Close</button>
+                <button id="closeReceiptBtn" class="modal-btn close-receipt-btn"> ✖ Close</button>
             </div>
         </div>
     </div>
 
     <div id="passwordModal" class="modal" style="display: none;">
         <div class="modal-content">
-          <h3>Enter Password to Void this Item</h3>
+          <h3 class="text-dark">Enter Password to Void this Item</h3>
       
           <div style="position: relative; margin-bottom: 10px;">
             <input type="password" id="passwordInput" placeholder="Password"
@@ -192,8 +206,8 @@
           </div>
       
           <div class="modal-actions">
-            <button id="confirmRemoveBtn" class="modal-btn">Confirm</button>
-            <button id="cancelRemoveBtn" class="modal-btn">Cancel</button>
+            <button id="confirmRemoveBtn" class="modal-btn">  ✔ Confirm</button>
+            <button id="cancelRemoveBtn" class="modal-btn">    ✖ Cancel</button>
           </div>
         </div>
       </div>
@@ -207,7 +221,6 @@
         let cart = [];
         let lastOrderDetails = null;
         let itemToRemoveId = null;
-        {{--  const password = 'admin123';  --}}
         const password = @json(config('app.remove_item_password'));
         
         // DOM Elements
@@ -233,7 +246,9 @@
         const receiptContent = document.getElementById('receiptContent');
         const actualPrintBtn = document.getElementById('actualPrintBtn');
         const closeReceiptBtn = document.getElementById('closeReceiptBtn');
-        console.log(products); 
+        const customer = document.getElementById('customerSelect');
+
+
         // Initialize the page
         function init() {
             setupBarcodeInput();
@@ -264,7 +279,7 @@
             if (entered === password) {
               removeItem(itemToRemoveId);
               closePasswordModal();
-            showMessage('Product void successfully', 'success');
+             showMessage('Product void successfully', 'success');
             } else {
               alert('Incorrect password.');
             }
@@ -331,6 +346,16 @@
         function findProductByBarcode(barcode) {
             return products.find(product => product.barcode === barcode);
         }
+
+        // Disable product cards with zero stock
+        document.querySelectorAll('.product-card').forEach(card => {
+            const stock = parseInt(card.getAttribute('data-quantity')) || 0;
+            if (stock === 0) {
+                card.style.opacity = '0.5';
+                card.style.pointerEvents = 'none';
+            }
+        });
+        
         
         // Setup product card click event
         document.querySelectorAll('.product-card').forEach(card => {
@@ -346,9 +371,21 @@
             });
         });
 
+
         function addToCart(product) {
             const existingItem = cart.find(item => item.id === product.id);
-            
+
+            // Find the corresponding product card
+            const productCard = document.querySelector(`.product-card[data-id="${product.id}"]`);
+            let currentStock = parseInt(productCard.getAttribute('data-quantity'));
+
+            // Prevent adding if out of stock
+            if (currentStock <= 0) {
+                alert('This product is out of stock.');
+    
+                return;
+            }
+
             if (existingItem) {
                 existingItem.quantity++;
             } else {
@@ -360,28 +397,47 @@
                 });
             }
 
+            // Decrease stock
+            currentStock--;
+            productCard.setAttribute('data-quantity', currentStock);
+
+            // Update quantity display on the product card
+            const qtySpan = productCard.querySelector('span');
+            if (qtySpan) {
+                qtySpan.textContent = `Stock: ${currentStock}`;
+            }
+
             updateCart();
         }
+
 
         function updateCart() {
             cartItems.innerHTML = '';
         
             const cartSummary = document.getElementById('cartSummary');
             const printWrapper = document.getElementById('printWrapper');
+            const customerSelect = document.getElementById('customerSelect');
             const printBtn = document.getElementById('printReceiptBtn');
-        
-            if (cart.length === 0) {
-                cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">🛒 Your cart is empty</td></tr>`;
-        
-                if (cartSummary) cartSummary.style.display = 'none';
-                if (printWrapper) printWrapper.style.display = 'none';
-                if (printBtn) printBtn.disabled = true;
-        
-            } else {
+            
+            
+            // Ensure that the cartSummary and printWrapper are visible only if:
+            // - A customer is selected.
+            // - The cart has items.
+            if (customerSelect.value && cart.length > 0) {
+                // Customer is selected and cart is not empty
                 if (cartSummary) cartSummary.style.display = 'block';
                 if (printWrapper) printWrapper.style.display = 'block';
                 if (printBtn) printBtn.disabled = false;
+            } else {
+                // Either no customer selected or the cart is empty
+                if (cartSummary) cartSummary.style.display = 'none';
+                if (printWrapper) printWrapper.style.display = 'none';
+                if (printBtn) printBtn.disabled = true;
+            }
         
+            if (cart.length === 0) {
+                cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">🛒 Your cart is empty</td></tr>`;
+            } else {
                 cart.forEach(item => {
                     const total = item.price * item.quantity;
         
@@ -397,29 +453,78 @@
                         <td>$${total.toFixed(2)}</td>
                         <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
                     `;
-        
                     cartItems.appendChild(row);
                 });
         
                 document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
-                    btn.addEventListener('click', () => updateQuantity(btn.dataset.id, -1));
+                    btn.addEventListener('click', () => {
+                        const itemId = btn.dataset.id;
+                        updateQuantity(itemId, -1);
+                
+                        // Return 1 item to stock
+                        const productCard = document.querySelector(`.product-card[data-id="${itemId}"]`);
+                        if (productCard) {
+                            let currentStock = parseInt(productCard.getAttribute('data-quantity')) || 0;
+                            currentStock += 1;
+                            productCard.setAttribute('data-quantity', currentStock);
+                            const qtySpan = productCard.querySelector('span');
+                            if (qtySpan) qtySpan.textContent = `Stock: ${currentStock}`;
+                        }
+                    });
                 });
-        
+                
                 document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
-                    btn.addEventListener('click', () => updateQuantity(btn.dataset.id, 1));
+                    btn.addEventListener('click', () => {
+                        const itemId = btn.dataset.id;
+                
+                        // Deduct 1 from stock only if stock is available
+                        const productCard = document.querySelector(`.product-card[data-id="${itemId}"]`);
+                        if (productCard) {
+                            let currentStock = parseInt(productCard.getAttribute('data-quantity')) || 0;
+                            if (currentStock > 0) {
+                                currentStock -= 1;
+                                productCard.setAttribute('data-quantity', currentStock);
+                                const qtySpan = productCard.querySelector('span');
+                                if (qtySpan) qtySpan.textContent = `Stock: ${currentStock}`;
+                                
+                                updateQuantity(itemId, 1);
+                            } else {
+                                showMessage("No more stock available for this item.", "error");
+                            }
+                        }
+                    });
                 });
-                // Add event listener to remove buttons
+                
+        
                 document.querySelectorAll('.remove-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                      itemToRemoveId = btn.dataset.id;
-                      document.getElementById('passwordModal').style.display = 'block';
+                        itemToRemoveId = btn.dataset.id;
+                        const itemName = cart.find(item => item.id === itemToRemoveId).name;
+                        const productCard = document.querySelector(`.product-card[data-id="${itemToRemoveId}"]`);
+                            if (productCard) {
+                                let currentStock = parseInt(productCard.getAttribute('data-quantity')) || 0;
+                                let removedQty = cart.find(item => item.id === itemToRemoveId)?.quantity || 1;
+                                currentStock += removedQty;
+                                productCard.setAttribute('data-quantity', currentStock);
+                                const qtySpan = productCard.querySelector('span');
+                                if (qtySpan) {
+                                    qtySpan.textContent = `QTY: ${currentStock}`;
+                                }
+                                productCard.style.opacity = '1';
+                                productCard.style.pointerEvents = 'auto';
+                            }
+                        document.getElementById('passwordModal').style.display = 'block';
                     });
-                  });
-                  
+                });
             }
         
             updateTotals();
         }
+        
+        document.getElementById('customerSelect').addEventListener('change', function() {
+            updateCart();
+        });
+        
 
         // Update quantity of an item in the cart
         function updateQuantity(itemId, change) {
@@ -441,6 +546,14 @@
         // Remove item from cart
         function removeItem(itemId) {
             cart = cart.filter(item => item.id !== itemId);
+            const itemToRemove = cart.find(item => item.id === itemId);
+            if (itemToRemove) {
+                cart.push(itemToRemove);
+            }
+            const itemToRemoveIndex = cart.findIndex(item => item.id === itemId);
+            if (itemToRemoveIndex !== -1) {
+                cart.splice(itemToRemoveIndex, 1);
+            }
             updateCart();
 
             if (printReceiptBtn) printReceiptBtn.disabled = true;
@@ -465,15 +578,7 @@
                     return;
                 }
         
-                const orderDetails = {
-                    orderNumber: generateOrderNumber(),
-                    date: new Date(),
-                    items: cart,
-                    subtotal: parseFloat(subtotalEl.textContent.replace('$', '')),
-                    tax: parseFloat(taxEl.textContent.replace('$', '')),
-                    total: parseFloat(totalEl.textContent.replace('$', ''))
-                };
-        
+                const orderDetails = createOrderDetails();
                 lastOrderDetails = orderDetails;
         
                 generateReceipt(orderDetails);
@@ -482,132 +587,98 @@
         
             actualPrintBtn.addEventListener('click', () => {
                 const receiptContent = document.getElementById('receiptContent');
-        
+                const orderDetails = createOrderDetails();
+
+                // Check if receiptContent is valid
                 if (!receiptContent) {
                     showMessage('No receipt content found', 'error');
                     return;
                 }
-        
+                // Check if orderDetails is valid
+                if (!orderDetails) {
+                    showMessage('No order details found', 'error');
+                    return;
+                }
+
+                // Open a new window for printing
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write(`
-                <html>
-                  <head>
-                    <title>Receipt</title>
-                    <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        padding: 20px;
-                        margin: 0;
-                        color: #000;
-                        background-color: #fff;
-                        font-size: 14px;
-                        line-height: 1.6;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                        text-align: center;
-                    }
-                
-                    .receipt {
-                        width: 100%;
-                        max-width: 400px;
-                        margin: 0 auto;
-                    }
-                
-                    .receipt-header,
-                    .receipt-footer {
-                        text-align: center;
-                        margin-bottom: 20px;
-                    }
-                
-                    .receipt-header h2 {
-                        margin: 0;
-                        font-size: 22px;
-                        font-weight: bold;
-                    }
-                
-                    .receipt-header p {
-                        margin: 4px 0;
-                        font-size: 13px;
-                    }
-                
-                    .order-info {
-                        margin: 10px 0;
-                        font-size: 13px;
-                        border-top: 1px dashed #000;
-                        border-bottom: 1px dashed #000;
-                        padding: 10px 0;
-                    }
-                
-                    .item-details {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        font-size: 14px;
-                    }
-                    .receipt-items {
-                        margin: 10px 0;
-                        border-top: 1px dashed #000;
-                        border-bottom: 1px dashed #000;
-                        padding: 10px 0;
-                        font-size: 14px;
-                    }
-                
-                    
-                    .receipt-item {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 5px 0;
-                    }
-                    .item-quantity{
-                        justify-content: space-between;
-                    }
-                    .item-name {
-                        flex-grow: 1;
-                    }
-                    .item-total {
-                        font-weight: bold;
-                        justify-content: space-between;
-                    }
-                    .receipt-summary {
-                        margin: 10px 0;
-                        justify-content: space-between;
-                        font-size: 14px;
-                    }
-                    .receipt-total {
-                        font-size: 16px;
-                        font-weight: bold;
-                        margin-top: 10px;
-                        justify-content: space-between;
-                    }
-                    .receipt-footer p {
-                        margin: 4px 0;
-                        font-size: 13px;
-                    }
-                    .summary-row {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 5px 0;
-                    }
-                    @media print {
-                        button {
-                            display: none;
-                        }
-                
-                        body {
-                            font-size: 12pt;
-                        }
-                    }
-                    </style>
-                  </head>
-                  <body>
-                    <div class="receipt">
-                      ${receiptContent.innerHTML}
-                    </div>
-                  </body>
-                </html>
-                                
+                    <html>
+                    <head>
+                        <title>Receipt</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                padding: 20px;
+                                margin: 0;
+                                color: #000;
+                                background-color: #fff;
+                                font-size: 14px;
+                                line-height: 1.6;
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                                text-align: center;
+                            }
+                            .receipt {
+                                width: 100%;
+                                max-width: 400px;
+                                margin: 0 auto;
+                            }
+                            .receipt-header, .receipt-footer {
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                            .receipt-header h2 {
+                                margin: 0;
+                                font-size: 22px;
+                                font-weight: bold;
+                            }
+                            .receipt-header p,
+                            .receipt-footer p {
+                                margin: 4px 0;
+                                font-size: 13px;
+                            }
+                            .order-info,
+                            .receipt-items,
+                            .receipt-summary {
+                                margin: 10px 0;
+                                padding: 10px 0;
+                                border-top: 1px dashed #000;
+                                border-bottom: 1px dashed #000;
+                                font-size: 14px;
+                            }
+                            .receipt-item,
+                            .summary-row {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                padding: 5px 0;
+                            }
+                            .item-details {
+                                display: flex;
+                                gap: 5px;
+                            }
+                            .receipt-total {
+                                font-size: 16px;
+                                font-weight: bold;
+                                margin-top: 10px;
+                            }
+                            @media print {
+                                button {
+                                    display: none;
+                                }
+                                body {
+                                    font-size: 12pt;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="receipt">
+                            ${receiptContent.innerHTML}
+                        </div>
+                    </body>
+                    </html>
                 `);
                 printWindow.document.close();
         
@@ -616,13 +687,47 @@
                     printWindow.print();
                     printWindow.close();
                 };
+
+                saveOrderToBackend(orderDetails);
             });
         
+            function saveOrderToBackend(orderDetails) {
+                fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderDetails)
+                })
+                .then(response => {
+                    console.log('Status:', response.status);
+                    if (response.status !== 200) {
+                        console.error('Error saving order:', response.statusText);
+                        throw new Error('Failed to save order');
+                    }
+                    showMessage('Order successfully!', 'success');
+                
+                    // Close receipt modal
+                    receiptModal.style.display = 'none';
+
+                    // Reset cart
+                    cart = [];
+                    updateCart();
+
+                    // Reset stock on UI if needed
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.style.opacity = '1';
+                        card.style.pointerEvents = 'auto';
+                    });
+                    return response.json();
+                })
+            }
+
+            
             closeReceiptBtn.addEventListener('click', () => {
                 receiptModal.style.display = 'none';
             });
         
-            // Optional: close when clicking outside modal
             window.addEventListener('click', (event) => {
                 if (event.target === receiptModal) {
                     receiptModal.style.display = 'none';
@@ -635,11 +740,33 @@
             return Math.floor(100000 + Math.random() * 900000);
         }
         
+        // Create a reusable order details object
+        function createOrderDetails() {
+            const selectedCustomerId = customerSelect.value;
+            const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+            const customerName = selectedOption?.dataset?.name || 'N/A';
+            
+            return {
+                customer_id: selectedCustomerId,
+                customer_name: customerName,
+                cashier_id : {{ $user->id }},
+                order_number: generateOrderNumber(),
+                date: new Date().toISOString(),
+                items: cart,
+                subtotal: parseFloat(subtotalEl.textContent.replace('$', '')),
+                tax: parseFloat(taxEl.textContent.replace('$', '')),
+                total: parseFloat(totalEl.textContent.replace('$', ''))
+            };
+        }
+        
         // Generate receipt HTML
         function generateReceipt(orderDetails) {
-            const date = orderDetails.date.toLocaleDateString();
-            const time = orderDetails.date.toLocaleTimeString();
-            
+            const dateObj = new Date(orderDetails.date);
+
+            const date = dateObj.toLocaleDateString();
+            const time = dateObj.toLocaleTimeString();
+
+        
             let receiptHTML = `
                 <div class="receipt-header">
                     <h2>STORE NAME</h2>
@@ -652,10 +779,9 @@
                     <p>Time: ${time}</p>
                     <p>--------------------------------</p>
                 </div>
-                
                 <div class="receipt-items">
             `;
-            
+        
             orderDetails.items.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 receiptHTML += `
@@ -664,14 +790,13 @@
                             <span class="item-quantity">${item.quantity}x</span>
                             <span>${item.name}</span>
                         </div>
-                        <div class="item-total text-black">$${itemTotal.toFixed(2)}</div>
+                        <div class="item-total">$${itemTotal.toFixed(2)}</div>
                     </div>
                 `;
             });
-            
+        
             receiptHTML += `
                 </div>
-                
                 <div class="receipt-summary">
                     <div class="summary-row">
                         <span>Subtotal:</span>
@@ -686,13 +811,14 @@
                         <span>$${orderDetails.total.toFixed(2)}</span>
                     </div>
                 </div>
-                
-                <div class="receipt-footer">
-                    <p>Thank you for your purchase!</p>
+                <div class="receipt-footer text-dark">
+                    <p>Thank you, ${orderDetails.customerName}!</p>
+                    <p>For your order of ${orderDetails.items.length} items</p>
+                    <p>--------------------------------</p>
                     <p>Please come again</p>
                 </div>
             `;
-            
+        
             receiptContent.innerHTML = receiptHTML;
         }
         

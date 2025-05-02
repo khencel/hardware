@@ -171,11 +171,43 @@
         </div>
     </div>
 
+    <div id="passwordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <h3>Enter Password to Remove Item</h3>
+      
+          <div style="position: relative; margin-bottom: 10px;">
+            <input type="password" id="passwordInput" placeholder="Password"
+                   style="width: 100%; padding-right: 40px;" />
+      
+            <!-- Eye toggle icon -->
+            <span id="togglePassword" style="
+              position: absolute;
+              right: 10px;
+              top: 50%;
+              transform: translateY(-50%);
+              cursor: pointer;
+              font-size: 16px;
+            ">👁️</span>
+          </div>
+      
+          <div class="modal-actions">
+            <button id="confirmRemoveBtn" class="modal-btn">Confirm</button>
+            <button id="cancelRemoveBtn" class="modal-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+      
+      
+
+
     <script>
 
         // Cart data
         let cart = [];
         let lastOrderDetails = null;
+        let itemToRemoveId = null;
+        {{--  const password = 'admin123';  --}}
+        const password = @json(config('app.remove_item_password'));
         
         // DOM Elements
         const hiddenProducts = document.querySelectorAll('#hidden-products .hidden-product'); //fetching products
@@ -225,6 +257,25 @@
             });
         }
         
+        // Setup remove item functionality
+        document.getElementById('confirmRemoveBtn').addEventListener('click', () => {
+            const entered = document.getElementById('passwordInput').value;
+            if (entered === password) {
+              removeItem(itemToRemoveId);
+              closePasswordModal();
+            } else {
+              alert('Incorrect password.');
+            }
+          });
+          
+          document.getElementById('cancelRemoveBtn').addEventListener('click', closePasswordModal);
+          
+          function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            itemToRemoveId = null;
+          }
+
         // Show barcode alert message
         function showBarcodeAlert(message) {
             barcodeAlert.textContent = message;
@@ -355,10 +406,14 @@
                 document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
                     btn.addEventListener('click', () => updateQuantity(btn.dataset.id, 1));
                 });
-        
+                // Add event listener to remove buttons
                 document.querySelectorAll('.remove-btn').forEach(btn => {
-                    btn.addEventListener('click', () => removeItem(btn.dataset.id));
-                });
+                    btn.addEventListener('click', () => {
+                      itemToRemoveId = btn.dataset.id;
+                      document.getElementById('passwordModal').style.display = 'block';
+                    });
+                  });
+                  
             }
         
             updateTotals();
@@ -737,5 +792,17 @@
             });
         });
     </script>
+
+    <script>
+        const passwordInput = document.getElementById('passwordInput');
+        const togglePassword = document.getElementById('togglePassword');
+      
+        togglePassword.addEventListener('click', () => {
+          const isHidden = passwordInput.type === 'password';
+          passwordInput.type = isHidden ? 'text' : 'password';
+          togglePassword.textContent = isHidden ? '🙈' : '👁️';
+        });
+      </script>
+      
 </body>
 </html>

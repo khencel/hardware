@@ -792,3 +792,40 @@ th {
     overflow-y: auto;
     padding-right: 10px;
   }
+
+  #passwordModal .modal-content {
+    width: 300px;
+    padding: 20px;
+    background: white;
+    text-align: center;
+  }
+  
+  #passwordModal input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+  }
+  
+  #confirmRemoveBtn{
+    background-color: blue;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  #cancelRemoveBtn{
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }

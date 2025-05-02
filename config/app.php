@@ -185,4 +185,6 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'remove_item_password' => env('VOID_PASSWORD_API_KEY', 'admin123'),
+
 ];

@@ -67,7 +67,14 @@ class ReportController extends Controller
                     $report->customer_name,
                     ($report->cashier->firstname ?? '') . ' ' . ($report->cashier->lastname ?? ''),
                     $report->order_number,
-                    $items,
+                    // Build a string for items with quantities
+                    implode(', ', array_map(function ($item) {
+                        // Check if the item is an array and includes 'name' and 'quantity'
+                        if (is_array($item)) {
+                            return ($item['quantity'] ?? 'N/A') . ' pcs-' . ' ' . $item['name'];
+                        }
+                        return $item;  // If it's not an array, return the item directly
+                    }, $report->items)),
                     $report->total,
                     $report->date,
                 ]);

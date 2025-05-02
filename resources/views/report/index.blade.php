@@ -49,10 +49,13 @@
                             @if(is_array($report->items))
                                 <ul class="mb-0 ps-3">
                                     @foreach($report->items as $item)
-                                        <li>
-                                            {{ is_array($item) ? ($item['name'] ?? json_encode($item)) : $item }}
-                                        </li>
-                                    @endforeach
+                                    <li>
+                                        {{ is_array($item) ? ($item['name'] ?? json_encode($item)) : $item }}
+                                        @if(is_array($item) && isset($item['quantity']))
+                                            <span class="badge bg-info">X  {{ $item['quantity'] }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
                                 </ul>
                             @else
                                 {{ $report->items }}

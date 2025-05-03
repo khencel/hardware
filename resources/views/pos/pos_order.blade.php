@@ -121,9 +121,15 @@
                             <select id="customerSelect" class="form-select" style="width: 100%;">
                                 <option value="">Choose a Customer</option>
                                 @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}" data-name="{{ $customer->name }}">{{ $customer->name }}</option>
+                                    <option value="{{ $customer->id }}"
+                                            data-name="{{ $customer->name }}"
+                                            data-balance="{{ $customer->current_balance }}">
+                                        {{ $customer->name }}
+                                    </option>
                                 @endforeach
                             </select>
+                            
+                            <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
                         </div>
                         
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
@@ -699,28 +705,41 @@
                     },
                     body: JSON.stringify(orderDetails)
                 })
-                .then(response => {
-                    console.log('Status:', response.status);
-                    if (response.status !== 200) {
-                        console.error('Error saving order:', response.statusText);
-                        throw new Error('Failed to save order');
+                .then(async (response) => {
+                    if (!response.ok) {
+                        const message = response.status === 400
+                            ? 'Insufficient balance'
+                            : 'Failed to save order';
+                        
+                        showMessage(message, 'error');
+                        receiptModal.style.display = 'none';
+                        return;
                     }
-                    showMessage('Order successfully!', 'success');
                 
-                    // Close receipt modal
+                    const data = await response.json();
+                    console.log(data);
+                    showMessage(
+                        `${data.message || 'Order successfully!'}\n${data.order.customer_name} current balance was ${data.remaining_balance}`,
+                        'success'
+                      );
                     receiptModal.style.display = 'none';
-
+                
                     // Reset cart
                     cart = [];
                     updateCart();
-
+                
                     // Reset stock on UI if needed
                     document.querySelectorAll('.product-card').forEach(card => {
                         card.style.opacity = '1';
                         card.style.pointerEvents = 'auto';
                     });
-                    return response.json();
+                
+                    // Optionally use data.order or data.remaining_balance here
                 })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('An error occurred while placing the order.', 'error');
+                });
             }
 
             
@@ -920,7 +939,8 @@
             });
         });
     </script>
-
+    
+    //hide and show password
     <script>
         const passwordInput = document.getElementById('passwordInput');
         const togglePassword = document.getElementById('togglePassword');
@@ -931,6 +951,23 @@
           togglePassword.textContent = isHidden ? '🙈' : '👁️';
         });
       </script>
-      
+
+      //balance display
+      <script>
+        document.getElementById('customerSelect').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const balanceDisplay = document.getElementById('balanceDisplay');
+        
+            if (this.value) {
+                const balance = selectedOption.getAttribute('data-balance');
+                balanceDisplay.textContent = `Remaining Balance: $${balance}`;
+                balanceDisplay.style.display = 'block';
+                balanceDisplay.style.color = 'black';
+            } else {
+                balanceDisplay.style.display = 'none';
+            }
+        });
+        </script>
+        
 </body>
 </html>

@@ -5,26 +5,42 @@
 @section('content')
     <div class="container mt-5">
         <form method="GET" action="{{ route('reports.index') }}" class="row g-3 align-items-end mb-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="start_date" class="form-label">Start Date</label>
                 <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}" class="form-control">
             </div>
         
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="end_date" class="form-label">End Date</label>
                 <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}" class="form-control">
             </div>
-        
+            
             <div class="col-md-3">
+                <label for="customer_id" class="form-label">Customer</label>
+                <select name="customer_id" id="customer_id" class="form-select">
+                    <option value="">All Customers</option>
+                    @foreach ($customers as $customer)
+                        <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                            {{ $customer->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bx bx-filter-alt"></i> Filter
                 </button>
             </div>
-        
+            
             <div class="col-md-3">
-                <a href="{{ route('reports.export.csv', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn btn-success w-100">
+                <a href="{{ route('reports.export.csv', [
+                    'start_date' => request('start_date'),
+                    'end_date' => request('end_date'),
+                    'customer_id' => request('customer_id'),
+                ]) }}" class="btn btn-success w-100">
                     <i class="bx bx-download"></i> Export to CSV
-                </a>
+                </a>                
             </div>
         </form>
   

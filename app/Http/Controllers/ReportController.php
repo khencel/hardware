@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\ReportsExport;
 use App\Models\Order;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
+use App\Exports\ReportsExport;
 
 class ReportController extends Controller
 {
@@ -21,9 +22,16 @@ class ReportController extends Controller
             $query->whereBetween('date', [$request->start_date, $request->end_date]);
         }
 
+        if ($request->customer_id) {
+            $query->where('customer_id', $request->customer_id);
+        }
+
         $reports = $query->paginate(10);
 
-        return view('report.index', compact('reports'));
+        // Add this if not already done
+        $customers = Customer::latest()->get();
+
+        return view('report.index', compact('reports', 'customers'));
     }
 
     /**
@@ -37,6 +45,10 @@ class ReportController extends Controller
             ->when($request->start_date && $request->end_date, function ($query) use ($request) {
                 $query->whereBetween('date', [$request->start_date, $request->end_date]);
             })
+            ->when($request->customer_id, function ($query) use ($request) {
+                $query->where('customer_id', $request->customer_id);
+            })
+            ->with('cashier')
             ->get();
 
         $headers = [
@@ -51,30 +63,23 @@ class ReportController extends Controller
             fputcsv($file, $columns);
 
             foreach ($reports as $report) {
-                // Decode items if it's a JSON string
                 $decodedItems = is_string($report->items)
                     ? json_decode($report->items, true)
                     : $report->items;
 
-                // Handle item display
                 $items = is_array($decodedItems)
                     ? implode(', ', array_map(function ($item) {
-                        return is_array($item) ? ($item['name'] ?? json_encode($item)) : $item;
+                        return is_array($item)
+                            ? (($item['quantity'] ?? 'N/A') . ' pcs - ' . ($item['name'] ?? ''))
+                            : $item;
                     }, $decodedItems))
                     : $decodedItems;
-                // Write CSV row
+
                 fputcsv($file, [
                     $report->customer_name,
                     ($report->cashier->firstname ?? '') . ' ' . ($report->cashier->lastname ?? ''),
                     $report->order_number,
-                    // Build a string for items with quantities
-                    implode(', ', array_map(function ($item) {
-                        // Check if the item is an array and includes 'name' and 'quantity'
-                        if (is_array($item)) {
-                            return ($item['quantity'] ?? 'N/A') . ' pcs-' . ' ' . $item['name'];
-                        }
-                        return $item;  // If it's not an array, return the item directly
-                    }, $report->items)),
+                    $items,
                     $report->total,
                     $report->date,
                 ]);

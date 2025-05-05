@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Role;
 use App\Http\Traits\UpdateUser;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
@@ -47,9 +48,8 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->hasMany(UserRole::class, 'user_id');
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
-
     /**
      * Check if user has any of the specified roles.
      *
@@ -91,7 +91,9 @@ class User extends Authenticatable
      */
     public function getRoleAttribute()
     {
-        return $this->roles->isEmpty() ? 'No Role' : $this->roles->first()->role->name;
+        return $this->roles->isEmpty()
+            ? 'No Role'
+            : $this->roles->first()->name;
     }
 
     public function getStatusAttribute()

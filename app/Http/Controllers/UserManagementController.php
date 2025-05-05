@@ -16,13 +16,12 @@ class UserManagementController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles.role')
+        $users = User::with('roles')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('user-management.index', compact('users'));
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -91,6 +90,7 @@ class UserManagementController extends Controller
      */
     public function update(Request $request, string $id)
     {
+
         // Validate the incoming request data
         $request->validate([
             'firstname' => 'required',
@@ -112,14 +112,28 @@ class UserManagementController extends Controller
             'password' => $request->password ? Hash::make($request->password) : $user->password, // Only hash the new password if provided
         ]);
 
-        // Update the UserRole record (this assumes a one-to-one relation between User and Role)
         if ($request->has('role') && $request->role !== null) {
-            UserRole::where('user_id', $user->id)
-                ->update([
+            $existing = UserRole::where('user_id', $user->id)->first();
+
+            if ($existing) {
+                // Update the existing record
+                $existing->update([
                     'role_id' => $request->role,
                     'updated_at' => now(),
                 ]);
+            } else {
+                // Create a new record
+                UserRole::create([
+                    'user_id' => $user->id,
+                    'role_id' => $request->role,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            dd('Role assigned/updated successfully.');
         }
+
 
         // Redirect with success message
         return redirect()->route('users.index')->with('success', 'User updated successfully.');

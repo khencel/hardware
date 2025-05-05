@@ -5,75 +5,26 @@
 
     @php
         $routes = [
-            // [
-            //     'url' => '/dashboard',
-            //     'name' => 'cms.dashboard',
-            //     'label' => 'Dashboard',
-            //     'icon' => 'bx bx-grid-alt',
-            //     'roles' => [12, 2, 11],
-            // ],
-            // [
-            //     'url' => '/user-management',
-            //     'name' => 'user-management',
-            //     'label' => 'User Management',
-            //     'roles' => [],
-            //     'icon' => 'bx bx-user',
-            // ],
-            // [
-            //     'url' => '/room-category',
-            //     'name' => 'room-category',
-            //     'label' => 'Room Category',
-            //     'icon' => 'bx bx-box',
-            //     'roles' => [12, 11],
-            // ],
-            // [
-            //     'url' => '/rooms',
-            //     'name' => 'rooms',
-            //     'label' => 'Rooms',
-            //     'icon' => 'bx bx-list-ul',
-            //     'roles' => [12, 11],
-            // ],
-            // [
-            //     'url' => '/package',
-            //     'name' => 'package',
-            //     'label' => 'Package',
-            //     'icon' => 'bx bx-pie-chart-alt-2',
-            //     'roles' => [12, 11],
-            // ],
-            // [
-            //     'url' => '/leisures-add-ons',
-            //     'name' => 'leisures-add-ons',
-            //     'label' => 'Leisures/Add-ons',
-            //     'icon' => 'bx bx-coin-stack',
-            //     'roles' => [12, 11],
-            // ],
-            // [
-            //     'url' => '/booking',
-            //     'name' => 'booking',
-            //     'label' => 'Booking',
-            //     'icon' => 'bx bx-heart',
-            //     'roles' => [12, 2, 11],
-            // ],
             [
                 'url' => '/food-categories',
                 'name' => 'food-categories',
                 'label' => 'Item Categories',
                 'icon' => 'bx bx-food-menu',
-                'roles' => [],
+                'roles' => [12],
             ],
             [
                 'url' => '/foods',
                 'name' => 'foods',
                 'label' => 'Item',
                 'icon' => 'bx bx-food-menu',
-                'roles' => [],
+                'roles' => [12],
             ],
             [
                 'url' => '/customers',
                 'name' => 'customers',
                 'label' => 'Customers',
                 'icon' => 'bx bx-user',
-                'roles' => [], // Adjust roles as needed
+                'roles' => [12],
             ],
             [
                 'url' => '/pos',
@@ -87,36 +38,15 @@
                 'name' => 'user-management',
                 'label' => 'User Management',
                 'icon' => 'bx bx-user-circle',
-                'roles' => [],
+                'roles' => [12],
             ],
             [
                 'url' => '/reports',
                 'name' => 'reports',
                 'label' => 'Reports',
                 'icon' => 'bx bxs-report',
-                'roles' => [],
+                'roles' => [12],
             ],
-            // [
-            //     'url' => '/payment-methods',
-            //     'name' => 'payment-methods',
-            //     'label' => 'Payment Methods',
-            //     'icon' => 'bx bx-calculator',
-            //     'roles' => [12, 11],
-            // ],
-            // [
-            //     'url' => '/inventories',
-            //     'name' => 'inventories',
-            //     'label' => 'Inventories',
-            //     'icon' => 'bx bx-box',
-            //     'roles' => [12, 11],
-            // ],
-            // [
-            //     'url' => '/discounts',
-            //     'name' => 'discounts',
-            //     'label' => 'Discounts',
-            //     'icon' => 'bx bx-purchase-tag',
-            //     'roles' => [12, 11],
-            // ],
         ];
     @endphp
 

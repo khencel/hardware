@@ -34,7 +34,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ReservationDetailsController;
 use App\Http\Controllers\Rooms\RoomCategoryController;
 use App\Http\Controllers\UserVerifyPasswordController;
-
+use Carbon\Carbon;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -72,27 +72,49 @@ Route::middleware(['auth'])->group(function () {
         return view('pos.pos_order', compact('products', 'user', 'categories', 'customers'));
     });
 
+
+
     Route::get('/dashboard', function () {
 
         $items = Food::where('is_available', true)->count();
         $user = Auth::user();
         $totalCustomers = Customer::count();
-        $totalSales = Order::sum('total');
-        $sales = Order::select(
-            DB::raw("DATE(date) as date"),
+
+        // Total sales per month
+        $monthlySales = Order::select(
+            DB::raw("DATE_FORMAT(date, '%Y-%m') as month"),
             DB::raw("SUM(total) as total")
         )
-            ->groupBy(DB::raw("DATE(date)"))
-            ->orderBy('date', 'asc')
-            ->take(7)
-            ->get();
-        $chartLabels = $sales->pluck('date')->map(function ($date) {
-            return \Carbon\Carbon::parse($date)->format('D, M j, Y');
-        })->toArray();
-        $chartData = $sales->pluck('total')->toArray();
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->take(7) // last 6 months
+            ->get()
+            ->reverse(); // to show oldest -> newest
 
+        $chartLabels = $monthlySales->pluck('month')->map(function ($month) {
+            return Carbon::parse($month . '-01')->format('F Y');
+        })->toArray();
+
+        $chartData = $monthlySales->pluck('total')->toArray();
+
+        // Still fetch low inventory items
         $lowItemsInInventory = Food::where('quantity', '<', 5)->paginate(10);
-        return view('dashboard.index', compact('items', 'user', 'totalCustomers', 'totalSales', 'lowItemsInInventory', 'chartLabels', 'chartData'));
+
+        //total sales
+        $totalSales = Order::whereYear('created_at', now()->year)->sum('total');
+        //average 
+        $averageMonthlySales = count($chartData) > 0 ? array_sum($chartData) / count($chartData) : 0;
+
+        return view('dashboard.index', compact(
+            'items',
+            'user',
+            'totalCustomers',
+            'totalSales',
+            'lowItemsInInventory',
+            'averageMonthlySales',
+            'chartLabels',
+            'chartData'
+        ));
     });
 
     Route::post('/logout', Logout::class)->name('auth.logout');

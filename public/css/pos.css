@@ -160,7 +160,6 @@ body.dark .cart-section th, body.dark .cart-section td {
     cursor: not-allowed;
 }
 .cart-table-container {
-    max-width: 600px;
     overflow-y: auto;
     margin-top: 1rem;
     overflow: hidden;
@@ -794,7 +793,7 @@ th {
   }
 
   #passwordModal .modal-content {
-    width: 700px;
+    width: 7.cart-table-container 00px;
     padding: 20px;
     background: white;
     text-align: center;

@@ -22,15 +22,15 @@
                 </div>
                 <div class="col-3">
                     <div class="card text-white bg-success mb-3">
-                        <div class="card-header">Total Sales</div>
+                        <div class="card-header">Total Items Available</div>
                         <div class="card-body">
-                            <h5 class="card-title">${{ $totalSales }}</h5>
+                            <h5 class="card-title">{{ $items }}</h5>
                         </div>
                     </div>
                 </div>
                 <div class="col-3">
                     <div class="card text-white bg-secondary mb-3">
-                        <div class="card-header">Total Sales this year</div>
+                        <div class="card-header">Total Sales This year</div>
                         <div class="card-body">
                             <h5 class="card-title">${{ $totalSales }}</h5>
                         </div>
@@ -40,7 +40,7 @@
                     <div class="card text-white bg-warning mb-3">
                         <div class="card-header">Average monthly sales</div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ $averageMonthlySales }}</h5>
+                            <h5 class="card-title">${{ $averageMonthlySales }}</h5>
                         </div>
                     </div>
                 </div>

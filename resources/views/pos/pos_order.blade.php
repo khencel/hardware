@@ -14,8 +14,17 @@
 <body class="{{ session('theme', 'light') }}">
     <div class="container-fluid" style="padding: 50px">
         <div class="row">
-            <div class="col-6">
-                <h1>Welcome {{ $user->firstname.' '.$user->lastname }}</h1>
+            <div class="col-6 row d-flex ">
+                <div class="col-2">
+                    <a href="{{ url('/') }}" class="btn btn-primary">
+                        ← Back to CMS
+                    </a>
+                </div>
+                <div class="col-10 text-start">
+                    <h1>Welcome {{ $user->firstname.' '.$user->lastname }}</h1>
+                </div>
+              
+             
             </div>
             <div class="col-6 d-flex justify-content-end">
                 <div class="form-check form-switch">

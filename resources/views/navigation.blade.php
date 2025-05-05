@@ -10,14 +10,14 @@
                 'name' => 'food-categories',
                 'label' => 'Item Categories',
                 'icon' => 'bx bx-food-menu',
-                'roles' => [12],
+                'roles' => [],
             ],
             [
                 'url' => '/foods',
                 'name' => 'foods',
                 'label' => 'Item',
                 'icon' => 'bx bx-food-menu',
-                'roles' => [12],
+                'roles' => [],
             ],
             [
                 'url' => '/customers',

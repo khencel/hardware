@@ -15,12 +15,12 @@
     <div class="container-fluid" style="padding: 50px">
         <div class="row">
             <div class="col-6 row d-flex ">
-                <div class="col-2">
-                    <a href="{{ url('/') }}" class="btn btn-primary">
+                <div class="col-3">
+                    <a href="{{ url('/dashboard') }}" class="btn btn-primary">
                         ← Back to CMS
                     </a>
                 </div>
-                <div class="col-10 text-start">
+                <div class="col-9 text-start">
                     <h1>Welcome {{ $user->firstname.' '.$user->lastname }}</h1>
                 </div>
               

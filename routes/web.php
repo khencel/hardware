@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\Food;
+use App\Models\Order;
 use App\Models\Customer;
 use App\Models\FoodCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +70,29 @@ Route::middleware(['auth'])->group(function () {
         }
 
         return view('pos.pos_order', compact('products', 'user', 'categories', 'customers'));
+    });
+
+    Route::get('/dashboard', function () {
+
+        $items = Food::where('is_available', true)->count();
+        $user = Auth::user();
+        $totalCustomers = Customer::count();
+        $totalSales = Order::sum('total');
+        $sales = Order::select(
+            DB::raw("DATE(date) as date"),
+            DB::raw("SUM(total) as total")
+        )
+            ->groupBy(DB::raw("DATE(date)"))
+            ->orderBy('date', 'asc')
+            ->take(7)
+            ->get();
+        $chartLabels = $sales->pluck('date')->map(function ($date) {
+            return \Carbon\Carbon::parse($date)->format('D, M j, Y');
+        })->toArray();
+        $chartData = $sales->pluck('total')->toArray();
+
+        $lowItemsInInventory = Food::where('quantity', '<', 5)->paginate(10);
+        return view('dashboard.index', compact('items', 'user', 'totalCustomers', 'totalSales', 'lowItemsInInventory', 'chartLabels', 'chartData'));
     });
 
     Route::post('/logout', Logout::class)->name('auth.logout');

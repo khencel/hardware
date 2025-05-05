@@ -6,6 +6,13 @@
     @php
         $routes = [
             [
+                'url' => '/dashboard',
+                'name' => 'dashboard',
+                'label' => 'Dashboard',
+                'icon' => 'bx bx-grid-alt',
+                'roles' => [],
+            ],
+            [
                 'url' => '/food-categories',
                 'name' => 'food-categories',
                 'label' => 'Item Categories',

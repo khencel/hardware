@@ -40,7 +40,7 @@ class ReportController extends Controller
     public function export(Request $request)
     {
         $fileName = 'reports.csv';
-
+    
         $reports = Order::query()
             ->when($request->start_date && $request->end_date, function ($query) use ($request) {
                 $query->whereBetween('date', [$request->start_date, $request->end_date]);
@@ -50,23 +50,24 @@ class ReportController extends Controller
             })
             ->with('cashier')
             ->get();
-
+    
         $headers = [
             "Content-Type" => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
         ];
-
-        $columns = ['Customer Name', 'Cashier Name', 'Order Number', 'Items', 'Total', 'Date Purchase'];
-
+    
+        // 🔥 Added 'Rate Type' to the headers
+        $columns = ['Customer Name', 'Cashier Name', 'Order Number', 'Rate Type', 'Items', 'Total', 'Date Purchase'];
+    
         $callback = function () use ($reports, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-
+    
             foreach ($reports as $report) {
                 $decodedItems = is_string($report->items)
                     ? json_decode($report->items, true)
                     : $report->items;
-
+    
                 $items = is_array($decodedItems)
                     ? implode(', ', array_map(function ($item) {
                         return is_array($item)
@@ -74,22 +75,23 @@ class ReportController extends Controller
                             : $item;
                     }, $decodedItems))
                     : $decodedItems;
-
+    
                 fputcsv($file, [
                     $report->customer_name,
                     ($report->cashier->firstname ?? '') . ' ' . ($report->cashier->lastname ?? ''),
                     $report->order_number,
+                    $report->rate_type ?? 'N/A',
                     $items,
                     $report->total,
                     $report->date,
                 ]);
             }
-
+    
             fclose($file);
         };
-
+    
         return response()->stream($callback, 200, $headers);
-    }
+    }    
     /**
      * Show the form for creating a new resource.
      */

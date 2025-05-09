@@ -459,13 +459,13 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${item.name}</td>
-                        <td>$${item.price.toFixed(2)}</td>
+                        <td>₱${item.price.toFixed(2)}</td>
                         <td class="quantity-cell">
                             <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                            <span class="quantity-value">${item.quantity}</span>
+                            <span class="quantity-value"> ₱{item.quantity}</span>
                             <button class="quantity-btn plus" data-id="${item.id}">+</button>
                         </td>
-                        <td>$${total.toFixed(2)}</td>
+                        <td>₱${total.toFixed(2)}</td>
                         <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
                     `;
                     cartItems.appendChild(row);
@@ -580,9 +580,9 @@
             const tax = subtotal * 0.07;
             const total = subtotal + tax;
 
-            subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-            taxEl.textContent = `$${tax.toFixed(2)}`;
-            totalEl.textContent = `$${total.toFixed(2)}`;
+            subtotalEl.textContent = ` ₱${subtotal.toFixed(2)}`;
+            taxEl.textContent = ` ₱${tax.toFixed(2)}`;
+            totalEl.textContent = ` ₱${total.toFixed(2)}`;
         }
         
         // Setup receipt functionality

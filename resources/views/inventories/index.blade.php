@@ -47,7 +47,7 @@
                                 </span>
                             </td>
                             <td class="small">{{ $item->category ?? 'N/A' }}</td>
-                            <td class="text-center small">${{ number_format($item->unit_price, 2) }}</td>
+                            <td class="text-center small">₱{{ number_format($item->unit_price, 2) }}</td>
                             <td class="small">{{ $item->supplier ?? 'Unknown' }}</td>
                             <td class="text-center">
                                 <div class="d-flex flex-wrap justify-content-center gap-1">

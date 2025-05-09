@@ -92,7 +92,7 @@
                                             
                                             style="flex: 1 1 calc(33.333% - 0.75rem); border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background-color: #fdfdfd; display: block; flex-direction: column; gap: 0.3rem; min-width: 180px; transition: transform 0.3s ease, box-shadow 0.3s ease;">
                                             <h3 style="margin: 0; font-size: 14px;">{{ $product->name }}</h3>
-                                            <p style="margin: 0; font-size: 12px;"><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
+                                            <p style="margin: 0; font-size: 12px;"><strong>Price:</strong>₱{{ number_format($product->price, 2) }}</p>
                                             <p style="margin: 0; font-size: 12px; color: #555;"><strong>Barcode:</strong> {{ $product->barcode }}</p>
                                             <span style="margin: 0; font-size: 12px; color: #555;">{{  $product->quantity <= 0 ? 'Out of Stock'  : 'Stock:' }}  {{ $product->quantity <= 0 ?  '' : $product->quantity }}</span>
                                             <div style="margin-top: auto;">

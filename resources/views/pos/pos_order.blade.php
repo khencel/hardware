@@ -462,7 +462,7 @@
                         <td>₱${item.price.toFixed(2)}</td>
                         <td class="quantity-cell">
                             <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                            <span class="quantity-value"> ₱${item.quantity}</span>
+                            <span class="quantity-value"> ${item.quantity}</span>
                             <button class="quantity-btn plus" data-id="${item.id}">+</button>
                         </td>
                         <td>₱${total.toFixed(2)}</td>

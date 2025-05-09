@@ -42,9 +42,7 @@
                     <option value="">Select Category</option>
                     @foreach ($categories as $category)
                         <option value="{{ $category->id }}"
-                            {{ old('category_id', $food->category_id) == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
+                            {{ old('category_id', $food->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                     @endforeach
                 </select>
                 @error('category_id')
@@ -56,8 +54,28 @@
             <div class="mb-3">
                 <label for="food_price" class="form-label">Price</label>
                 <input type="number" class="form-control @error('price') is-invalid @enderror" id="food_price"
-                    name="price" value="{{ old('price', $food->price) }}" step="0.01">
+                    name="price" value="{{ old('price', $food->price) }}" step="0.01" oninput="updateMarginPercentage()">
                 @error('price')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Cost Price -->
+            <div class="mb-3">
+                <label for="food_cost_price" class="form-label">Cost Price</label>
+                <input type="number" class="form-control @error('cost_price') is-invalid @enderror" id="food_cost_price"
+                    name="cost_price" value="{{ old('cost_price', $food->cost_price) }}" step="0.01" oninput="updateMarginPercentage()">
+                @error('cost_price')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Margin Percentage (Editable) -->
+            <div class="mb-3">
+                <label for="food_margin_percentage" class="form-label">Margin Percentage</label>
+                <input type="number" class="form-control @error('margin_percentage') is-invalid @enderror" id="food_margin_percentage"
+                    name="margin_percentage" value="{{ old('margin_percentage', $food->margin_percentage) }}" step="0.01" oninput="updateSellingPrice()">
+                @error('margin_percentage')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
@@ -92,8 +110,8 @@
                     name="is_available">
                     <option value="1" {{ old('is_available', $food->is_available) == 1 ? 'selected' : '' }}>Available
                     </option>
-                    <option value="0" {{ old('is_available', $food->is_available) == 0 ? 'selected' : '' }}>
-                        Unavailable</option>
+                    <option value="0" {{ old('is_available', $food->is_available) == 0 ? 'selected' : '' }}>Unavailable
+                    </option>
                 </select>
                 @error('is_available')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -103,4 +121,26 @@
             <button type="submit" class="btn btn-primary">Update</button>
         </form>
     </div>
+
+    <script>
+        // Function to calculate the margin percentage based on cost price and selling price
+        function updateMarginPercentage() {
+            const costPrice = parseFloat(document.getElementById('food_cost_price').value);
+            const sellingPrice = parseFloat(document.getElementById('food_price').value);
+            if (costPrice && sellingPrice && sellingPrice > costPrice) {
+                const marginPercentage = ((sellingPrice - costPrice) / sellingPrice) * 100;
+                document.getElementById('food_margin_percentage').value = marginPercentage.toFixed(2);
+            }
+        }
+
+        // Function to calculate the selling price based on margin percentage and cost price
+        function updateSellingPrice() {
+            const costPrice = parseFloat(document.getElementById('food_cost_price').value);
+            const marginPercentage = parseFloat(document.getElementById('food_margin_percentage').value);
+            if (costPrice && marginPercentage >= 0) {
+                const sellingPrice = costPrice / (1 - (marginPercentage / 100));
+                document.getElementById('food_price').value = sellingPrice.toFixed(2);
+            }
+        }
+    </script>
 @endsection

@@ -44,7 +44,9 @@
                     <th>#</th>
                     <th>Name</th>
                     <th>Category</th>
-                    <th>Price</th>
+                    <th>Capital Cost</th>
+                    <th>Selling Price</th>
+                    <th>Margin %</th>
                     <th>Availability</th>
                     <th>Actions</th>
                 </tr>
@@ -55,7 +57,9 @@
                         <td>{{ $key + 1 + (($foods->currentPage() - 1) * $foods->perPage()) }}</td>
                         <td>{{ $food->name }}</td>
                         <td>{{ $food->category->name }}</td>
+                        <td>₱{{ number_format($food->cost_price, 2) }}</td>
                         <td>₱{{ number_format($food->price, 2) }}</td>
+                        <td>{{ $food->margin_percentage}} %</td>
                         <td>
                             <span class="badge bg-{{ $food->is_available ? 'success' : 'danger' }}">
                                 {{ $food->is_available ? 'Available' : 'Unavailable' }}

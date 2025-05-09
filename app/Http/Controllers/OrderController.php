@@ -12,9 +12,8 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
 
-    public function create(request $request)
+    public function create(Request $request)
     {
-
         $orderDetails = $request->only([
             'customer_id',
             'cashier_id',
@@ -25,8 +24,9 @@ class OrderController extends Controller
             'subtotal',
             'tax',
             'total',
+            'rate_type',
         ]);
-
+    
         // Fetch customer
         $customer = Customer::find($orderDetails['customer_id']);
         if (!$customer) {
@@ -34,7 +34,7 @@ class OrderController extends Controller
                 'message' => 'Customer not found.',
             ], 404);
         }
-
+    
         // Check if balance is enough BEFORE placing order
         if ($customer->current_balance < $orderDetails['total']) {
             return response()->json([
@@ -43,10 +43,10 @@ class OrderController extends Controller
                 'available_balance' => $customer->current_balance,
             ], 400);
         }
-
+    
         // Save the order
         $order = Order::create($orderDetails);
-
+    
         // Reduce food stock
         foreach ($orderDetails['items'] as $item) {
             $food = Food::find($item['id']);
@@ -55,15 +55,16 @@ class OrderController extends Controller
                 $food->save();
             }
         }
-
+    
         // Deduct order total from customer's balance
         $customer->current_balance -= $orderDetails['total'];
         $customer->save();
-
+    
         return response()->json([
             'message' => 'Order placed successfully!',
             'order' => $order,
             'remaining_balance' => $customer->current_balance,
         ], 200);
     }
+    
 }

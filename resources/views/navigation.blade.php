@@ -69,23 +69,32 @@
                 'roles' => [12],
                 'children' => [
                     [
-                        'url' => '/food-categories',
-                        'name' => 'food-categories',
-                        'label' => 'Categories',
-                        'icon' => 'bx bx-food-menu',
+                        'url' => '/drivers',
+                        'name' => 'drivers',
+                        'label' => 'Drivers',
+                        'icon' => 'bx bx-smile',
                         'roles' => [],
                     ],
                     [
-                        'url' => '/food-categories',
-                        'name' => 'food-categories',
-                        'label' => 'Categories',
-                        'icon' => 'bx bx-food-menu',
+                        'url' => '/discounts',
+                        'name' => 'discounts',
+                        'label' => 'Discount',
+                        'icon' => 'bx bxs-discount',
+                        'roles' => [],
+                    ],
+                    [
+                        'url' => '/taxes',
+                        'name' => 'taxes',
+                        'label' => 'Tax',
+                        'icon' => 'bx bx-infinite',
                         'roles' => [],
                     ],
                 ],
             ],
         ];
     @endphp
+
+    {{--  https://themesbrand.com/skote-symfony/layouts/icons-boxicons.html  --}}
 
     @foreach ($routes as $route)
         @if (empty($route['roles']) || collect($userRoles)->intersect($route['roles'])->isNotEmpty())

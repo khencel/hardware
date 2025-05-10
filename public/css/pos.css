@@ -828,3 +828,123 @@ th {
     font-weight: bold;
     transition: background-color 0.3s ease;
   }
+
+
+/* Modal Styles */
+#discountModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    color: #333;
+    cursor: pointer;
+}
+
+#discountForm {
+    margin-bottom: 20px;
+}
+
+#discountForm div {
+    margin-bottom: 10px;
+}
+
+#discountForm label {
+    font-size: 16px;
+    color: #444;
+    display: flex;
+    align-items: center;
+}
+
+#discountForm input[type="radio"] {
+    margin-right: 10px;
+}
+
+.apply-discount-btn {
+    background-color: #28a745;
+    color: white; 
+    font-size: 16px; 
+    font-weight: bold;
+    padding: 12px 20px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    display: flex;
+    align-items: center; 
+    gap: 8px;
+    transition: background-color 0.3s, transform 0.2s; 
+    margin: 0 auto;
+    width: 100%;
+}
+
+.apply-discount-btn:hover {
+    background-color: #218838; 
+    transform: scale(1.05); 
+}
+
+.apply-discount-btn:active {
+    background-color: #1e7e34; 
+    transform: scale(0.98); 
+}
+
+.apply-discount-btn .icon {
+    font-size: 20px; 
+}
+
+/* Modal open state */
+#discountModal.show {
+    display: flex;
+}
+
+/* Close Button Styles */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+    z-index: 1050; /* Ensure it's above modal content */
+}
+
+.close:hover {
+    color: #e74c3c !important; /* Red color on hover */
+    transform: scale(1.1); /* Slightly enlarge on hover */
+}
+
+.close:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.5); /* Red glow on focus */
+}

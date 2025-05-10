@@ -1,16 +1,16 @@
 @extends('homepage')
 
-@section('header', 'Customers')
+@section('header', 'Driver')
 
 @section('content')
     <div class="container mt-5">
         <x-table 
-            :columns="['name', 'email', 'initial_balance', 'current_balance', 'phone']" 
-            :rows="$customers" 
-            createRoute="{{ route('customers.create') }}" 
-            createLabel="New Customer"
-            editRoute="customers.edit"
-            deleteRoute="" 
+            :columns="['name', 'email', 'phone','address']" 
+            :rows="$driver" 
+            createRoute="{{ route('drivers.create') }}" 
+            createLabel="New Driver"
+            editRoute="drivers.edit"
+            deleteRoute="drivers.destroy" 
         />
     </div>
 @endsection

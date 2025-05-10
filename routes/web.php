@@ -1,8 +1,11 @@
 <?php
 
+use Carbon\Carbon;
+use App\Models\Tax;
 use App\Models\Food;
 use App\Models\Order;
 use App\Models\Customer;
+use App\Models\Discount;
 use App\Models\FoodCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
@@ -10,10 +13,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TaxController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeisureController;
 use App\Http\Controllers\PackageController;
@@ -34,7 +39,6 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ReservationDetailsController;
 use App\Http\Controllers\Rooms\RoomCategoryController;
 use App\Http\Controllers\UserVerifyPasswordController;
-use Carbon\Carbon;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -64,12 +68,23 @@ Route::middleware(['auth'])->group(function () {
         $user = Auth::user();
         $categories = FoodCategory::latest()->get();
         $customers = Customer::latest()->get();
+
+        $taxes = Tax::where('is_active', true)->first(); 
+        $discounts = Discount::latest()->get();
+        
+        if (!$taxes) {
+            // Handle the case when no active tax exists
+            // For example, set a default tax percentage or display an error
+            $taxes->percentage = 0; // Default to 0% tax if no active tax
+        } else {
+            $taxes = $taxes->percentage;
+        }
         // Check if there are products available
         if ($products->isEmpty()) {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers'));
+        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts'));
     });
 
 
@@ -122,6 +137,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('foods', FoodController::class);
     Route::resource('food-categories', FoodCategoryController::class);
     Route::resource('customers', CustomerController::class);
+    Route::resource('drivers', DriverController::class);
+    Route::resource('discounts', DiscountController::class);
+    Route::resource('taxes', TaxController::class);
     Route::resource('users', UserManagementController::class);
     Route::resource('purchase-orders', PurchaseOrderController::class);
 

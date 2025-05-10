@@ -173,13 +173,21 @@
                         </table>
                         
                         <div class="cart-summary">
+                            <div class="summary-row" id="discountSection">
+                                <label class="text-dark">
+                                    Apply Discount
+                                    <input type="checkbox" id="applyDiscountCheckbox">
+                                </label>
+                                <span id="discount">₱0.00</span>
+                            </div>
+                            
                             <div class="summary-row">
                                 <span>Subtotal:</span>
                                 <span id="subtotal">$0.00</span>
                             </div>
                             <div class="summary-row">
-                                <span>Tax (7%):</span>
-                                <span id="tax">$0.00</span>
+                                <span>Tax ({{ number_format($taxes, 0) }}%):</span>
+                                <span id="tax">00.00</span>
                             </div>
                             <div class="summary-row total-row">
                                 <span>Total:</span>
@@ -237,6 +245,39 @@
           </div>
         </div>
       </div>
+
+      {{--  discount modal  --}}
+      <div id="discountModal" class="modal" style="display: none;">
+        <div class="modal-content text-dark">
+            <span class="close" id="closeDiscountModal">&times;</span>
+            <h3>Select a Discount</h3>
+            <form id="discountForm">
+                @foreach ($discounts as $discount)
+                    <div>
+                        <label>
+                            <input 
+                                type="radio" 
+                                name="discount_option" 
+                                value="{{ $discount->id }}"
+                                data-type="{{ $discount->is_percentage ? 'percent' : 'fixed' }}"
+                                data-value="{{ $discount->discount }}"
+                            >
+                            {{ $discount->title_name }} 
+                            @if($discount->is_percentage)
+                                ({{ $discount->discount }}%)
+                            @else
+                                (₱{{ number_format($discount->discount, 2) }})
+                            @endif
+                        </label>
+                    </div>
+                @endforeach
+            </form>
+            <button id="applySelectedDiscount" class="apply-discount-btn">
+                <span class="icon">🎟️</span> Apply Discount
+            </button>
+        </div>
+    </div>
+        
       
       
 
@@ -247,6 +288,8 @@
         let cart = [];
         let lastOrderDetails = null;
         let itemToRemoveId = null;
+        let selectedDiscountType = 'none';
+        let selectedDiscountValue = 0;
         const password = @json(config('app.remove_item_password'));
         
         // DOM Elements
@@ -274,7 +317,14 @@
         const closeReceiptBtn = document.getElementById('closeReceiptBtn');
         const customer = document.getElementById('customerSelect');
         const rateType = document.getElementById('rateTypeSelect');
+        const taxPercentage = {{ $taxes }};
 
+        //discount
+        const discountModal = document.getElementById('discountModal');
+        const applyDiscountCheckbox = document.getElementById('applyDiscountCheckbox');
+        const closeDiscountModal = document.getElementById('closeDiscountModal');
+        const applySelectedDiscountBtn = document.getElementById('applySelectedDiscount');
+        const discountEl = document.getElementById('discount'); 
         // Initialize the page
         function init() {
             setupBarcodeInput();
@@ -399,6 +449,7 @@
 
 
         function addToCart(product) {
+
             const existingItem = cart.find(item => item.id === product.id);
 
             // Find the corresponding product card
@@ -584,16 +635,67 @@
 
             if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
+        
+        // Discount Checkbox
+        applyDiscountCheckbox.addEventListener('change', () => {
+            if (applyDiscountCheckbox.checked) {
+                discountModal.style.display = 'block';
+            } else {
+                selectedDiscountType = 'none';
+                selectedDiscountValue = 0;
+                updateTotals();
+                document.getElementById('discount').textContent = '₱0.00';
+            }
+        });
+        
+        closeDiscountModal.addEventListener('click', () => {
+            discountModal.style.display = 'none';
+            applyDiscountCheckbox.checked = false;
+            document.getElementById('discountModal').style.display = 'none';
+        });
+        
+        applySelectedDiscountBtn.addEventListener('click', () => {
+            const selectedOption = document.querySelector('input[name="discount_option"]:checked');
+            if (selectedOption) {
+                selectedDiscountType = selectedOption.dataset.type;
+                selectedDiscountValue = parseFloat(selectedOption.dataset.value);
+        
+                // Validate: Check if the discount is greater than the subtotal
+                const subtotal = parseCurrency(subtotalEl.textContent); 
+                if (selectedDiscountValue > subtotal) {
+                    alert('Discount cannot be greater than the subtotal price.');
+                    selectedDiscountType = 'none'; 
+                    selectedDiscountValue = 0; 
+                    updateTotals();
+                    document.getElementById('discount').textContent = '₱0.00';
+                    return;
+                }
+        
+                updateTotals(); // Update totals with the selected discount
+            }
+            discountModal.style.display = 'none';
+        });
+        
+
 
         // Update totals in the carts
         function updateTotals() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const tax = subtotal * 0.07;
-            const total = subtotal + tax;
-
-            subtotalEl.textContent = ` ₱${subtotal.toFixed(2)}`;
-            taxEl.textContent = ` ₱${tax.toFixed(2)}`;
-            totalEl.textContent = ` ₱${total.toFixed(2)}`;
+            const tax = subtotal * (taxPercentage / 100);
+    
+            let discount = 0;
+            if (selectedDiscountType === 'percent') {
+                discount = subtotal * (selectedDiscountValue / 100);
+            } else if (selectedDiscountType === 'fixed') {
+                discount = selectedDiscountValue;
+            }
+    
+            const total = subtotal + tax - discount;
+    
+            subtotalEl.textContent = `₱${subtotal.toFixed(2)}`;
+            taxEl.textContent = `₱${tax.toFixed(2)}`;
+            discountEl.textContent = `₱${discount.toFixed(2)}`;
+            totalEl.textContent = `₱${total.toFixed(2)}`;
         }
         
         // Setup receipt functionality
@@ -785,20 +887,37 @@
             const selectedOption = customerSelect.options[customerSelect.selectedIndex];
             const customerName = selectedOption?.dataset?.name || 'N/A';
             const rateType = rateTypeSelect?.value || 'retail'; // fallback to 'retail' if nothing is selected or element is missing
+        
+            const subtotal = parseCurrency(subtotalEl.textContent);
+            const tax = parseCurrency(taxEl.textContent);
+            const total = parseCurrency(totalEl.textContent);
+        
+            let discount = 0; // Default value for discount
+    
+            // Check if discount is applied
+            if (applyDiscountCheckbox.checked && selectedDiscountType && selectedDiscountValue !== null) {
+                if (selectedDiscountType === 'percent') {
+                    discount = subtotal * (selectedDiscountValue / 100);
+                } else if (selectedDiscountType === 'fixed') {
+                    discount = selectedDiscountValue;
+                }
+            }
+        
             return {
                 customer_id: selectedCustomerId,
                 customer_name: customerName,
-                cashier_id : {{ $user->id }},
+                cashier_id: {{ $user->id }},
                 order_number: generateOrderNumber(),
                 date: new Date().toISOString(),
                 items: cart,
                 rate_type: rateType,
-                subtotal: parseCurrency(subtotalEl.textContent),
-                tax: parseCurrency(taxEl.textContent),
-                total: parseCurrency(totalEl.textContent)
+                subtotal: subtotal,
+                discount: discount,
+                tax: tax,
+                total: total
             };
         }
-
+        
         function parseCurrency(str) {
             const cleaned = str?.replace(/[^\d.-]/g, ''); // still removes ₱, $, etc.
             const parsed = parseFloat(cleaned);
@@ -845,7 +964,7 @@
             receiptHTML += `
                 </div>
                 <div class="receipt-summary">
-                     <div class="summary-row">
+                    <div class="summary-row">
                         <span>Rate Type:</span>
                         <span>${orderDetails.rate_type}</span>
                     </div>
@@ -853,6 +972,14 @@
                         <span>Subtotal:</span>
                         <span>₱${orderDetails.subtotal.toFixed(2)}</span>
                     </div>
+                    ${
+                        orderDetails.discount && orderDetails.discount > 0
+                        ? `<div class="summary-row">
+                                <span>Discount:</span>
+                                <span>-₱${orderDetails.discount.toFixed(2)}</span>
+                        </div>`
+                        : ''
+                    }
                     <div class="summary-row">
                         <span>Tax (7%):</span>
                         <span>₱${orderDetails.tax.toFixed(2)}</span>
@@ -869,6 +996,7 @@
                     <p>Please come again</p>
                 </div>
             `;
+
         
             receiptContent.innerHTML = receiptHTML;
         }

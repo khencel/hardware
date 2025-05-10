@@ -56,7 +56,7 @@
                     <tr>
                         <td>{{ $key + 1 + (($foods->currentPage() - 1) * $foods->perPage()) }}</td>
                         <td>{{ $food->name }}</td>
-                        <td>{{ $food->category->name }}</td>
+                        <td>{{ $food->category?->name ?? 'no category selected' }}</td>
                         <td>₱{{ number_format($food->cost_price, 2) }}</td>
                         <td>₱{{ number_format($food->price, 2) }}</td>
                         <td>{{ $food->margin_percentage}} %</td>

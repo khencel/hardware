@@ -17,6 +17,7 @@ class OrderController extends Controller
         $orderDetails = $request->only([
             'customer_id',
             'cashier_id',
+            'driver_id',
             'customer_name',
             'order_number',
             'date',
@@ -25,6 +26,8 @@ class OrderController extends Controller
             'tax',
             'total',
             'rate_type',
+            'delivery_option',
+            'discount'
         ]);
     
         // Fetch customer

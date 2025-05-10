@@ -50,10 +50,10 @@
                     <th>Customer Name</th>
                     <th>Cashier Name</th>
                     <th>Order Number</th>
-                    <th>Rate Type</th>
                     <th>Items</th>
-                    <th>total</th>
+                    <th>Total</th>
                     <th>Date Purchase</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,7 +62,6 @@
                         <td>{{ $report->customer_name }}</td>
                         <td>{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}</td>
                         <td>{{ $report->order_number }}</td>
-                        <td>{{ $report->rate_type }}</td>
                         <td>
                             @if(is_array($report->items))
                                 <ul class="mb-0 ps-3">
@@ -81,6 +80,28 @@
                         </td>
                         <td>{{ $report->total }}</td>
                         <td>{{ $report->date->format('F d, Y h:i A') }} </td>
+                        <td>
+                            <!-- View Button -->
+                            <button class="btn btn-info btn-sm view-report-btn" data-bs-toggle="modal" data-bs-target="#reportModal" 
+                                data-customer="{{ $report->customer_name }}" 
+                                data-cashier="{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}" 
+                                data-order="{{ $report->order_number }}" 
+                                data-ratetype="{{ $report->rate_type }}" 
+                                data-items="{{ json_encode($report->items) }}" 
+                                data-total="₱{{ $report->total }}" 
+                                data-date="{{ $report->date->format('F d, Y h:i A') }}"
+                                data-delivery-option="{{ $report->delivery_option }}"
+                                @if($report->delivery_option == 'delivery' && $report->driver_id)
+                                    data-driver="{{ $report->driver->name }}"
+                                @endif
+                                @if(isset($report->discount))
+                                    data-discount="₱{{ $report->discount }}"
+                                @endif
+                            >
+                                <i class="bx bx-show"></i> View
+                            </button>
+
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -89,4 +110,75 @@
         {{ $reports->links() }}
         
     </div>
+
+    <!-- Modal for Detailed View -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">Report Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Order Number: <span id="modal-order"></span></h6>
+                    <h6>Customer Name: <span id="modal-customer"></span></h6>
+                    <h6>Cashier Name: <span id="modal-cashier"></span></h6>
+                    <h6>Rate Type: <span id="modal-ratetype"></span></h6>
+                    <h6>Items:</h6>
+                    <ul id="modal-items" class="ps-3"></ul>
+                    <h6>Option: <span id="modal-delivery-option"></span></h6>
+                    <h6>Driver Name: <span id="modal-driver"></span></h6>
+                    <h6>Discount: <span id="modal-discount"></span></h6>
+                    <h6>Total: <span id="modal-total"></span></h6>
+                    <h6>Date: <span id="modal-date"></span></h6>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.view-report-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Get data attributes from the clicked button
+                const customer = this.getAttribute('data-customer');
+                const cashier = this.getAttribute('data-cashier');
+                const order = this.getAttribute('data-order');
+                const rateType = this.getAttribute('data-ratetype');
+                const items = JSON.parse(this.getAttribute('data-items'));
+                const total = this.getAttribute('data-total');
+                const date = this.getAttribute('data-date');
+                const driver = this.getAttribute('data-driver') || 'N/A';  // Handle missing driver
+                const discount = this.getAttribute('data-discount') || 'N/A';  // Handle missing discount
+                const deliveryOption = this.getAttribute('data-delivery-option') || 'N/A';  // Handle missing delivery option
+                
+                // Set values in the modal
+                document.getElementById('modal-customer').innerText = customer;
+                document.getElementById('modal-cashier').innerText = cashier;
+                document.getElementById('modal-order').innerText = order;
+                document.getElementById('modal-ratetype').innerText = rateType;
+                document.getElementById('modal-total').innerText = total;
+                document.getElementById('modal-date').innerText = date;
+                document.getElementById('modal-driver').innerText = driver;
+                document.getElementById('modal-discount').innerText = discount;
+                document.getElementById('modal-delivery-option').innerText = deliveryOption;
+                
+                // Populate items list
+                const itemsList = document.getElementById('modal-items');
+                itemsList.innerHTML = ''; // Clear previous items
+                items.forEach(item => {
+                    let listItem = document.createElement('li');
+                    if (typeof item === 'object') {
+                        listItem.innerHTML = `${item.name} <span class="badge bg-info">X ${item.quantity}</span>`;
+                    } else {
+                        listItem.innerText = item;
+                    }
+                    itemsList.appendChild(listItem);
+                });
+            });
+        });        
+    </script>
+
 @endsection

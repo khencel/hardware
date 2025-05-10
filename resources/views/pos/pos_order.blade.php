@@ -125,32 +125,61 @@
             <div class="col-5" style="flex: 5; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">            
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
-                        <div class="mb-3">
-                            <h2 for="customerSelect" class="form-label text-dark"><img src="{{ asset('img/icon/profile.png') }}" alt="Barcode Icon" width="30" height="30"> Customer</h2>
-                            <select id="customerSelect" class="form-select" style="width: 100%;">
-                                <option value="">Choose a Customer</option>
-                                @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}"
-                                            data-name="{{ $customer->name }}"
-                                            data-balance="{{ $customer->current_balance }}">
-                                        {{ $customer->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            
-                            <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h2 for="customerSelect" class="form-label text-dark"><img src="{{ asset('img/icon/profile.png') }}" alt="Barcode Icon" width="30" height="30"> Customer</h2>
+                                <select id="customerSelect" class="form-select" style="width: 100%;">
+                                    <option value="">Choose a Customer</option>
+                                    @foreach($customers as $customer)
+                                        <option value="{{ $customer->id }}"
+                                                data-name="{{ $customer->name }}"
+                                                data-balance="{{ $customer->current_balance }}">
+                                            {{ $customer->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                
+                                <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
+                            </div>
+    
+                            <div class="col-6">
+                                <h2 for="rateTypeSelect" class="form-label text-dark">
+                                    <img src="{{ asset('img/icon/price-tag.png') }}" alt="Price Tag Icon" width="30" height="30"> Rate Type
+                                </h2>
+                                <select id="rateTypeSelect" class="form-select" style="width: 100%;">
+                                    <option value="">Choose Rate</option>
+                                    <option value="retail">Retail</option>
+                                    <option value="wholesale">Wholesale</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <h2 for="rateTypeSelect" class="form-label text-dark">
-                                <img src="{{ asset('img/icon/price-tag.png') }}" alt="Price Tag Icon" width="30" height="30"> Rate Type
-                            </h2>
-                            <select id="rateTypeSelect" class="form-select" style="width: 100%;">
-                                <option value="">Choose Rate</option>
-                                <option value="retail">Retail</option>
-                                <option value="wholesale">Wholesale</option>
-                            </select>
+                        <div class="row text-dark">
+                            <div class="col-6">
+                                <h2 for="rateTypeSelect" class="form-label text-dark">
+                                    <img src="{{ asset('img/icon/delivery-man.png') }}" alt="Price Tag Icon" width="30" height="30"> Delivery Option
+                                </h2>
+                                <select id="deliveryOption" class="form-select" aria-label="Select  Option">
+                                    <option value="pickup">Pickup</option>
+                                    <option value="delivery">Delivery</option>
+                                </select>
+                            </div>
+                            <div class="col-6" id="driverSelectionContainer" style="display: none;">
+                                <h2 for="rateTypeSelect" class="form-label text-dark">
+                                    <img src="{{ asset('img/icon/fast-delivery.png') }}" alt="Price Tag Icon" width="30" height="30"> Choose a Driver
+                                </h2>
+                                <select id="driverSelect" class="form-select" aria-label="Select Driver">
+                                    <option value="">Select Driver</option>
+                                    @foreach($drivers as $driver)
+                                    <option value="{{ $driver->id }}" data-name="{{ $driver->name }}">
+                                        {{ $driver->name }}
+                                    </option>
+                                @endforeach
+                                </select>
+                            </div>
                         </div>
+                        
+                       
                         
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
                         <table id="cartTable">
@@ -290,6 +319,9 @@
         let itemToRemoveId = null;
         let selectedDiscountType = 'none';
         let selectedDiscountValue = 0;
+        let driverId = null;
+        let driverName = null;
+
         const password = @json(config('app.remove_item_password'));
         
         // DOM Elements
@@ -325,6 +357,7 @@
         const closeDiscountModal = document.getElementById('closeDiscountModal');
         const applySelectedDiscountBtn = document.getElementById('applySelectedDiscount');
         const discountEl = document.getElementById('discount'); 
+
         // Initialize the page
         function init() {
             setupBarcodeInput();
@@ -887,7 +920,8 @@
             const selectedOption = customerSelect.options[customerSelect.selectedIndex];
             const customerName = selectedOption?.dataset?.name || 'N/A';
             const rateType = rateTypeSelect?.value || 'retail'; // fallback to 'retail' if nothing is selected or element is missing
-        
+            //delivery 
+            const deliveryOption = document.getElementById('deliveryOption')?.value || 'pickup';
             const subtotal = parseCurrency(subtotalEl.textContent);
             const tax = parseCurrency(taxEl.textContent);
             const total = parseCurrency(totalEl.textContent);
@@ -902,6 +936,13 @@
                     discount = selectedDiscountValue;
                 }
             }
+            //check if option is delivery
+            if (deliveryOption === 'delivery') {
+                const driverSelect = document.getElementById('driverSelect');
+                const selectedDriverOption = driverSelect.options[driverSelect.selectedIndex];
+                driverId = selectedDriverOption?.value || null;
+                driverName = selectedDriverOption?.dataset?.name || null;
+            }
         
             return {
                 customer_id: selectedCustomerId,
@@ -914,7 +955,10 @@
                 subtotal: subtotal,
                 discount: discount,
                 tax: tax,
-                total: total
+                total: total,
+                delivery_option: deliveryOption,
+                driver_id: driverId,  
+                driver_name: driverName      
             };
         }
         
@@ -943,6 +987,8 @@
                     <p>Order #: ${orderDetails.order_number}</p>
                     <p>Date: ${date}</p>
                     <p>Time: ${time}</p>
+                    <p>Option: ${orderDetails.delivery_option}</p>
+                       ${orderDetails.delivery_option === 'delivery' ? `<p>Driver Name: ${orderDetails.driver_name}</p>` : ''}
                     <p>--------------------------------</p>
                 </div>
                 <div class="receipt-items">
@@ -1125,7 +1171,21 @@
                 balanceDisplay.style.display = 'none';
             }
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const deliveryOption = document.getElementById('deliveryOption');
+            const driverSelectionContainer = document.getElementById('driverSelectionContainer');
+        
+            deliveryOption.addEventListener('change', () => {
+                if (deliveryOption.value === 'delivery') {
+                    driverSelectionContainer.style.display = 'block';
+                } else {
+                    driverSelectionContainer.style.display = 'none';
+                }
+            });
+        });
         </script>
+      
         
 </body>
 </html>

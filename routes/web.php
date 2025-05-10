@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use App\Models\Tax;
 use App\Models\Food;
 use App\Models\Order;
+use App\Models\Driver;
 use App\Models\Customer;
 use App\Models\Discount;
 use App\Models\FoodCategory;
@@ -71,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
 
         $taxes = Tax::where('is_active', true)->first(); 
         $discounts = Discount::latest()->get();
-        
+        $drivers = Driver::latest()->get();
         if (!$taxes) {
             // Handle the case when no active tax exists
             // For example, set a default tax percentage or display an error
@@ -84,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts'));
+        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts','drivers'));
     });
 
 

@@ -745,7 +745,7 @@ th {
     border-radius: 10px;
   }
   .cart-scroll {
-    max-height: 300px;
+    max-height: 700px;
     overflow-y: scroll;
     overflow-x: hidden;
   }

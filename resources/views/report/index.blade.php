@@ -50,6 +50,7 @@
                     <th>Customer Name</th>
                     <th>Cashier Name</th>
                     <th>Order Number</th>
+                    <th>Rate Type</th>
                     <th>Items</th>
                     <th>total</th>
                     <th>Date Purchase</th>
@@ -61,6 +62,7 @@
                         <td>{{ $report->customer_name }}</td>
                         <td>{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}</td>
                         <td>{{ $report->order_number }}</td>
+                        <td>{{ $report->rate_type }}</td>
                         <td>
                             @if(is_array($report->items))
                                 <ul class="mb-0 ps-3">

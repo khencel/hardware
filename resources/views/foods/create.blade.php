@@ -54,13 +54,33 @@
             <div class="mb-3">
                 <label for="food_price" class="form-label">Price</label>
                 <input type="number" class="form-control @error('price') is-invalid @enderror" id="food_price"
-                    name="price" value="{{ old('price') }}" step="0.01">
+                    name="price" value="{{ old('price') }}" step="0.01" oninput="updateMarginPercentage()">
                 @error('price')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            {{--  <!--qunatity --}}
+            {{--  <!-- Cost Price -->  --}}
+            <div class="mb-3">
+                <label for="food_cost_price" class="form-label">Cost Price</label>
+                <input type="number" class="form-control @error('cost_price') is-invalid @enderror" id="food_cost_price"
+                    name="cost_price" value="{{ old('cost_price') }}" step="0.01" oninput="updateMarginPercentage()">
+                @error('cost_price')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{--  <!-- Margin Percentage -->  --}}
+            <div class="mb-3">
+                <label for="food_margin_percentage" class="form-label">Margin Percentage</label>
+                <input type="number" class="form-control @error('margin_percentage') is-invalid @enderror" id="food_margin_percentage"
+                    name="margin_percentage" value="{{ old('margin_percentage') }}" step="0.01" oninput="updateSellingPrice()">
+                @error('margin_percentage')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{--  <!-- Quantity -->  --}}
             <div class="mb-3">
                 <label for="food_quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control @error('quantity') is-invalid @enderror" id="food_quantity"
@@ -70,7 +90,7 @@
                 @enderror
             </div>
 
-            {{--  <!-- barcode -->  --}}
+            {{--  <!-- Barcode -->  --}}
             <div class="mb-3">
                 <label for="food_barcode" class="form-label">Barcode</label>
                 <div class="input-group">
@@ -82,6 +102,7 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
             {{--  <!-- Availability -->  --}}
             <div class="mb-3">
                 <label for="food_availability" class="form-label">Availability</label>
@@ -98,6 +119,26 @@
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
+
+    <script>
+        // Function to calculate the margin percentage based on cost price and selling price
+        function updateMarginPercentage() {
+            const costPrice = parseFloat(document.getElementById('food_cost_price').value);
+            const sellingPrice = parseFloat(document.getElementById('food_price').value);
+            if (costPrice && sellingPrice && sellingPrice > costPrice) {
+                const marginPercentage = ((sellingPrice - costPrice) / sellingPrice) * 100;
+                document.getElementById('food_margin_percentage').value = marginPercentage.toFixed(2);
+            }
+        }
+
+        // Function to calculate and update the selling price based on the margin percentage and cost price
+        function updateSellingPrice() {
+            const marginPercentage = parseFloat(document.getElementById('food_margin_percentage').value);
+            const costPrice = parseFloat(document.getElementById('food_cost_price').value);
+            if (marginPercentage && costPrice && marginPercentage > 0) {
+                const sellingPrice = costPrice / (1 - marginPercentage / 100);
+                document.getElementById('food_price').value = sellingPrice.toFixed(2);
+            }
+        }
+    </script>
 @endsection
-
-

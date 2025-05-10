@@ -140,6 +140,17 @@
                             
                             <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
                         </div>
+
+                        <div class="mb-3">
+                            <h2 for="rateTypeSelect" class="form-label text-dark">
+                                <img src="{{ asset('img/icon/price-tag.png') }}" alt="Price Tag Icon" width="30" height="30"> Rate Type
+                            </h2>
+                            <select id="rateTypeSelect" class="form-select" style="width: 100%;">
+                                <option value="">Choose Rate</option>
+                                <option value="retail">Retail</option>
+                                <option value="wholesale">Wholesale</option>
+                            </select>
+                        </div>
                         
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
                         <table id="cartTable">
@@ -262,7 +273,7 @@
         const actualPrintBtn = document.getElementById('actualPrintBtn');
         const closeReceiptBtn = document.getElementById('closeReceiptBtn');
         const customer = document.getElementById('customerSelect');
-
+        const rateType = document.getElementById('rateTypeSelect');
 
         // Initialize the page
         function init() {
@@ -773,7 +784,7 @@
             const selectedCustomerId = customerSelect.value;
             const selectedOption = customerSelect.options[customerSelect.selectedIndex];
             const customerName = selectedOption?.dataset?.name || 'N/A';
-            
+            const rateType = rateTypeSelect?.value || 'retail'; // fallback to 'retail' if nothing is selected or element is missing
             return {
                 customer_id: selectedCustomerId,
                 customer_name: customerName,
@@ -781,16 +792,24 @@
                 order_number: generateOrderNumber(),
                 date: new Date().toISOString(),
                 items: cart,
-                subtotal: parseFloat(subtotalEl.textContent.replace('$', '')),
-                tax: parseFloat(taxEl.textContent.replace('$', '')),
-                total: parseFloat(totalEl.textContent.replace('$', ''))
+                rate_type: rateType,
+                subtotal: parseCurrency(subtotalEl.textContent),
+                tax: parseCurrency(taxEl.textContent),
+                total: parseCurrency(totalEl.textContent)
             };
         }
+
+        function parseCurrency(str) {
+            const cleaned = str?.replace(/[^\d.-]/g, ''); // still removes ₱, $, etc.
+            const parsed = parseFloat(cleaned);
+            return isNaN(parsed) ? 0 : parsed;
+        }
         
+
         // Generate receipt HTML
         function generateReceipt(orderDetails) {
             const dateObj = new Date(orderDetails.date);
-
+            console.log(orderDetails);
             const date = dateObj.toLocaleDateString();
             const time = dateObj.toLocaleTimeString();
 
@@ -802,7 +821,7 @@
                     <p>City, State 12345</p>
                     <p>Tel: (123) 456-7890</p>
                     <p>--------------------------------</p>
-                    <p>Order #: ${orderDetails.orderNumber}</p>
+                    <p>Order #: ${orderDetails.order_number}</p>
                     <p>Date: ${date}</p>
                     <p>Time: ${time}</p>
                     <p>--------------------------------</p>
@@ -826,21 +845,25 @@
             receiptHTML += `
                 </div>
                 <div class="receipt-summary">
+                     <div class="summary-row">
+                        <span>Rate Type:</span>
+                        <span>${orderDetails.rate_type}</span>
+                    </div>
                     <div class="summary-row">
                         <span>Subtotal:</span>
-                        <span>$${orderDetails.subtotal.toFixed(2)}</span>
+                        <span>₱${orderDetails.subtotal.toFixed(2)}</span>
                     </div>
                     <div class="summary-row">
                         <span>Tax (7%):</span>
-                        <span>$${orderDetails.tax.toFixed(2)}</span>
+                        <span>₱${orderDetails.tax.toFixed(2)}</span>
                     </div>
                     <div class="receipt-total">
                         <span>Total:</span>
-                        <span>$${orderDetails.total.toFixed(2)}</span>
+                        <span>₱${orderDetails.total.toFixed(2)}</span>
                     </div>
                 </div>
                 <div class="receipt-footer text-dark">
-                    <p>Thank you, ${orderDetails.customerName}!</p>
+                    <p>Thank you, ${orderDetails.customer_name}!</p>
                     <p>For your order of ${orderDetails.items.length} items</p>
                     <p>--------------------------------</p>
                     <p>Please come again</p>
@@ -928,7 +951,7 @@
     </script>
 
     <script>
-        // Function to filter products based on search input
+
         const searchInput = document.getElementById('productSearch');
         const productCards = document.querySelectorAll('.product-card');
     
@@ -949,7 +972,6 @@
         });
     </script>
     
-    //hide and show password
     <script>
         const passwordInput = document.getElementById('passwordInput');
         const togglePassword = document.getElementById('togglePassword');
@@ -961,7 +983,6 @@
         });
       </script>
 
-      //balance display
       <script>
         document.getElementById('customerSelect').addEventListener('change', function () {
             const selectedOption = this.options[this.selectedIndex];

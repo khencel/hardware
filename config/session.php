@@ -7,7 +7,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver
-    |--------------------------------------------------------------------------
+    |-------------------P-------------------------------------------------------
     |
     | This option controls the default session "driver" that will be used on
     | requests. By default, we will use the lightweight native driver but
@@ -128,7 +128,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
+        Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'
     ),
 
     /*

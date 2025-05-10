@@ -3,9 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\UserRole;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class SupervisorUserSeeder extends Seeder
 {
@@ -22,7 +23,8 @@ class SupervisorUserSeeder extends Seeder
             'is_active' => true
         ]);
 
-        $user->roles()->create([
+        UserRole::create([
+            'user_id' => $user->id,
             'role_id' => 8
         ]);
     }

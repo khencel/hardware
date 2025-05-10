@@ -41,7 +41,7 @@
                             </div>
                             <div class="col-md-4">
                                 <p class="mb-1 text-muted">Total Cost</p>
-                                <h6 class="fw-bold"> ₱{{ number_format($item->quantity * $item->unit_price, 2) }}</h6>
+                                <h6 class="fw-bold">₱{{ number_format($item->quantity * $item->unit_price, 2) }}</h6>
                             </div>
                             <div class="col-md-6">
                                 <p class="mb-1 text-muted">Supplier</p>

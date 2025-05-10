@@ -54,7 +54,7 @@
                     <tr>
                         <td>{{ $key + 1 + (($foods->currentPage() - 1) * $foods->perPage()) }}</td>
                         <td>{{ $food->name }}</td>
-                        <td>{{ $food->category->name }}</td>
+                        <td>{{ $food->category?->name ?? 'No category Selected' }}</td>
                         <td>₱{{ number_format($food->price, 2) }}</td>
                         <td>
                             <span class="badge bg-{{ $food->is_available ? 'success' : 'danger' }}">

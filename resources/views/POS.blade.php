@@ -24,12 +24,7 @@
 </head>
 
 <style>
-    nav-links,
-    ol,
-    ul {
-        padding-left: 0px !important;
-    }
-
+   
     .home-section .home-content {
         position: relative;
         padding-top: 85px;
@@ -72,13 +67,7 @@
     .links_name{
         color: black !important
     }
-    .nav-links li:hover .links_name{
-        color: white !important; 
-    }
-
-    .nav-links a:hover i {
-        color: white !important; 
-    }
+ 
 </style>
 
 <body>

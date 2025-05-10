@@ -24,17 +24,12 @@
 </head>
 
 <style>
-    nav-links,
-    ol,
-    ul {
-        padding-left: 0px !important;
-    }
 
     .home-section .home-content {
         position: relative;
         padding-top: 85px;
     }
-
+  
     .button-success {
         background: rgb(246, 145, 27) !important;
         color: white
@@ -366,6 +361,23 @@
             return barcode;
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.has-submenu > .menu-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    if (this.nextElementSibling && this.nextElementSibling.classList.contains('submenu')) {
+                        e.preventDefault();
+                        const parent = this.closest('.has-submenu');
+                        parent.classList.toggle('open');
+                        const arrow = this.querySelector('.arrow');
+                        if (arrow) arrow.classList.toggle('rotate');
+                    }
+                });
+            });
+        });
+    </script>
+    
+    
 </body>
 
 </html>

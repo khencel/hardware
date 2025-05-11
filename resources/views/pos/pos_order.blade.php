@@ -60,7 +60,7 @@
                     <div style="display: flex; gap: 2rem; font-family: sans-serif; flex: 1; overflow: hidden;">
                         <!-- Categories -->
                         <div style="flex: 1; overflow-x: hidden; overflow-y: auto; padding-right: 1rem; max-height: 100%;">
-                            <h2>Categories</h2>
+                            <h4 class="text-dark">Categories</h4>
                             <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
                                 @foreach($categories as $category)
                                     <button 
@@ -75,7 +75,7 @@
                     
                         <!-- Product / Order List Panel -->
                         <div style="flex: 4; display: flex; flex-direction: column; overflow: hidden;">
-                            <h2 style="flex-shrink: 0;">Products</h2>
+                            <h4 class="text-dark" style="flex-shrink: 0;">Products</h4>
                         
                             <div style="flex: 1; overflow-y: auto;">
                                 <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
@@ -86,13 +86,18 @@
                                             data-category-id="{{ $product->category_id }}"
                                             data-name="{{ $product->name }}" 
                                             data-barcode="{{ $product->barcode }}"
+                                            data-category="{{ $product->category->name}}"
                                             data-id="{{ $product->id }}"
                                             data-price="{{ $product->price }}"
+                                            data-wholesale="{{ $product->wholesale_price}}"
+                                            data-retail="{{ $product->retail_price}}"
                                             data-quantity="{{ $product->quantity }}"
                                             
                                             style="flex: 1 1 calc(33.333% - 0.75rem); border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background-color: #fdfdfd; display: block; flex-direction: column; gap: 0.3rem; min-width: 180px; transition: transform 0.3s ease, box-shadow 0.3s ease;">
                                             <h3 style="margin: 0; font-size: 14px;">{{ $product->name }}</h3>
-                                            <p style="margin: 0; font-size: 12px;"><strong>Price:</strong>₱{{ number_format($product->price, 2) }}</p>
+                                            <p style="margin: 0; font-size: 12px;"><strong>Wholesale Price : </strong>₱{{ number_format($product->wholesale_price, 2) }}</p>
+                                            <p style="margin: 0; font-size: 12px;"><strong>Retail Price: </strong>₱{{ number_format($product->retail_price, 2) }}</p>
+                                            <p style="margin: 0; font-size: 12px;"><strong>Selling Price: </strong>₱{{ number_format($product->price, 2) }}</p>
                                             <p style="margin: 0; font-size: 12px; color: #555;"><strong>Barcode:</strong> {{ $product->barcode }}</p>
                                             <span style="margin: 0; font-size: 12px; color: #555;">{{  $product->quantity <= 0 ? 'Out of Stock'  : 'Stock:' }}  {{ $product->quantity <= 0 ?  '' : $product->quantity }}</span>
                                             <div style="margin-top: auto;">
@@ -112,7 +117,10 @@
                                 data-id="{{ $product->id }}"
                                 data-name="{{ $product->name }}"
                                 data-price="{{ $product->price }}"
+                                data-wholesale="{{ $product->wholesale_price}}"
+                                data-retail="{{ $product->retail_price}}"
                                 data-barcode="{{ $product->barcode }}"
+                                data-category="{{ $product->category->name}}"
                                 data-image="{{ $product->image }}">
                                 {{ $product->name }}
                             </div>
@@ -126,7 +134,7 @@
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
                         <div class="row mb-3">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <h2 for="customerSelect" class="form-label text-dark"><img src="{{ asset('img/icon/profile.png') }}" alt="Barcode Icon" width="30" height="30"> Customer</h2>
                                 <select id="customerSelect" class="form-select" style="width: 100%;">
                                     <option value="">Choose a Customer</option>
@@ -140,17 +148,6 @@
                                 </select>
                                 
                                 <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
-                            </div>
-    
-                            <div class="col-6">
-                                <h2 for="rateTypeSelect" class="form-label text-dark">
-                                    <img src="{{ asset('img/icon/price-tag.png') }}" alt="Price Tag Icon" width="30" height="30"> Rate Type
-                                </h2>
-                                <select id="rateTypeSelect" class="form-select" style="width: 100%;">
-                                    <option value="">Choose Rate</option>
-                                    <option value="retail">Retail</option>
-                                    <option value="wholesale">Wholesale</option>
-                                </select>
                             </div>
                         </div>
 
@@ -190,6 +187,7 @@
                                     <th>Qty</th>
                                     <th>Total</th>
                                     <th></th>
+                                    <th>Type</th>
                                 </tr>
                             </thead>
                             <div id="cartScrollWrapper" style="max-height: 300px; overflow-y: auto;">
@@ -306,8 +304,16 @@
             </button>
         </div>
     </div>
-        
-      
+    
+    {{--  // Product Modal  --}}
+    <div id="product-modal" class="modal text-dark" style="display: none;">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h3 id="product-name"></h3>
+          <div id="price-options-container" ></div>
+          <button id="add-to-cart" class="apply-discount-btn mt-4">🎟️ Add to Cart</button>
+        </div>
+      </div>
       
 
 
@@ -330,7 +336,10 @@
             id: product.dataset.id,
             name: product.dataset.name,
             price: parseFloat(product.dataset.price),
+            wholesale: parseFloat(product.dataset.wholesale),
+            retail: parseFloat(product.dataset.retail),
             barcode: product.dataset.barcode,
+            category: product.dataset.category?.name,
             image: product.dataset.image
         })); // getting the data from the hidden div
         const productList = document.querySelector('.product-list');
@@ -429,7 +438,7 @@
                 
                 if (product) {
                     // Product found - add to cart
-                    addToCart(product);
+                    addToCart(product, product.price, null);
                     barcodeInput.value = '';
                     showMessage(`Added ${product.name} to cart`, 'success');
                     hideBarcodeAlert();
@@ -467,22 +476,85 @@
         
         
         // Setup product card click event
-        document.querySelectorAll('.product-card').forEach(card => {
+          // Setup product card click event
+          document.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('click', () => {
                 const product = {
-                    id: card.getAttribute('data-id'),
-                    name: card.getAttribute('data-name'),
-                    price: parseFloat(card.getAttribute('data-price')),
-                    barcode: card.getAttribute('data-barcode')
+                    id: card.dataset.id,
+                    name: card.dataset.name,
+                    barcode: card.dataset.barcode,
+                    category: card.dataset.category || 'Uncategorized',
+                    sellingPrice: parseFloat(card.dataset.price) || 0,
+                    wholesalePrice: parseFloat(card.dataset.wholesale) || 0,
+                    retailPrice: parseFloat(card.dataset.retail) || 0,
                 };
-
-                addToCart(product);
+                
+                openModal(product);
             });
         });
 
+        function openModal(product) {
+            const modal = document.getElementById('product-modal');
+            document.getElementById('product-name').textContent = product.name;
+        
+            const priceOptionsContainer = document.getElementById('price-options-container');
+            priceOptionsContainer.innerHTML = '';
+        
+            const prices = [
+                { label: 'Selling Price', value: product.sellingPrice },
+                { label: 'Wholesale Price', value: product.wholesalePrice },
+                { label: 'Retail Price', value: product.retailPrice }
+            ];
+        
+            // Create radio buttons dynamically for each price
+            prices.forEach((priceOption, index) => {
+                const radioId = `price-${index}`;
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <input type="radio" id="${radioId}" name="price" value="${priceOption.value}" ${index === 0 ? 'checked' : ''}>
+                    <label for="${radioId}">${priceOption.label} - ₱${priceOption.value.toFixed(2)}</label>
+                `;
+                priceOptionsContainer.appendChild(wrapper);
+            });
+        
+            // Function to get the selected price and label
+            function getSelectedPrice() {
+                const selectedPrice = parseFloat(document.querySelector('input[name="price"]:checked').value); // Get selected price (as number)
+                
+                // Get the corresponding label for the selected price
+                const selectedOption = prices.find(p => p.value === selectedPrice);
+                const selectedLabel = selectedOption ? selectedOption.label : 'Unknown Price';
+                
+                return { selectedPrice, selectedLabel };
+            }
+        
+            // Get the selected price and label when the modal is opened
+            const { selectedPrice, selectedLabel } = getSelectedPrice();
+        
+            // Update the "add-to-cart" button click handler to use the selected price
+            document.getElementById('add-to-cart').onclick = () => {
+                const { selectedPrice, selectedLabel } = getSelectedPrice(); // Get the updated selected price
+                addToCart(product, selectedPrice, selectedLabel);
+            };
+        
+            modal.style.display = 'block';
+        }
+        
+      
+          function closeModal() {
+            document.getElementById('product-modal').style.display = 'none';
+          }
+      
+       
+        // Close modal if user clicks outside the modal content
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('product-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
 
-        function addToCart(product) {
-
+        function addToCart(product,price, selectedLabel) {
             const existingItem = cart.find(item => item.id === product.id);
 
             // Find the corresponding product card
@@ -502,7 +574,9 @@
                 cart.push({
                     id: product.id,
                     name: product.name,
-                    price: product.price,
+                    price: price,
+                    type: selectedLabel,
+                    category: product.category,
                     quantity: 1
                 });
             }
@@ -518,6 +592,7 @@
             }
 
             updateCart();
+            closeModal();
         }
 
 
@@ -562,6 +637,7 @@
                         </td>
                         <td>₱${total.toFixed(2)}</td>
                         <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
+                        <td>${item.type}</td>
                     `;
                     cartItems.appendChild(row);
                 });
@@ -872,7 +948,6 @@
                     }
                 
                     const data = await response.json();
-                    console.log(data);
                     showMessage(
                         `${data.message || 'Order successfully!'}\n${data.order.customer_name} current balance was ${data.remaining_balance}`,
                         'success'
@@ -919,7 +994,7 @@
             const selectedCustomerId = customerSelect.value;
             const selectedOption = customerSelect.options[customerSelect.selectedIndex];
             const customerName = selectedOption?.dataset?.name || 'N/A';
-            const rateType = rateTypeSelect?.value || 'retail'; // fallback to 'retail' if nothing is selected or element is missing
+  
             //delivery 
             const deliveryOption = document.getElementById('deliveryOption')?.value || 'pickup';
             const subtotal = parseCurrency(subtotalEl.textContent);
@@ -943,15 +1018,20 @@
                 driverId = selectedDriverOption?.value || null;
                 driverName = selectedDriverOption?.dataset?.name || null;
             }
-        
+
+    
+            const itemsWithCategory = cart.map(item => ({
+                ...item,
+                category: item.category || 'Uncategorized',  // Default to 'Uncategorized' if no category
+                type : item.type || 'N/A'  // Default to 'N/A' if no type
+            }));
             return {
                 customer_id: selectedCustomerId,
                 customer_name: customerName,
                 cashier_id: {{ $user->id }},
                 order_number: generateOrderNumber(),
                 date: new Date().toISOString(),
-                items: cart,
-                rate_type: rateType,
+                items: itemsWithCategory,
                 subtotal: subtotal,
                 discount: discount,
                 tax: tax,
@@ -972,7 +1052,6 @@
         // Generate receipt HTML
         function generateReceipt(orderDetails) {
             const dateObj = new Date(orderDetails.date);
-            console.log(orderDetails);
             const date = dateObj.toLocaleDateString();
             const time = dateObj.toLocaleTimeString();
 
@@ -997,12 +1076,12 @@
             orderDetails.items.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 receiptHTML += `
-                    <div class="receipt-item">
+                    <div class="receipt-item text-dark">
                         <div class="item-details">
                             <span class="item-quantity">${item.quantity}x</span>
                             <span>${item.name}</span>
                         </div>
-                        <div class="item-total"> ₱${itemTotal.toFixed(2)}</div>
+                        <div class="item-total">${item.type} (₱${itemTotal.toFixed(2)})</div>
                     </div>
                 `;
             });
@@ -1010,10 +1089,6 @@
             receiptHTML += `
                 </div>
                 <div class="receipt-summary">
-                    <div class="summary-row">
-                        <span>Rate Type:</span>
-                        <span>${orderDetails.rate_type}</span>
-                    </div>
                     <div class="summary-row">
                         <span>Subtotal:</span>
                         <span>₱${orderDetails.subtotal.toFixed(2)}</span>
@@ -1164,7 +1239,7 @@
         
             if (this.value) {
                 const balance = selectedOption.getAttribute('data-balance');
-                balanceDisplay.textContent = `Remaining Balance: $${balance}`;
+                balanceDisplay.textContent = `Remaining Balance: ₱${balance}`;
                 balanceDisplay.style.display = 'block';
                 balanceDisplay.style.color = 'black';
             } else {

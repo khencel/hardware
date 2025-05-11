@@ -50,8 +50,6 @@
                     <th>Customer Name</th>
                     <th>Cashier Name</th>
                     <th>Order Number</th>
-                    <th>Items</th>
-                    <th>Total</th>
                     <th>Date Purchase</th>
                     <th>Action</th>
                 </tr>
@@ -62,33 +60,21 @@
                         <td>{{ $report->customer_name }}</td>
                         <td>{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}</td>
                         <td>{{ $report->order_number }}</td>
-                        <td>
-                            @if(is_array($report->items))
-                                <ul class="mb-0 ps-3">
-                                    @foreach($report->items as $item)
-                                    <li>
-                                        {{ is_array($item) ? ($item['name'] ?? json_encode($item)) : $item }}
-                                        @if(is_array($item) && isset($item['quantity']))
-                                            <span class="badge bg-info">X  {{ $item['quantity'] }}</span>
-                                        @endif
-                                    </li>
-                                @endforeach
-                                </ul>
-                            @else
-                                {{ $report->items }}
-                            @endif
-                        </td>
-                        <td>{{ $report->total }}</td>
                         <td>{{ $report->date->format('F d, Y h:i A') }} </td>
                         <td>
                             <!-- View Button -->
-                            <button class="btn btn-info btn-sm view-report-btn" data-bs-toggle="modal" data-bs-target="#reportModal" 
-                                data-customer="{{ $report->customer_name }}" 
-                                data-cashier="{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}" 
-                                data-order="{{ $report->order_number }}" 
-                                data-ratetype="{{ $report->rate_type }}" 
-                                data-items="{{ json_encode($report->items) }}" 
-                                data-total="₱{{ $report->total }}" 
+                            <button class="btn btn-info btn-sm view-report-btn" data-bs-toggle="modal" data-bs-target="#reportModal"
+                                data-customer="{{ $report->customer_name }}"
+                                data-cashier="{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}"
+                                data-order="{{ $report->order_number }}"
+                                data-ratetype="{{ $report->rate_type }}"
+                                data-items="{{ json_encode($report->items) }}"
+                                data-category="{{ json_encode(is_array($report->items) ? array_map(function($item) {
+                                    return $item['category'] ?? 'N/A';
+                                }, $report->items) : $report->items->map(function($item) {
+                                    return $item->category ?? 'N/A';
+                                })) }}"
+                                data-total="₱{{ $report->total }}"
                                 data-date="{{ $report->date->format('F d, Y h:i A') }}"
                                 data-delivery-option="{{ $report->delivery_option }}"
                                 @if($report->delivery_option == 'delivery' && $report->driver_id)
@@ -99,7 +85,7 @@
                                 @endif
                             >
                                 <i class="bx bx-show"></i> View
-                            </button>
+                        </button>
 
                         </td>
                     </tr>
@@ -124,6 +110,7 @@
                     <h6>Customer Name: <span id="modal-customer"></span></h6>
                     <h6>Cashier Name: <span id="modal-cashier"></span></h6>
                     <h6>Rate Type: <span id="modal-ratetype"></span></h6>
+                    <h6>Item Category: <span id="modal-itemcategory"></span></h6>
                     <h6>Items:</h6>
                     <ul id="modal-items" class="ps-3"></ul>
                     <h6>Option: <span id="modal-delivery-option"></span></h6>
@@ -147,7 +134,8 @@
                 const cashier = this.getAttribute('data-cashier');
                 const order = this.getAttribute('data-order');
                 const rateType = this.getAttribute('data-ratetype');
-                const items = JSON.parse(this.getAttribute('data-items'));
+                const items = JSON.parse(this.getAttribute('data-items')); // Parse items
+                const category = JSON.parse(this.getAttribute('data-category')); // Parse category
                 const total = this.getAttribute('data-total');
                 const date = this.getAttribute('data-date');
                 const driver = this.getAttribute('data-driver') || 'N/A';  // Handle missing driver
@@ -164,14 +152,23 @@
                 document.getElementById('modal-driver').innerText = driver;
                 document.getElementById('modal-discount').innerText = discount;
                 document.getElementById('modal-delivery-option').innerText = deliveryOption;
-                
+        
+                // Populate item categories
+                const itemCategoryElement = document.getElementById('modal-itemcategory');
+                itemCategoryElement.innerHTML = ''; // Clear previous categories
+                if (category && category.length > 0) {
+                    itemCategoryElement.innerText = category.join(', ');  // Join multiple categories with commas
+                } else {
+                    itemCategoryElement.innerText = 'N/A'; // Default message if no category is available
+                }
+        
                 // Populate items list
                 const itemsList = document.getElementById('modal-items');
                 itemsList.innerHTML = ''; // Clear previous items
                 items.forEach(item => {
                     let listItem = document.createElement('li');
                     if (typeof item === 'object') {
-                        listItem.innerHTML = `${item.name} <span class="badge bg-info">X ${item.quantity}</span>`;
+                        listItem.innerHTML = `${item.name} <span class="badge bg-info">X ${item.quantity} (${item.type ?? 'Selling Price'})</span>`;
                     } else {
                         listItem.innerText = item;
                     }

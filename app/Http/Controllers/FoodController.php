@@ -37,12 +37,14 @@ class FoodController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:food_categories,id',
-            'price' => 'nullable|numeric|min:0', // Price is nullable as it may be calculated from cost and margin
-            'cost_price' => 'required|numeric|min:0', // Ensure cost price is always provided
-            'margin_percentage' => 'required|numeric|min:0|max:100', // Margin percentage must be valid
+            'price' => 'nullable|numeric|min:0',
+            'cost_price' => 'required|numeric|min:0',
+            'margin_percentage' => 'required|numeric|min:0|max:100',
             'is_available' => 'required|boolean',
             'quantity' => 'required|integer|min:0',
             'barcode' => 'required|string|size:13|unique:foods,barcode',
+            'retail_price' => 'nullable|numeric|min:0',
+            'wholesale_price' => 'nullable|numeric|min:0',
         ]);
     
         // Calculate the price if it's not provided (based on cost price and margin percentage)
@@ -55,14 +57,22 @@ class FoodController extends Controller
         if (!$price) {
             $price = $costPrice / (1 - ($marginPercentage / 100));
         }
+
+        // Retail price - fallback to same as selling price
+        $retailPrice = $request->retail_price ?? $price;
+
+        // Wholesale price - fallback to 85% of retail
+        $wholesalePrice = $request->wholesale_price ?? ($retailPrice * 0.85);
     
         // Create the food record
         Food::create([
             'name' => $request->name,
             'category_id' => $request->category_id,
-            'price' => $price, // Store the calculated or provided price
-            'cost_price' => $costPrice, // Store the cost price
-            'margin_percentage' => $marginPercentage, // Store the margin percentage
+            'price' => $price,
+            'cost_price' => $costPrice,
+            'margin_percentage' => $marginPercentage,
+            'retail_price' => $retailPrice,
+            'wholesale_price' => $wholesalePrice,
             'is_available' => $request->is_available,
             'quantity' => $request->quantity,
             'barcode' => $request->barcode,
@@ -91,29 +101,35 @@ class FoodController extends Controller
             'is_available' => 'required|boolean',
             'quantity' => 'required|integer|min:0',
             'barcode' => 'required|string|size:13|unique:foods,barcode,' . $food->id,
+            'retail_price' => 'nullable|numeric|min:0',
+            'wholesale_price' => 'nullable|numeric|min:0',
         ]);
 
-        // Check if the margin percentage is provided. If not, calculate it from price and cost price.
+        $costPrice = $request->cost_price;
+        $price = $request->price;
+        
+        // Margin logic: use provided, or calculate if not
         if ($request->has('margin_percentage') && $request->margin_percentage !== null) {
             $marginPercentage = $request->margin_percentage;
         } else {
-            // Calculate margin percentage if not provided
-            $costPrice = $request->cost_price;
-            $price = $request->price;
-
             if ($costPrice && $price && $price > $costPrice) {
                 $marginPercentage = (($price - $costPrice) / $price) * 100;
             } else {
-                $marginPercentage = 0; // Default margin percentage if the values are invalid
+                $marginPercentage = 0;
             }
         }
+
+        $retailPrice = $request->retail_price ?? $price;
+        $wholesalePrice = $request->wholesale_price ?? ($retailPrice * 0.85);
 
         $food->update([
             'name' => $request->name,
             'category_id' => $request->category_id,
-            'price' => $request->price,
-            'cost_price' => $request->cost_price,
+            'price' => $price,
+            'cost_price' => $costPrice,
             'margin_percentage' => $marginPercentage,
+            'retail_price' => $retailPrice,
+            'wholesale_price' => $wholesalePrice,
             'is_available' => $request->is_available,
             'quantity' => $request->quantity,
             'barcode' => $request->barcode,

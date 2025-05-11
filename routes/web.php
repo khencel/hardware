@@ -65,7 +65,7 @@ Route::post('/login', Login::class)->name('auth.login');
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/pos', function () {
-        $products = Food::where('is_available', true)->get(); // Retrieve products where 'is_available' is true.
+        $products = Food::with('category')->where('is_available', true)->get(); // Retrieve products where 'is_available' is true.
         $user = Auth::user();
         $categories = FoodCategory::latest()->get();
         $customers = Customer::latest()->get();

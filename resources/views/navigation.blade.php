@@ -55,13 +55,6 @@
                 'roles' => [12],
             ],
             [
-                'url' => '/reports',
-                'name' => 'reports',
-                'label' => 'Reports',
-                'icon' => 'bx bxs-report',
-                'roles' => [12],
-            ],
-            [
                 'url' => '/settings',
                 'name' => 'settings',
                 'label' => 'Settings',
@@ -87,6 +80,13 @@
                         'name' => 'taxes',
                         'label' => 'Tax',
                         'icon' => 'bx bx-infinite',
+                        'roles' => [],
+                    ],
+                    [
+                        'url' => '/reports',
+                        'name' => 'reports',
+                        'label' => 'Reports',
+                        'icon' => 'bx bxs-report',
                         'roles' => [],
                     ],
                 ],

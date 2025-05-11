@@ -25,7 +25,6 @@ class OrderController extends Controller
             'subtotal',
             'tax',
             'total',
-            'rate_type',
             'delivery_option',
             'discount'
         ]);
@@ -38,6 +37,7 @@ class OrderController extends Controller
             ], 404);
         }
     
+        $orderDetails['rate_type'] = 'null';
         // Check if balance is enough BEFORE placing order
         if ($customer->current_balance < $orderDetails['total']) {
             return response()->json([

@@ -60,6 +60,26 @@
                 @enderror
             </div>
 
+            <!-- Retail Price -->
+            <div class="mb-3">
+                <label for="food_retail_price" class="form-label">Retail Price</label>
+                <input type="number" class="form-control @error('retail_price') is-invalid @enderror" id="food_retail_price"
+                    name="retail_price" value="{{ old('retail_price', $food->retail_price) }}" step="0.01">
+                @error('retail_price')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Wholesale Price -->
+            <div class="mb-3">
+                <label for="food_wholesale_price" class="form-label">Wholesale Price</label>
+                <input type="number" class="form-control @error('wholesale_price') is-invalid @enderror" id="food_wholesale_price"
+                    name="wholesale_price" value="{{ old('wholesale_price', $food->wholesale_price) }}" step="0.01">
+                @error('wholesale_price')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <!-- Cost Price -->
             <div class="mb-3">
                 <label for="food_cost_price" class="form-label">Cost Price</label>

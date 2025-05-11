@@ -10,7 +10,8 @@
             createRoute="{{ route('customers.create') }}" 
             createLabel="New Customer"
             editRoute="customers.edit"
+            topUpRoute="{{ route('customers.create') }}"
             deleteRoute="" 
-        />
+    />
     </div>
 @endsection

@@ -65,4 +65,17 @@ class CustomerController extends Controller
 
         return redirect()->route('customers.index')->with('success', 'Customer added.');
     }
+
+    public function topUp(request $request){
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $customer = Customer::find($request->customer_id);
+        $customer->current_balance += $request->amount;
+        $customer->initial_balance += $request->amount;
+        $customer->save();
+
+        return redirect()->route('customers.index')->with('success', 'Customer balance updated successfully.');
+    }
 }

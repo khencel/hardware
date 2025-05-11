@@ -135,6 +135,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', Logout::class)->name('auth.logout');
 
+    Route::post('/customers/{id}/topup', [CustomerController::class, 'topUp'])->name('user.topup');
+
     Route::resource('foods', FoodController::class);
     Route::resource('food-categories', FoodCategoryController::class);
     Route::resource('customers', CustomerController::class);

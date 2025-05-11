@@ -53,6 +53,12 @@ body.dark .cart-section th, body.dark .cart-section td {
 .container-fluid {
     padding: 2rem;
 }
+.button-row {
+    gap: 15px;
+    justify-content: center; 
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
 
 .products-section, .cart-section {
     background: rgba(255, 255, 255, 0.85);
@@ -65,6 +71,70 @@ body.dark .cart-section th, body.dark .cart-section td {
 .print-icon{
     color:white;
 }
+
+.quotation-btn{
+    background-color: #0b7dda;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.hold-btn{
+    background-color: #ff9800;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.action-btn {
+    width: 120px;
+    height: 120px;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column; /* icon on top, text below */
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 8px;
+}
+
+.print-btn {
+    background-color: #007BFF;
+}
+
+
+
+/* Make sure columns don’t squish the buttons */
+.col-4 {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+
 .barcode-input {
     width: 100%;
     padding: 0.75rem;

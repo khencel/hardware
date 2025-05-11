@@ -36,22 +36,36 @@
                         @endif
                     </td>
                 @endforeach
-                <td>
-                    @if (!empty($editRoute))
-                        <a href="{{ route($editRoute, $row->id) }}" class="btn btn-warning btn-sm d-flex align-items-center justify-content-center px-3 py-2 rounded-3 shadow-sm border-0 transition-all hover:bg-warning hover:text-white">
-                            <i class="bx bx-pencil me-2"></i> <span class="d-none d-sm-inline">Edit</span>
-                        </a>
-                    @endif
-                    @if (!empty($deleteRoute))
-                        <form action="{{ route($deleteRoute, $row->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Are you sure you want to delete this item?');">
-                                <i class="bx bx-trash"></i> Delete
-                            </button>
-                        </form>
-                    @endif
+                <td class="text-center">
+
+                    <div class="d-flex justify-content-center flex-wrap gap-1">
+                        @if (Route::currentRouteName() === 'customers.index')
+                            <a href="javascript:void(0);" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#topUpModal" 
+                                data-id="{{ $row->id }}" 
+                                class="btn btn-info btn-sm" 
+                                title="Top-Up this customer">
+                                <i class="bx bx-wallet"></i> Top Up
+                            </a>
+                        @endif
+                    
+                        @if (!empty($editRoute))
+                            <a href="{{ route($editRoute, $row->id) }}" class="btn btn-warning btn-sm d-flex align-items-center gap-1">
+                                <i class="bx bx-pencil"></i> <span class="d-none d-sm-inline">Edit</span>
+                            </a>
+                        @endif
+                
+                        @if (!empty($deleteRoute))
+                            <form action="{{ route($deleteRoute, $row->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-1">
+                                    <i class="bx bx-trash"></i> <span class="d-none d-sm-inline">Delete</span>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </td>
             </tr>
         @empty
@@ -62,12 +76,52 @@
     </tbody>
 </table>
 
+<!-- top up Modal -->
+<div class="modal fade" id="topUpModal" tabindex="-1" aria-labelledby="topUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="topUpModalLabel">Top Up on this Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('user.topup', $row->id) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="customer_id" id="customer_id">
+
+                    <!-- Initial Amount Input -->
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Enter Amount to Top Up</label>
+                        <input type="number" name="amount" id="amount" class="form-control" placeholder="Amount" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @if ($rows instanceof \Illuminate\Pagination\LengthAwarePaginator)
     {{ $rows->links() }}
 @endif
 
 @section('scripts')
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const topUpButtons = document.querySelectorAll('[data-bs-toggle="modal"]');
+            topUpButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const customerId = button.getAttribute('data-id');
+                    document.getElementById('customer_id').value = customerId;
+                });
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const statusElements = document.querySelectorAll('.status-toggle');
             statusElements.forEach(function (statusElement) {

@@ -9,7 +9,7 @@
             :rows="$discounts ?? collect([])" 
             createRoute="{{ route('discounts.create') }}" 
             createLabel="Add Discount"
-            editRoute="discounts.edit" 
+            editRoute="discounts.edit"
             deleteRoute="discounts.destroy" 
         />
     </div>

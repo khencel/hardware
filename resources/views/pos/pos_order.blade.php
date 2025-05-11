@@ -221,11 +221,26 @@
                                 <span id="total">$0.00</span>
                             </div>
                             
-                            {{--  <button id="checkoutBtn" class="action-btn checkout-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Checkout</button>  --}}
-                            <div id="printWrapper" style="text-align: center; display: none;">
-                                <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  Payout Receipt</button>
+                            <div id="printWrapper" style=" display: none;" class="row">
+                                <div class="col-4">
+                                    <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  
+                                        Payout Receipt
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="printQuotationBtn" class="action-btn quotation-btn" style="margin-left: 10px;">
+                                        <img src="{{ asset('img/icon/quotation.png') }}" alt="Quotation Icon" width="30" height="30">  
+                                        Make a Quotation
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="printHoldBtn" class="action-btn hold-btn" style="margin-left: 10px;">
+                                        <img src="{{ asset('img/icon/hold.png') }}" alt="Quotation Icon" width="30" height="30">  
+                                       Hold
+                                    </button>
+                                </div>
                             </div>
-
+                           
                         </div>
                     </div>
                 </div>
@@ -327,6 +342,7 @@
         let selectedDiscountValue = 0;
         let driverId = null;
         let driverName = null;
+        let isQuotation = false;
 
         const password = @json(config('app.remove_item_password'));
         
@@ -610,8 +626,8 @@
             // - The cart has items.
             if (customerSelect.value && cart.length > 0) {
                 // Customer is selected and cart is not empty
-                if (cartSummary) cartSummary.style.display = 'block';
-                if (printWrapper) printWrapper.style.display = 'block';
+                if (cartSummary) cartSummary.style.display = 'flex';
+                if (printWrapper) printWrapper.style.display = 'flex';
                 if (printBtn) printBtn.disabled = false;
             } else {
                 // Either no customer selected or the cart is empty
@@ -807,8 +823,9 @@
             totalEl.textContent = `₱${total.toFixed(2)}`;
         }
         
-        // Setup receipt functionality
+        //Quotation Functionality
         function setupReceiptFunctionality() {
+            // Print receipt functionality
             printReceiptBtn.addEventListener('click', () => {
                 if (cart.length === 0) {
                     showMessage('No items in cart to print receipt', 'error');
@@ -817,26 +834,41 @@
         
                 const orderDetails = createOrderDetails();
                 lastOrderDetails = orderDetails;
-        
                 generateReceipt(orderDetails);
                 receiptModal.style.display = 'block';
             });
         
+            // Print quotation functionality
+            printQuotationBtn.addEventListener('click', () => {
+                if (cart.length === 0) {
+                    showMessage('No items in cart to make a quotation', 'error');
+                    return;
+                }
+        
+                const orderDetails = createOrderDetails();
+                lastOrderDetails = orderDetails;
+                isQuotation = true; // Set to true, indicating it's a quotation
+                generateQuotation(orderDetails);
+                receiptModal.style.display = 'block';
+            });
+        
+            // Actual print functionality
             actualPrintBtn.addEventListener('click', () => {
                 const receiptContent = document.getElementById('receiptContent');
                 const orderDetails = createOrderDetails();
-
+        
                 // Check if receiptContent is valid
                 if (!receiptContent) {
                     showMessage('No receipt content found', 'error');
                     return;
                 }
+        
                 // Check if orderDetails is valid
                 if (!orderDetails) {
                     showMessage('No order details found', 'error');
                     return;
                 }
-
+        
                 // Open a new window for printing
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write(`
@@ -924,9 +956,17 @@
                     printWindow.print();
                     printWindow.close();
                 };
-
-                saveOrderToBackend(orderDetails);
+        
+                // Only save order to backend if it's not a quotation
+                if (!isQuotation) {
+                    saveOrderToBackend(orderDetails);
+                }
+                
+                receiptModal.style.display = 'none';
+                // Reset isQuotation flag
+                isQuotation = false;
             });
+        }
         
             function saveOrderToBackend(orderDetails) {
                 fetch('/api/orders', {
@@ -982,11 +1022,11 @@
                     receiptModal.style.display = 'none';
                 }
             });
-        }
         
         // Generate a random order number
         function generateOrderNumber() {
-            return Math.floor(100000 + Math.random() * 900000);
+            const randomNum = Math.floor(100000 + Math.random() * 900000);
+            return `${randomNum}`;
         }
         
         // Create a reusable order details object
@@ -1017,9 +1057,9 @@
                 const selectedDriverOption = driverSelect.options[driverSelect.selectedIndex];
                 driverId = selectedDriverOption?.value || null;
                 driverName = selectedDriverOption?.dataset?.name || null;
-            }
+            }   
 
-    
+
             const itemsWithCategory = cart.map(item => ({
                 ...item,
                 category: item.category || 'Uncategorized',  // Default to 'Uncategorized' if no category
@@ -1048,34 +1088,19 @@
             return isNaN(parsed) ? 0 : parsed;
         }
         
-
-        // Generate receipt HTML
-        function generateReceipt(orderDetails) {
-            const dateObj = new Date(orderDetails.date);
-            const date = dateObj.toLocaleDateString();
-            const time = dateObj.toLocaleTimeString();
-
+        // Generate quotation HTML
+        function formatDateTime(dateString) {
+            const dateObj = new Date(dateString);
+            return {
+                date: dateObj.toLocaleDateString(),
+                time: dateObj.toLocaleTimeString()
+            };
+        }
         
-            let receiptHTML = `
-                <div class="receipt-header">
-                    <h2>STORE NAME</h2>
-                    <p>123 Main Street</p>
-                    <p>City, State 12345</p>
-                    <p>Tel: (123) 456-7890</p>
-                    <p>--------------------------------</p>
-                    <p>Order #: ${orderDetails.order_number}</p>
-                    <p>Date: ${date}</p>
-                    <p>Time: ${time}</p>
-                    <p>Option: ${orderDetails.delivery_option}</p>
-                       ${orderDetails.delivery_option === 'delivery' ? `<p>Driver Name: ${orderDetails.driver_name}</p>` : ''}
-                    <p>--------------------------------</p>
-                </div>
-                <div class="receipt-items">
-            `;
-        
-            orderDetails.items.forEach(item => {
+        function generateReceiptItemsHTML(items) {
+            return items.map(item => {
                 const itemTotal = item.price * item.quantity;
-                receiptHTML += `
+                return `
                     <div class="receipt-item text-dark">
                         <div class="item-details">
                             <span class="item-quantity">${item.quantity}x</span>
@@ -1084,23 +1109,24 @@
                         <div class="item-total">${item.type} (₱${itemTotal.toFixed(2)})</div>
                     </div>
                 `;
-            });
+            }).join('');
+        }
         
-            receiptHTML += `
-                </div>
+        function generateSummaryHTML(orderDetails) {
+            const discountHTML = orderDetails.discount && orderDetails.discount > 0
+                ? `<div class="summary-row">
+                        <span>Discount:</span>
+                        <span>-₱${orderDetails.discount.toFixed(2)}</span>
+                   </div>`
+                : '';
+        
+            return `
                 <div class="receipt-summary">
                     <div class="summary-row">
                         <span>Subtotal:</span>
                         <span>₱${orderDetails.subtotal.toFixed(2)}</span>
                     </div>
-                    ${
-                        orderDetails.discount && orderDetails.discount > 0
-                        ? `<div class="summary-row">
-                                <span>Discount:</span>
-                                <span>-₱${orderDetails.discount.toFixed(2)}</span>
-                        </div>`
-                        : ''
-                    }
+                    ${discountHTML}
                     <div class="summary-row">
                         <span>Tax (7%):</span>
                         <span>₱${orderDetails.tax.toFixed(2)}</span>
@@ -1110,16 +1136,56 @@
                         <span>₱${orderDetails.total.toFixed(2)}</span>
                     </div>
                 </div>
-                <div class="receipt-footer text-dark">
-                    <p>Thank you, ${orderDetails.customer_name}!</p>
-                    <p>For your order of ${orderDetails.items.length} items</p>
+            `;
+        }
+        
+        function generateHeaderHTML(orderDetails, isQuotation) {
+            const { date, time } = formatDateTime(orderDetails.date);
+            return `
+                <div class="receipt-header">
+                    <h2>STORE NAME</h2>
+                    <p>123 Main Street</p>
+                    <p>City, State 12345</p>
+                    <p>Tel: (123) 456-7890</p>
                     <p>--------------------------------</p>
-                    <p>Please come again</p>
+                    <p>${isQuotation ? 'Quotation' : 'Order'} #: ${orderDetails.order_number}</p>
+                    <p>Date: ${date}</p>
+                    <p>Time: ${time}</p>
+                    <p>Option: ${orderDetails.delivery_option}</p>
+                    ${orderDetails.delivery_option === 'delivery' ? `<p>Driver Name: ${orderDetails.driver_name}</p>` : ''}
+                    <p>--------------------------------</p>
                 </div>
             `;
-
+        }
         
-            receiptContent.innerHTML = receiptHTML;
+        function generateFooterHTML(orderDetails, isQuotation) {
+            return `
+                <div class="receipt-footer text-dark">
+                    <p>${isQuotation ? 'Prepared for' : 'Thank you'}, ${orderDetails.customer_name}!</p>
+                    <p>${isQuotation ? 'Quotation includes' : 'For your order of'} ${orderDetails.items.length} items</p>
+                    <p>--------------------------------</p>
+                    <p>${isQuotation ? 'This is not a receipt' : 'Please come again'}</p>
+                </div>
+            `;
+        }
+        
+        function generateDocumentHTML(orderDetails, isQuotation = false) {
+            return `
+                ${generateHeaderHTML(orderDetails, isQuotation)}
+                <div class="receipt-items">
+                    ${generateReceiptItemsHTML(orderDetails.items)}
+                </div>
+                ${generateSummaryHTML(orderDetails)}
+                ${generateFooterHTML(orderDetails, isQuotation)}
+            `;
+        }
+        
+        function generateQuotation(orderDetails) {
+            receiptContent.innerHTML = generateDocumentHTML(orderDetails, true);
+        }
+        
+        function generateReceipt(orderDetails) {
+            receiptContent.innerHTML = generateDocumentHTML(orderDetails, false);
         }
         
         // Show status message

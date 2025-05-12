@@ -28,10 +28,12 @@ class OrderController extends Controller
             'tax',
             'total',
             'delivery_option',
-            'discount'
+            'discount',
+            'payment_method',
+            'reference_number',
         ]);
     
-        // Fetch customer
+        // Fetch customer from the database
         $customer = Customer::find($orderDetails['customer_id']);
         if (!$customer) {
             return response()->json([
@@ -39,20 +41,26 @@ class OrderController extends Controller
             ], 404);
         }
     
+        // Set rate_type to null (if needed, you can update this later)
         $orderDetails['rate_type'] = 'null';
-        // Check if balance is enough BEFORE placing order
-        if ($customer->current_balance < $orderDetails['total']) {
-            return response()->json([
-                'message' => 'Insufficient balance.',
-                'required' => $orderDetails['total'],
-                'available_balance' => $customer->current_balance,
-            ], 400);
+    
+        // Check balance only for Credit payment method
+        if (strtolower($orderDetails['payment_method']) === 'credit') {
+            if ($customer->current_balance < $orderDetails['total']) {
+                return response()->json([
+                    'message' => 'Insufficient balance.',
+                    'required' => $orderDetails['total'],
+                    'available_balance' => $customer->current_balance,
+                ], 400);
+            }
         }
     
-        // Save the order
+
+      
+        // Save the order to the database
         $order = Order::create($orderDetails);
     
-        // Reduce food stock
+        // Reduce food stock based on the order items
         foreach ($orderDetails['items'] as $item) {
             $food = Food::find($item['id']);
             if ($food) {
@@ -61,16 +69,22 @@ class OrderController extends Controller
             }
         }
     
-        // Deduct order total from customer's balance
-        $customer->current_balance -= $orderDetails['total'];
-        $customer->save();
+        // Deduct balance if payment method is Credit
+        if (strtolower($orderDetails['payment_method']) === 'credit') {
+            $customer->current_balance -= $orderDetails['total'];
+            $customer->save();
+        }
     
+        // Return a success response with order details
         return response()->json([
             'message' => 'Order placed successfully!',
             'order' => $order,
+            'payment_method' => $orderDetails['payment_method'],
             'remaining_balance' => $customer->current_balance,
         ], 200);
     }
+    
+    
     
     public function holdOrders(request $request)
     {

@@ -134,22 +134,7 @@
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
                         <div class="row mb-3">
-                            <div class="col-6">
-                                <h2 for="customerSelect" class="form-label text-dark"><img src="{{ asset('img/icon/profile.png') }}" alt="Barcode Icon" width="30" height="30"> Customer</h2>
-                                <select id="customerSelect" class="form-select" style="width: 100%;">
-                                    <option value="">Choose a Customer</option>
-                                    @foreach($customers as $customer)
-                                        <option value="{{ $customer->id }}"
-                                                data-name="{{ $customer->name }}"
-                                                data-balance="{{ $customer->current_balance }}">
-                                            {{ $customer->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                
-                                <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
-                            </div>
-                            <div class="col-6">
+                            <div class="col-12">
                                 <h2 for="HoldOderSelect" class="form-label text-dark"><img src="{{ asset('img/icon/hold.png') }}" alt="Barcode Icon" width="30" height="30"> Hold Order</h2>
                                 <select id="HoldOderSelect" class="form-select" style="width: 100%;">
                                     <option value="">Choose order Number</option>
@@ -231,7 +216,7 @@
                                 <span id="total">$0.00</span>
                             </div>
                             
-                            <div id="printWrapper" style=" display: none;" class="row">
+                            <div id="printWrapper"  class="row">
                                 <div class="col-4">
                                     <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  
                                         Payout Receipt
@@ -352,6 +337,79 @@
       </div>
 
 
+        {{--  payment modal  --}}
+        <div id="paymentModal" class="modal text-dark" style="display:none;">
+            <div class="modal-content">
+                <span id="closePaymentMethodModal" class="close">&times;</span>
+                <h3>Select Payment Method</h3>
+        
+                <div class="payment-options">
+                    <div class="payment-option" data-method="Cash">💵 Cash</div>
+                    <div class="payment-option" data-method="GCash">📱 GCash</div>
+                    <div class="payment-option" data-method="Bank Transfer">🏦 Bank Transfer</div>
+                    <div class="payment-option" data-method="Bank Checks">🧾 Bank Checks</div>
+                    <div class="payment-option" data-method="Credit">💳 Credit</div> 
+                    <div class="payment-option" data-method="Other">💳 Other</div> 
+                </div>
+        
+                <!-- Customer Name -->
+                <div  id="customerContainer" >
+                    <label for="customerName" style="font-weight: bold; font-size: 14px;">Customer Name:</label>
+                    <input 
+                        type="text" 
+                        id="customerName"
+                        style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100%; outline: none; transition: border-color 0.3s ease; margin-top: 5px;" 
+                        placeholder="Enter Customer Name"
+                    >
+            
+                </div>
+               
+                <!-- Reference Number -->
+                <div id="refContainer" style="margin-top:20px; display:none;">
+                    <label for="refNumber" style="font-weight: bold; font-size: 14px;">Reference Number:</label>
+                    <input 
+                        type="text" 
+                        id="refNumber" 
+                        style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100%; outline: none; transition: border-color 0.3s ease; margin-top: 5px;" 
+                        placeholder="Enter reference number"
+                    >
+                </div>
+        
+                <!-- Customer Select Dropdown (Initially hidden) -->
+                <div id="creditCustomerContainer" style="display:none; margin-top: 20px;">
+                    <h2 for="customerSelect" class="form-label text-dark">
+                        <img src="{{ asset('img/icon/profile.png') }}" alt="Profile Icon" width="30" height="30"> Customer
+                    </h2>
+                    <select id="customerSelect" class="form-select" style="width: 100%;">
+                        <option value="">Choose a Customer</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}"
+                                    data-name="{{ $customer->name }}"
+                                    data-balance="{{ $customer->current_balance }}">
+                                {{ $customer->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
+                </div>
+        
+                <!-- Confirm Button -->
+                <div class="mt-4">
+                    <button 
+                        id="confirmPaymentBtn" 
+                        class="apply-discount-btn" 
+                        style="width: 100%; padding: 12px; font-size: 16px; border: none; border-radius: 6px; background-color: #28a745; color: white; cursor: pointer; transition: background-color 0.3s ease;"
+                        onmouseover="this.style.backgroundColor='#218838'"
+                        onmouseout="this.style.backgroundColor='#28a745'"
+                    >
+                        ✔ Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        
+
     <script>
 
         // Cart data
@@ -365,7 +423,11 @@
         let selectedHoldOrderId = null;
         let isQuotation = false;
         let isHold = false;
+        let selectedMethod = "";
+        let customerNameInputed = '';
+
         const password = @json(config('app.remove_item_password'));
+        
         
         // DOM Elements
         const hiddenProducts = document.querySelectorAll('#hidden-products .hidden-product'); //fetching products
@@ -397,6 +459,13 @@
         const rateType = document.getElementById('rateTypeSelect');
         const taxPercentage = {{ $taxes }};
 
+        const paymentOptions = document.querySelectorAll('.payment-option');
+        const customerNameInput = document.getElementById('customerName');
+        const customerContainer = document.getElementById('customerContainer');
+        const refContainer = document.getElementById('refContainer');
+        const creditCustomerContainer = document.getElementById('creditCustomerContainer');
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const customerSelect = document.getElementById('customerSelect');
         //discount
         const discountModal = document.getElementById('discountModal');
         const applyDiscountCheckbox = document.getElementById('applyDiscountCheckbox');
@@ -637,26 +706,15 @@
             cartItems.innerHTML = '';
         
             const cartSummary = document.getElementById('cartSummary');
-            const printWrapper = document.getElementById('printWrapper');
             const customerSelect = document.getElementById('customerSelect');
             const printBtn = document.getElementById('printReceiptBtn');
             
-            
-            // Ensure that the cartSummary and printWrapper are visible only if:
-            // - A customer is selected.
-            // - The cart has items.
-            if (customerSelect.value && cart.length > 0) {
-                // Customer is selected and cart is not empty
-                if (cartSummary) cartSummary.style.display = 'flex';
-                if (printWrapper) printWrapper.style.display = 'flex';
-                if (printBtn) printBtn.disabled = false;
-            } else {
-                // Either no customer selected or the cart is empty
-                if (cartSummary) cartSummary.style.display = 'none';
-                if (printWrapper) printWrapper.style.display = 'none';
-                if (printBtn) printBtn.disabled = true;
-            }
-        
+         
+            if (cartSummary) cartSummary.style.display = 'flex';
+            if (printWrapper) printWrapper.style.display = 'flex';
+            if (printBtn) printBtn.disabled = false;
+
+
             if (cart.length === 0) {
                 cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">🛒 Your cart is empty</td></tr>`;
             } else {
@@ -744,10 +802,7 @@
             updateTotals();
         }
         
-        document.getElementById('customerSelect').addEventListener('change', function() {
-            updateCart();
-        });
-        
+   
 
         // Update quantity of an item in the cart
         function updateQuantity(itemId, change) {
@@ -852,11 +907,74 @@
                     showMessage('No items in cart to print receipt', 'error');
                     return;
                 }
-        
+            
+                // Show the payment method modal
+                document.getElementById('paymentModal').style.display = 'block';
+            });
+
+           //close payment method modal
+            closePaymentMethodModal.addEventListener('click', () => {
+                document.getElementById('paymentModal').style.display  = 'none';
+            });
+
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    // Clear old selection
+                    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            
+                    // Set new selection
+                    option.classList.add('selected');
+                    selectedMethod = option.getAttribute('data-method');
+                    //enan
+                    if (selectedMethod === 'Cash') {
+                        customerContainer.style.display = 'block';
+                        refContainer.style.display = 'none';
+                        creditCustomerContainer.style.display = 'none';
+                    }else if(selectedMethod === 'Credit') {
+                        customerContainer.style.display = 'none';
+                        refContainer.style.display = 'none';
+                        creditCustomerContainer.style.display = 'block';        
+                    }else {
+                        customerContainer.style.display = 'block';
+                        refContainer.style.display = 'block';
+                        creditCustomerContainer.style.display = 'none';
+                    }
+                });
+            });
+
+            document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
+                const refNumber = document.getElementById('refNumber').value.trim();
+                const customerName = customerNameInput ? customerNameInput.value.trim() : '';
+
+                console.log('xxxx',selectedMethod);
+                if (!selectedMethod) {
+                    alert('Please select a payment method');
+                    return;
+                }
+            
+
+                if (selectedMethod == 'Credit' && !refNumber) {
+                    alert('Reference number is required for non-cash and credit payments');
+                    return;
+                }
+
+                if (selectedMethod !== 'Credit' && !customerName) {
+                    alert('Customer name is required');
+                    return;
+                }
+            
                 const orderDetails = createOrderDetails();
+                orderDetails.payment_method = selectedMethod;
+                orderDetails.reference_number = selectedMethod === 'Cash' ? null : refNumber;
+                orderDetails.customer_name = selectedMethod === 'Credit' ? 
+                document.getElementById('customerSelect').options[document.getElementById('customerSelect').selectedIndex].text : 
+                customerName;
+                customerNameInputed = customerName;
                 lastOrderDetails = orderDetails;
                 generateReceipt(orderDetails);
                 receiptModal.style.display = 'block';
+                document.getElementById('paymentModal').style.display = 'none';
+            
             });
         
             // Print quotation functionality
@@ -901,7 +1019,6 @@
                 const orderDetails = createOrderDetails();
                 orderDetails.reason = reason;
                 lastOrderDetails = orderDetails;
-                console.log(orderDetails);
                 saveHoldOrder(orderDetails);
                 showMessage('Order has been put on hold', 'success');
             
@@ -911,6 +1028,7 @@
 
             // Function to save hold order
             function saveHoldOrder(orderDetails) {
+
                 fetch('/api/hold-orders', {
                     method: 'POST',
                     headers: {
@@ -950,7 +1068,8 @@
             actualPrintBtn.addEventListener('click', () => {
                 const receiptContent = document.getElementById('receiptContent');
                 const orderDetails = createOrderDetails();
-        
+                
+                console.log('actualPrintBtn clicked', orderDetails);
                 // Check if receiptContent is valid
                 if (!receiptContent) {
                     showMessage('No receipt content found', 'error');
@@ -1063,6 +1182,7 @@
         }
         
             function saveOrderToBackend(orderDetails) {
+                console.log('Saving order to backend:', orderDetails);
                 fetch('/api/orders', {
                     method: 'POST',
                     headers: {
@@ -1082,12 +1202,18 @@
                     }
                 
                     const data = await response.json();
+
                     showMessage(
-                        `${data.message || 'Order successfully!'}\n${data.order.customer_name} current balance was ${data.remaining_balance}`,
+                        `${data.payment_method.toLowerCase() === 'credit' 
+                            ? `${data.message || 'Order successfully!'}\n${data.order.customer_name} current balance was ${data.remaining_balance}`
+                            : 'Order placed successfully!'}`,
                         'success'
-                      );
+                    );
                     receiptModal.style.display = 'none';
-                
+                    selectedMethod = ''; 
+                    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+                    document.getElementById('refNumber').value = '';
+                    document.getElementById('refContainer').style.display = 'none';
                     // Reset cart
                     cart = [];
                     updateCart();
@@ -1128,7 +1254,7 @@
             const selectedCustomerId = customerSelect.value;
             const selectedOption = customerSelect.options[customerSelect.selectedIndex];
             const customerName = selectedOption?.dataset?.name || 'N/A';
-  
+            
             //delivery 
             const deliveryOption = document.getElementById('deliveryOption')?.value || 'pickup';
             const subtotal = parseCurrency(subtotalEl.textContent);
@@ -1159,9 +1285,12 @@
                 category: item.category || 'Uncategorized',  // Default to 'Uncategorized' if no category
                 type : item.type || 'N/A'  // Default to 'N/A' if no type
             }));
+
+            const referenceNumber = selectedMethod !== 'Cash' ? document.getElementById('refNumber').value.trim() : null;
+            const customerNameX = selectedMethod === 'Credit' ? customerName :  customerNameInputed;
             return {
-                customer_id: selectedCustomerId,
-                customer_name: customerName,
+                customer_id: 1,
+                customer_name: customerNameX,
                 cashier_id: {{ $user->id }},
                 order_number: generateOrderNumber(),
                 date: new Date().toISOString(),
@@ -1172,7 +1301,9 @@
                 total: total,
                 delivery_option: deliveryOption,
                 driver_id: driverId,  
-                driver_name: driverName      
+                driver_name: driverName,
+                payment_method: selectedMethod,
+                reference_number: referenceNumber
             };
         }
         
@@ -1253,10 +1384,14 @@
         }
         
         function generateFooterHTML(orderDetails, isQuotation) {
+            const isCash = orderDetails.payment_method?.toLowerCase() === 'cash';
             return `
                 <div class="receipt-footer text-dark">
                     <p>${isQuotation ? 'Prepared for' : 'Thank you'}, ${orderDetails.customer_name}!</p>
                     <p>${isQuotation ? 'Quotation includes' : 'For your order of'} ${orderDetails.items.length} items</p>
+                    <p>--------------------------------</p>
+                    <p>Payment Method: ${orderDetails.payment_method || 'N/A'}</p>
+                    ${!isCash && orderDetails.reference_number ? `<p>Reference #: ${orderDetails.reference_number}</p>` : ''}
                     <p>--------------------------------</p>
                     <p>${isQuotation ? 'This is not a receipt' : 'Please come again'}</p>
                 </div>
@@ -1444,20 +1579,6 @@
       </script>
 
       <script>
-        document.getElementById('customerSelect').addEventListener('change', function () {
-            const selectedOption = this.options[this.selectedIndex];
-            const balanceDisplay = document.getElementById('balanceDisplay');
-        
-            if (this.value) {
-                const balance = selectedOption.getAttribute('data-balance');
-                balanceDisplay.textContent = `Remaining Balance: ₱${balance}`;
-                balanceDisplay.style.display = 'block';
-                balanceDisplay.style.color = 'black';
-            } else {
-                balanceDisplay.style.display = 'none';
-            }
-        });
-
         document.addEventListener('DOMContentLoaded', () => {
             const deliveryOption = document.getElementById('deliveryOption');
             const driverSelectionContainer = document.getElementById('driverSelectionContainer');
@@ -1471,7 +1592,5 @@
             });
         });
         </script>
-      
-        
 </body>
 </html>

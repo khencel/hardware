@@ -1025,3 +1025,29 @@ button:disabled {
     cursor: not-allowed;
     opacity: 1; /* So it’s not too faded */
 }
+
+.payment-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .payment-option {
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .payment-option:hover {
+    border-color: #007bff;
+    background-color: #f0f8ff;
+  }
+  
+  .payment-option.selected {
+    border-color: #007bff;
+    background-color: #d0e8ff;
+    font-weight: bold;
+  }

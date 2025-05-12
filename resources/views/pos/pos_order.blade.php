@@ -175,9 +175,7 @@
                                 </select>
                             </div>
                         </div>
-                        
-                       
-                        
+
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
                         <table id="cartTable">
                             <thead class="table-header text-center">

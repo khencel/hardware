@@ -89,6 +89,13 @@
                         'icon' => 'bx bxs-report',
                         'roles' => [],
                     ],
+                    [
+                        'url' => '/activity-log',
+                        'name' => 'activity-log',
+                        'label' => 'Activity Log',
+                        'icon' => 'bx bx-history',
+                        'roles' => [],
+                    ],
                 ],
             ],
         ];

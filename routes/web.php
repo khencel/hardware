@@ -31,6 +31,7 @@ use App\Http\Controllers\Authentication\Login;
 use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\RestoTableController;
 use App\Http\Controllers\Rooms\RoomController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Authentication\Logout;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\FoodCategoryController;
@@ -145,7 +146,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('taxes', TaxController::class);
     Route::resource('users', UserManagementController::class);
     Route::resource('purchase-orders', PurchaseOrderController::class);
-
+    
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity.logs');
     Route::get('/profile', [UserController::class, 'edit'])->name('profile.view'); //edit profile
     Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('users.profile');
 

@@ -11,13 +11,17 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
     use UpdateUser;
+    use CausesActivity, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -45,6 +49,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['firstname', 'lastname', 'email', 'is_active']) // customize as needed
+            ->useLogName('user') // optional: custom log name
+            ->logOnlyDirty() // logs only changed attributes
+            ->setDescriptionForEvent(function(string $eventName){
+                return "User model has been {$eventName}";
+            });
+    }
 
     public function roles()
     {

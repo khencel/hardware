@@ -1214,6 +1214,8 @@
                     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
                     document.getElementById('refNumber').value = '';
                     document.getElementById('refContainer').style.display = 'none';
+                    document.getElementById('customerName').value = '';
+                    document.getElementById('customerContainer').style.display = 'none';
                     // Reset cart
                     cart = [];
                     updateCart();

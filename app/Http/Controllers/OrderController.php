@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Food;
+use App\Models\Hold;
 use App\Models\Order;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -70,4 +72,75 @@ class OrderController extends Controller
         ], 200);
     }
     
+    public function holdOrders(request $request)
+    {
+
+        $holdDetails = $request->only([
+            'customer_id',
+            'cashier_id',
+            'driver_id',
+            'customer_name',
+            'order_number',
+            'date',
+            'items',
+            'subtotal',
+            'tax',
+            'total',
+            'delivery_option',
+            'discount',
+            'reason'
+        ]);
+    
+        $holdOrder = Hold::create($holdDetails);
+        
+        return response()->json([
+            'message' => 'Order held successfully!',
+            'hold_order' => $holdOrder,
+        ], 200);
+        
+    }
+
+    public function getHoldOrders()
+    {
+        $query = Hold::with(['cashier', 'driver']);
+
+        $holdOrders = $query->paginate(10);
+
+        // Add this if not already done
+        $customers = Customer::latest()->get();
+
+        return view('hold_orders.index', compact('holdOrders', 'customers'));
+
+    }
+
+
+   public function cancelHold($id)
+    {
+        // Find the hold order by ID
+        $holdOrder = Hold::find($id);
+
+        if (!$holdOrder) {
+            return redirect()->route('hold_orders.index')->with('error', 'Hold order not found.');
+        }
+
+        // Delete the hold order
+        $holdOrder->delete();
+
+        // Redirect with a success message
+        return redirect()->route('hold_orders.index')->with('success', 'Hold order deleted successfully.');
+    }
+
+    public function getHoldOrderById($id)
+    {
+        $holdOrder = Hold::with(['cashier', 'driver'])->find($id);
+
+        if (!$holdOrder) {
+            return response()->json([
+                'message' => 'Hold order not found.',
+            ], 404);
+        }
+
+       
+        return response()->json($holdOrder);
+    }
 }

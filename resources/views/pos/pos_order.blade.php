@@ -134,7 +134,7 @@
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
                         <div class="row mb-3">
-                            <div class="col-12">
+                            <div class="col-6">
                                 <h2 for="customerSelect" class="form-label text-dark"><img src="{{ asset('img/icon/profile.png') }}" alt="Barcode Icon" width="30" height="30"> Customer</h2>
                                 <select id="customerSelect" class="form-select" style="width: 100%;">
                                     <option value="">Choose a Customer</option>
@@ -148,6 +148,18 @@
                                 </select>
                                 
                                 <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
+                            </div>
+                            <div class="col-6">
+                                <h2 for="HoldOderSelect" class="form-label text-dark"><img src="{{ asset('img/icon/hold.png') }}" alt="Barcode Icon" width="30" height="30"> Hold Order</h2>
+                                <select id="HoldOderSelect" class="form-select" style="width: 100%;">
+                                    <option value="">Choose order Number</option>
+                                    @foreach($holdOrder as $order)
+                                        <option value="{{ $order->id }}"
+                                                data-name="{{ $order->customer_name }}">
+                                            {{ $order->customer_name}} (order no : {{ $order->order_number }})
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
@@ -324,10 +336,20 @@
           <span class="close" onclick="closeModal()">&times;</span>
           <h3 id="product-name"></h3>
           <div id="price-options-container" ></div>
-          <button id="add-to-cart" class="apply-discount-btn mt-4">🎟️ Add to Cart</button>
+          <button id="add-to-cart" class="apply-discount-btn mt-4">📥 Add to Cart</button>
         </div>
       </div>
       
+      {{--  hold modal  --}}
+      <div id="holdModal" class="modal">
+        <div class="modal-content">
+          <span id="closeHoldModal" class="close">&times;</span>
+          <h2>Put Order on Hold ?</h2>
+          <label for="holdReason">Reason:</label>
+          <textarea id="holdReason" rows="4" cols="40" placeholder="Enter reason..."></textarea>
+          <button id="confirmHoldBtn" class="apply-discount-btn mt-4"> 🕓 Confirm Hold</button>
+        </div>
+      </div>
 
 
     <script>
@@ -340,8 +362,9 @@
         let selectedDiscountValue = 0;
         let driverId = null;
         let driverName = null;
+        let selectedHoldOrderId = null;
         let isQuotation = false;
-
+        let isHold = false;
         const password = @json(config('app.remove_item_password'));
         
         // DOM Elements
@@ -845,10 +868,83 @@
         
                 const orderDetails = createOrderDetails();
                 lastOrderDetails = orderDetails;
-                isQuotation = true; // Set to true, indicating it's a quotation
+                isQuotation = true;
                 generateQuotation(orderDetails);
                 receiptModal.style.display = 'block';
             });
+
+            printHoldBtn.addEventListener('click', () => {
+                if (cart.length === 0) {
+                    showMessage('No items in cart to hold', 'error');
+                    return;
+                }
+                holdModal.style.display = 'block';
+            });
+            
+            // Close modal logic
+            closeHoldModal.addEventListener('click', () => {
+                holdModal.style.display = 'none';
+            });
+            
+            // Confirm Hold logic
+            confirmHoldBtn.addEventListener('click', () => {
+                const reason = holdReason.value.trim();
+                if (cart.length === 0) {
+                    showMessage('No items in cart to hold', 'error');
+                    return;
+                }
+                if (reason === '') {
+                    alert('Please enter a reason for holding the order.', 'error');
+                    return;
+                }
+            
+                const orderDetails = createOrderDetails();
+                orderDetails.reason = reason;
+                lastOrderDetails = orderDetails;
+                console.log(orderDetails);
+                saveHoldOrder(orderDetails);
+                showMessage('Order has been put on hold', 'success');
+            
+                holdModal.style.display = 'none';
+                holdReason.value = ''; // Reset textarea
+            });
+
+            // Function to save hold order
+            function saveHoldOrder(orderDetails) {
+                fetch('/api/hold-orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderDetails)
+                })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        const message = response.status === 400
+                            ? 'Insufficient balance'
+                            : 'Failed to save order';
+                        
+                        showMessage(message, 'error');
+                        receiptModal.style.display = 'none';
+                        return;
+                    }
+                
+                    const data = await response.json();
+
+                    receiptModal.style.display = 'none';
+                
+                    // Reset cart
+                    cart = [];
+                    updateCart();
+                
+                    // Reset stock on UI if needed
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.style.opacity = '1';
+                        card.style.pointerEvents = 'auto';
+                    });
+
+                })
+            }
         
             // Actual print functionality
             actualPrintBtn.addEventListener('click', () => {
@@ -1233,6 +1329,57 @@
             const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
             setTheme(currentTheme === 'dark' ? 'light' : 'dark');
         });
+
+
+        document.getElementById('HoldOderSelect').addEventListener('change', function () {
+            selectedHoldOrderId = this.value;
+
+            getHoldOrderById(selectedHoldOrderId);
+        });
+
+        function getHoldOrderById(orderId) {
+            fetch(`/api/hold-orders/${orderId}`)
+                .then(async (response) => {
+                    if (!response.ok) {
+                        showMessage('Could not retrieve hold order', 'error');
+                        return;
+                    }
+        
+                    const data = await response.json();
+
+                    const customerSelect = document.getElementById('customerSelect');
+                    if (customerSelect && data.customer_id) {
+                        customerSelect.value = data.customer_id;
+                        // Optional: trigger change event if needed
+                        customerSelect.dispatchEvent(new Event('change'));
+                    }
+        
+                    cart = [];
+
+                    data.items.forEach(item => {
+                        cart.push({
+                            id: item.id,
+                            name: item.name,
+                            price: item.price,
+                            type: item.type,
+                            category: item.category,
+                            quantity: item.quantity
+                        });
+                    });
+
+                    const printHoldBtn = document.getElementById('printHoldBtn');
+                    if (printHoldBtn) {
+                        printHoldBtn.disabled = true;
+                        printHoldBtn.classList.add('disabled'); 
+                    }
+                    updateCart(); 
+        
+                })
+                .catch(error => {
+                    console.error('GET hold order failed:', error);
+                    showMessage('Error fetching hold order', 'error');
+                });
+        }
     </script>
 
     <script>

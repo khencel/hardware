@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use App\Models\Tax;
 use App\Models\Food;
+use App\Models\Hold;
 use App\Models\Order;
 use App\Models\Driver;
 use App\Models\Customer;
@@ -70,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
         $user = Auth::user();
         $categories = FoodCategory::latest()->get();
         $customers = Customer::latest()->get();
-
+        $holdOrder = Hold::latest()->get();
         $taxes = Tax::where('is_active', true)->first(); 
         $discounts = Discount::latest()->get();
         $drivers = Driver::latest()->get();
@@ -86,7 +87,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts','drivers'));
+        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts','drivers','holdOrder'));
     });
 
 
@@ -164,4 +165,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-csv', [ReportController::class, 'export'])->name('reports.export.csv');
+
+    //hold orders
+    Route::get('/hold-orders', [OrderController::class, 'getHoldOrders'])->name('hold_orders.index');    ;
+    Route::delete('/hold/{id}/cancel', [OrderController::class, 'cancelHold'])->name('hold.cancel');
 });

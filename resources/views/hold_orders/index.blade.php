@@ -1,48 +1,10 @@
 @extends('homepage')
 
-@section('header', 'Reports')
+@section('header', 'Hold Orders')
 
 @section('content')
     <div class="container mt-5">
-        <form method="GET" action="{{ route('reports.index') }}" class="row g-3 align-items-end mb-4">
-            <div class="col-md-2">
-                <label for="start_date" class="form-label">Start Date</label>
-                <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}" class="form-control">
-            </div>
-        
-            <div class="col-md-2">
-                <label for="end_date" class="form-label">End Date</label>
-                <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}" class="form-control">
-            </div>
-            
-            <div class="col-md-3">
-                <label for="customer_id" class="form-label">Customer</label>
-                <select name="customer_id" id="customer_id" class="form-select">
-                    <option value="">All Customers</option>
-                    @foreach ($customers as $customer)
-                        <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
-                            {{ $customer->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bx bx-filter-alt"></i> Filter
-                </button>
-            </div>
-            
-            <div class="col-md-3">
-                <a href="{{ route('reports.export.csv', [
-                    'start_date' => request('start_date'),
-                    'end_date' => request('end_date'),
-                    'customer_id' => request('customer_id'),
-                ]) }}" class="btn btn-success w-100">
-                    <i class="bx bx-download"></i> Export to CSV
-                </a>                
-            </div>
-        </form>
+      
   
         <table  class="table table-sm table-bordered table-hover align-middle">
             <thead class="table-dark text-center">
@@ -55,7 +17,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($reports as $report)
+                @forelse($holdOrders as $report)
                     <tr>
                         <td>{{ $report->customer_name }}</td>
                         <td>{{ $report->cashier->firstname }} {{ $report->cashier->lastname }}</td>
@@ -69,11 +31,13 @@
                                 data-order="{{ $report->order_number }}"
                                 data-ratetype="{{ $report->rate_type }}"
                                 data-items="{{ json_encode($report->items) }}"
-                                data-category="{{ json_encode(is_array($report->items) ? array_map(function($item) {
-                                    return $item['category'] ?? 'N/A';
-                                }, $report->items) : $report->items->map(function($item) {
-                                    return $item->category ?? 'N/A';
-                                })) }}"
+                                data-category="{{ json_encode(
+                                    is_array($report->items)
+                                        ? array_map(fn($item) => $item['category'] ?? 'N/A', $report->items)
+                                        : ($report->items instanceof \Illuminate\Support\Collection
+                                            ? $report->items->map(fn($item) => $item->category ?? 'N/A')->toArray()
+                                            : ['N/A'])
+                                ) }}"
                                 data-total="₱{{ $report->total }}"
                                 data-date="{{ $report->date->format('F d, Y h:i A') }}"
                                 data-delivery-option="{{ $report->delivery_option }}"
@@ -83,21 +47,29 @@
                                 @if(isset($report->discount))
                                     data-discount="₱{{ $report->discount }}"
                                 @endif
+                                data-reason="{{ $report->reason }}" 
                             >
                                 <i class="bx bx-show"></i> View
                         </button>
 
+                        <form action="{{ route('hold.cancel', $report->id) }}" method="POST" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this order?')">
+                                <i class="bx bx-x-circle"></i> Cancel
+                            </button>
+                        </form>
                         </td>
                     </tr>
-                @empty
-                <tr>
-                    <td colspan="8" class="text-center"><i>No data found...</i></td>
-                </tr>
-                @endforelse
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center"><i>No data found...</i></td>
+                    </tr>
+                    @endforelse
             </tbody>
         </table>
         
-        {{ $reports->links() }}
+        {{ $holdOrders->links() }}
         
     </div>
 
@@ -122,6 +94,7 @@
                     <h6>Discount: <span id="modal-discount"></span></h6>
                     <h6>Total: <span id="modal-total"></span></h6>
                     <h6>Date: <span id="modal-date"></span></h6>
+                    <h6>Reason: <span id="modal-reason"></span></h6> 
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -145,7 +118,8 @@
                 const driver = this.getAttribute('data-driver') || 'N/A';  // Handle missing driver
                 const discount = this.getAttribute('data-discount') || 'N/A';  // Handle missing discount
                 const deliveryOption = this.getAttribute('data-delivery-option') || 'N/A';  // Handle missing delivery option
-                
+                const reason = this.getAttribute('data-reason') || 'N/A'; // Handle missing reason
+
                 // Set values in the modal
                 document.getElementById('modal-customer').innerText = customer;
                 document.getElementById('modal-cashier').innerText = cashier;
@@ -156,7 +130,7 @@
                 document.getElementById('modal-driver').innerText = driver;
                 document.getElementById('modal-discount').innerText = discount;
                 document.getElementById('modal-delivery-option').innerText = deliveryOption;
-        
+                document.getElementById('modal-reason').innerText = reason; 
                 // Populate item categories
                 const itemCategoryElement = document.getElementById('modal-itemcategory');
                 itemCategoryElement.innerHTML = ''; // Clear previous categories

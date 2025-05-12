@@ -48,6 +48,13 @@
                 'roles' => [],
             ],
             [
+                'url' => '/hold-orders',
+                'name' => 'hold-orders',
+                'label' => 'Hold Orders',
+                'icon' => 'bx bx-purchase-tag-alt',
+                'roles' => [12],
+            ],
+            [
                 'url' => '/users',
                 'name' => 'user-management',
                 'label' => 'User Management',

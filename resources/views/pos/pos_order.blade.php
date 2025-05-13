@@ -1084,7 +1084,7 @@
             confirmHoldBtn.addEventListener('click', () => {
                 const reason = holdReason.value.trim();
                 const customerName = document.getElementById('customerNameInput').value.trim(); // Get customer name
-            
+                
                 if (cart.length === 0) {
                     showMessage('No items in cart to hold', 'error');
                     return;
@@ -1105,17 +1105,22 @@
                 orderDetails.reason = reason;
                 orderDetails.customer_name = customerName;  // Add customer name to orderDetails
                 lastOrderDetails = orderDetails;
-                
+                orderDetails.order_number = cart[0].order_number;
+              
                 saveHoldOrder(orderDetails);
                 showMessage('Order has been put on hold', 'success');
             
                 holdModal.style.display = 'none';
-                holdReason.value = ''; // Reset textarea
-                document.getElementById('customerNameInput').value = ''; // Reset customer name input
+                holdReason.value = ''; 
+                document.getElementById('customerNameInput').value = ''; 
+                 //Reset the dropdown
+                const holdOrderSelect = document.getElementById('HoldOderSelect');
+                if (holdOrderSelect) {
+                    holdOrderSelect.selectedIndex = 0; // Reset to default "Choose order Number"
+                }
             });
             // Function to save hold order
             function saveHoldOrder(orderDetails) {
-
                 fetch('/api/hold-orders', {
                     method: 'POST',
                     headers: {
@@ -1579,7 +1584,7 @@
                     }
         
                     cart = [];
-
+              
                     data.items.forEach(item => {
                         cart.push({
                             id: item.id,
@@ -1587,15 +1592,11 @@
                             price: item.price,
                             type: item.type,
                             category: item.category,
-                            quantity: item.quantity
+                            quantity: item.quantity,
+                            order_number: data.order_number,
                         });
                     });
 
-                    const printHoldBtn = document.getElementById('printHoldBtn');
-                    if (printHoldBtn) {
-                        printHoldBtn.disabled = true;
-                        printHoldBtn.classList.add('disabled'); 
-                    }
                     updateCart(); 
         
                 })

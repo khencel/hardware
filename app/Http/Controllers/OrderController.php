@@ -85,10 +85,8 @@ class OrderController extends Controller
     }
     
     
-    
-    public function holdOrders(request $request)
+    public function holdOrders(Request $request)
     {
-
         $holdDetails = $request->only([
             'customer_id',
             'cashier_id',
@@ -105,13 +103,26 @@ class OrderController extends Controller
             'reason'
         ]);
     
-        $holdOrder = Hold::create($holdDetails);
-        
+        // Check if order_number exists
+        $existingHoldOrder = Hold::where('order_number', $holdDetails['order_number'])->first();
+    
+        if ($existingHoldOrder) {
+            // Update the existing hold order
+            $existingHoldOrder->update($holdDetails);
+    
+            return response()->json([
+                'message' => 'Hold order updated successfully!',
+                'hold_order' => $existingHoldOrder,
+            ], 200);
+        }
+    
+        // Otherwise, create a new hold order
+        $newHoldOrder = Hold::create($holdDetails);
+    
         return response()->json([
             'message' => 'Order held successfully!',
-            'hold_order' => $holdOrder,
-        ], 200);
-        
+            'hold_order' => $newHoldOrder,
+        ], 201);
     }
 
     public function getHoldOrders()

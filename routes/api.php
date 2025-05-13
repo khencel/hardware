@@ -128,3 +128,6 @@ Route::get('/get-all-item-per-category/{category_id}', [FoodController::class, '
 Route::post('/orders', [OrderController::class, 'create']);
 Route::get('/hold-orders/{id}', [OrderController::class, 'getHoldOrderById']);
 Route::post('/hold-orders', [OrderController::class, 'holdOrders']);
+
+//quotation
+Route::post('/quotation', [OrderController::class, 'createQuotation']);

@@ -161,6 +161,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/export-csv', [ReportController::class, 'export'])->name('reports.export.csv');
 
     //hold orders
-    Route::get('/hold-orders', [OrderController::class, 'getHoldOrders'])->name('hold_orders.index');    ;
+    Route::get('/hold-orders', [OrderController::class, 'getHoldOrders'])->name('hold_orders.index');
     Route::delete('/hold/{id}/cancel', [OrderController::class, 'cancelHold'])->name('hold.cancel');
+
+    //quotation
+    Route::get('/quotation-orders', [OrderController::class, 'getQuotation'])->name('quotation_orders.index');
+    Route::delete('/quotation/{id}/cancel', [OrderController::class, 'quotationDelete'])->name('quotation.cancel');
 });

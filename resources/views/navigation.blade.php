@@ -55,6 +55,13 @@
                 'roles' => [12],
             ],
             [
+                'url' => '/quotation-orders',
+                'name' => 'quotation-orders',
+                'label' => 'Quotation',
+                'icon' => 'bx bx-purchase-tag-alt',
+                'roles' => [12],
+            ],
+            [
                 'url' => '/users',
                 'name' => 'user-management',
                 'label' => 'User Management',

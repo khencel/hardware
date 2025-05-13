@@ -1047,7 +1047,13 @@
                 customerName;
                 customerNameInputed = customerName;
                 lastOrderDetails = orderDetails;
-                generateReceipt(orderDetails);
+
+                if(isQuotation){
+                    generateQuotation(orderDetails) ;
+                }else{
+                    generateReceipt(orderDetails);
+                }
+              
                 receiptModal.style.display = 'block';
                 document.getElementById('paymentModal').style.display = 'none';
             
@@ -1063,10 +1069,10 @@
                 const orderDetails = createOrderDetails();
                 lastOrderDetails = orderDetails;
                 isQuotation = true;
-                generateQuotation(orderDetails);
-                receiptModal.style.display = 'block';
+                document.getElementById('paymentModal').style.display = 'block';
             });
 
+   
             printHoldBtn.addEventListener('click', () => {
                 if (cart.length === 0) {
                     showMessage('No items in cart to hold', 'error');
@@ -1161,7 +1167,6 @@
                 const receiptContent = document.getElementById('receiptContent');
                 const orderDetails = createOrderDetails();
                 
-                console.log('actualPrintBtn clicked', orderDetails);
                 // Check if receiptContent is valid
                 if (!receiptContent) {
                     showMessage('No receipt content found', 'error');
@@ -1263,7 +1268,9 @@
                 };
         
                 // Only save order to backend if it's not a quotation
-                if (!isQuotation) {
+                if (isQuotation) {
+                    saveOrderToQuotation(orderDetails);
+                }else{
                     saveOrderToBackend(orderDetails);
                 }
                 
@@ -1273,6 +1280,57 @@
             });
         }
         
+            function saveOrderToQuotation(orderDetails) {
+                console.log('Saving order to backend:', orderDetails);
+                fetch('/api/quotation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderDetails)
+                })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        const message = response.status === 400
+                            ? 'Insufficient balance'
+                            : 'Failed to save order';
+                        
+                        showMessage(message, 'error');
+                        receiptModal.style.display = 'none';
+                        return;
+                    }
+                
+                    const data = await response.json();
+
+                    showMessage(
+                        'Qoutation successfully Made!',
+                        'success'
+                    );
+                    receiptModal.style.display = 'none';
+                    selectedMethod = ''; 
+                    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+                    document.getElementById('refNumber').value = '';
+                    document.getElementById('refContainer').style.display = 'none';
+                    document.getElementById('customerName').value = '';
+                    document.getElementById('customerContainer').style.display = 'none';
+                    // Reset cart
+                    cart = [];
+                    updateCart();
+                
+                    // Reset stock on UI if needed
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.style.opacity = '1';
+                        card.style.pointerEvents = 'auto';
+                    });
+                
+                    // Optionally use data.order or data.remaining_balance here
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('An error occurred while placing the order.', 'error');
+                });
+            }
+
             function saveOrderToBackend(orderDetails) {
                 console.log('Saving order to backend:', orderDetails);
                 fetch('/api/orders', {

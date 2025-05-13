@@ -7,6 +7,7 @@ use App\Models\Food;
 use App\Models\Hold;
 use App\Models\Order;
 use App\Models\Customer;
+use App\Models\Quotation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -167,5 +168,57 @@ class OrderController extends Controller
 
        
         return response()->json($holdOrder);
+    }
+
+
+    //quotation
+    public function createQuotation(Request $request)
+    {
+        $quotationDetails = $request->only([
+            'customer_id',
+            'cashier_id',
+            'driver_id',
+            'customer_name',
+            'order_number',
+            'date',
+            'items',
+            'subtotal',
+            'tax',
+            'total',
+            'delivery_option',
+            'discount',
+        ]);
+        // Save the quotation to the database
+        $quotation = Quotation::create($quotationDetails);
+    
+        // Return a success response with quotation details
+        return response()->json([
+            'message' => 'Quotation created successfully!',
+            'quotation' => $quotation,
+        ], 200);
+    }
+    public function getQuotation()
+    {
+        $query = Quotation::with(['cashier', 'driver']);
+
+        $quotations = $query->paginate(10);
+
+        return view('quotations.index', compact('quotations'));
+    }
+    
+    public function quotationDelete($id)
+    {
+        // Find the quotation by ID
+        $quotation = Quotation::find($id);
+
+        if (!$quotation) {
+            return redirect()->route('quotation_orders.index')->with('error', 'Quotation not found.');
+        }
+
+        // Delete the quotation
+        $quotation->delete();
+
+        // Redirect with a success message
+        return redirect()->route('quotation_orders.index')->with('success', 'Quotation deleted successfully.');
     }
 }

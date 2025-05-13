@@ -326,15 +326,21 @@
       </div>
       
       {{--  hold modal  --}}
-      <div id="holdModal" class="modal">
-        <div class="modal-content">
-          <span id="closeHoldModal" class="close">&times;</span>
-          <h2>Put Order on Hold ?</h2>
-          <label for="holdReason">Reason:</label>
-          <textarea id="holdReason" rows="4" cols="40" placeholder="Enter reason..."></textarea>
-          <button id="confirmHoldBtn" class="apply-discount-btn mt-4"> 🕓 Confirm Hold</button>
+      {{-- Hold Modal --}}
+        <div id="holdModal" class="modal">
+            <div class="modal-content">
+            <span id="closeHoldModal" class="close">&times;</span>
+            <h2>Put Order on Hold for</h2>
+            <label for="customerNameInput">Customer Name:</label>
+            <input type="text" id="customerNameInput" placeholder="Enter customer name" />
+        
+            <label for="holdReason">Reason:</label>
+            <textarea id="holdReason" rows="4" cols="40" placeholder="Enter reason..."></textarea>
+            
+            <button id="confirmHoldBtn" class="apply-discount-btn mt-4"> 🕓 Confirm Hold</button>
+            </div>
         </div>
-      </div>
+  
 
 
         {{--  payment modal  --}}
@@ -665,9 +671,6 @@
             if (itemIndex !== -1) {
                 cart[itemIndex].price = selectedPrice;
                 cart[itemIndex].type = selectedLabel;
-        
-                console.log(`Updated item ${itemBeingEditedId}:`, cart[itemIndex]);
-        
                 updateCart();
                 closeModal();
             } else {
@@ -1080,25 +1083,36 @@
             // Confirm Hold logic
             confirmHoldBtn.addEventListener('click', () => {
                 const reason = holdReason.value.trim();
+                const customerName = document.getElementById('customerNameInput').value.trim(); // Get customer name
+            
                 if (cart.length === 0) {
                     showMessage('No items in cart to hold', 'error');
                     return;
                 }
+            
                 if (reason === '') {
                     alert('Please enter a reason for holding the order.', 'error');
                     return;
                 }
             
+                if (customerName === '') {
+                    alert('Please enter the customer name.', 'error');
+                    return;
+                }
+                
+                
                 const orderDetails = createOrderDetails();
                 orderDetails.reason = reason;
+                orderDetails.customer_name = customerName;  // Add customer name to orderDetails
                 lastOrderDetails = orderDetails;
+                
                 saveHoldOrder(orderDetails);
                 showMessage('Order has been put on hold', 'success');
             
                 holdModal.style.display = 'none';
                 holdReason.value = ''; // Reset textarea
+                document.getElementById('customerNameInput').value = ''; // Reset customer name input
             });
-
             // Function to save hold order
             function saveHoldOrder(orderDetails) {
 

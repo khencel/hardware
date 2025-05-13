@@ -321,7 +321,7 @@
           <span class="close" onclick="closeModal()">&times;</span>
           <h3 id="product-name"></h3>
           <div id="price-options-container" ></div>
-          <button id="add-to-cart" class="apply-discount-btn mt-4">📥 Add to Cart</button>
+          <button id="changeProductType" class="apply-discount-btn mt-4">🔁 Update This Item</button>
         </div>
       </div>
       
@@ -425,7 +425,7 @@
         let isHold = false;
         let selectedMethod = "";
         let customerNameInputed = '';
-
+        let itemBeingEditedId = null;
         const password = @json(config('app.remove_item_password'));
         
         
@@ -477,11 +477,13 @@
         function init() {
             setupBarcodeInput();
             setupReceiptFunctionality();
+    
         }
         
 
         document.addEventListener('DOMContentLoaded', () => {
             updateCart();
+            
         });
 
         // Setup barcode input with auto-submit
@@ -581,8 +583,7 @@
         });
         
         
-        // Setup product card click event
-          // Setup product card click event
+            // Setup product card click event
           document.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('click', () => {
                 const product = {
@@ -594,11 +595,15 @@
                     wholesalePrice: parseFloat(card.dataset.wholesale) || 0,
                     retailPrice: parseFloat(card.dataset.retail) || 0,
                 };
-                
-                openModal(product);
+
+
+                // Auto-add to cart with Selling Price on click
+                addToCart(product, product.sellingPrice, 'Selling Price');
             });
         });
 
+   
+        
         function openModal(product) {
             const modal = document.getElementById('product-modal');
             document.getElementById('product-name').textContent = product.name;
@@ -636,15 +641,44 @@
         
             // Get the selected price and label when the modal is opened
             const { selectedPrice, selectedLabel } = getSelectedPrice();
-        
-            // Update the "add-to-cart" button click handler to use the selected price
-            document.getElementById('add-to-cart').onclick = () => {
-                const { selectedPrice, selectedLabel } = getSelectedPrice(); // Get the updated selected price
-                addToCart(product, selectedPrice, selectedLabel);
-            };
-        
+    
+            itemBeingEditedId = product.id; // Store the ID of the item being edited
             modal.style.display = 'block';
         }
+
+        document.getElementById('changeProductType').addEventListener('click', () => {
+            if (!itemBeingEditedId) {
+                console.warn("No item being edited.");
+                return;
+            }
+        
+            const selectedRadio = document.querySelector('input[name="price"]:checked');
+            if (!selectedRadio) {
+                console.warn("No price option selected.");
+                return;
+            }
+        
+            const selectedPrice = parseFloat(selectedRadio.value);
+            const selectedLabel = selectedRadio.nextElementSibling.textContent.split(' - ')[0]; // Grab label
+        
+            const itemIndex = cart.findIndex(item => item.id === itemBeingEditedId);
+            if (itemIndex !== -1) {
+                cart[itemIndex].price = selectedPrice;
+                cart[itemIndex].type = selectedLabel;
+        
+                console.log(`Updated item ${itemBeingEditedId}:`, cart[itemIndex]);
+        
+                updateCart();
+                closeModal();
+            } else {
+                console.warn(`Item with ID ${itemBeingEditedId} not found in cart.`);
+            }
+        
+            // Reset
+            itemBeingEditedId = null;
+            modalProductData = null;
+        });
+        
         
       
           function closeModal() {
@@ -660,47 +694,71 @@
             }
         });
 
-        function addToCart(product,price, selectedLabel) {
-            const existingItem = cart.find(item => item.id === product.id);
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('product-type-btn')) {
+                const productId = e.target.getAttribute('data-id');
+                const productType = e.target.getAttribute('data-type');
+                const sellingPrice = parseFloat(e.target.getAttribute('data-selling-price'));
+                const wholesalePrice = parseFloat(e.target.getAttribute('data-wholesale-price'));
+                const retailPrice = parseFloat(e.target.getAttribute('data-retail-price'));
+                const product = cart.find(item => item.id === productId);
+                
+                if (product) {
+                    openModal(product); // pass the specific product
+                    updateCart();
+                } else {
+                    console.warn(`Product with ID ${productId} not found in cart.`);
+                }
+            }
+        });
+        
+       
 
-            // Find the corresponding product card
+
+        function addToCart(product, price, selectedLabel) {
+            // Check if the same product with the same price type already exists in the cart
+            const existingItem = cart.find(item => item.id === product.id && item.type === selectedLabel);
+        
+            // Find the corresponding product card in the DOM
             const productCard = document.querySelector(`.product-card[data-id="${product.id}"]`);
             let currentStock = parseInt(productCard.getAttribute('data-quantity'));
-
-            // Prevent adding if out of stock
             if (currentStock <= 0) {
                 alert('This product is out of stock.');
-    
                 return;
             }
-
+        
             if (existingItem) {
                 existingItem.quantity++;
             } else {
+                // Treat product with different price type as a unique item
                 cart.push({
                     id: product.id,
                     name: product.name,
                     price: price,
                     type: selectedLabel,
                     category: product.category,
+                    retailPrice : product.retailPrice,
+                    sellingPrice : product.sellingPrice,
+                    wholesalePrice: product.wholesalePrice,
                     quantity: 1
                 });
             }
-
+        
             // Decrease stock
             currentStock--;
             productCard.setAttribute('data-quantity', currentStock);
-
-            // Update quantity display on the product card
+        
+            // Update stock display
             const qtySpan = productCard.querySelector('span');
             if (qtySpan) {
                 qtySpan.textContent = `Stock: ${currentStock}`;
             }
 
+            
+        
             updateCart();
             closeModal();
         }
-
 
         function updateCart() {
             cartItems.innerHTML = '';
@@ -720,7 +778,7 @@
             } else {
                 cart.forEach(item => {
                     const total = item.price * item.quantity;
-        
+
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${item.name}</td>
@@ -732,7 +790,23 @@
                         </td>
                         <td>₱${total.toFixed(2)}</td>
                         <td><button class="remove-btn" data-id="${item.id}">✕</button></td>
-                        <td>${item.type}</td>
+                         <td>
+                            ${item.type}
+                        <button 
+                            class="product-type-btn" 
+                            data-id="${item.id}" 
+                            data-type="${item.type}" 
+                            data-selling-price="${item}" 
+                            data-wholesale-price="${item.wholesalePrice}"
+                            data-retail-price="${item.retailPrice}"
+                            data-selling-Price="${item.sellingPrice}"
+                            style="background-color: transparent; border: none; cursor: pointer; color: #007bff;"
+                        >
+                            🔄
+                        </button>
+                        </td>
+                       
+                       
                     `;
                     cartItems.appendChild(row);
                 });
@@ -797,12 +871,12 @@
                         document.getElementById('passwordModal').style.display = 'block';
                     });
                 });
+
             }
-        
             updateTotals();
         }
         
-   
+
 
         // Update quantity of an item in the cart
         function updateQuantity(itemId, change) {
@@ -946,7 +1020,6 @@
                 const refNumber = document.getElementById('refNumber').value.trim();
                 const customerName = customerNameInput ? customerNameInput.value.trim() : '';
 
-                console.log('xxxx',selectedMethod);
                 if (!selectedMethod) {
                     alert('Please select a payment method');
                     return;

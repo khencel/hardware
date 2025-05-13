@@ -72,16 +72,10 @@ Route::middleware(['auth'])->group(function () {
         $categories = FoodCategory::latest()->get();
         $customers = Customer::latest()->get();
         $holdOrder = Hold::latest()->get();
-        $taxes = Tax::where('is_active', true)->first(); 
+        // if no tax is set, set default tax to 12%
+        $taxes = optional(Tax::where('is_active', true)->first())->percentage ?? 12;
         $discounts = Discount::latest()->get();
         $drivers = Driver::latest()->get();
-        if (!$taxes) {
-            // Handle the case when no active tax exists
-            // For example, set a default tax percentage or display an error
-            $taxes->percentage = 0; // Default to 0% tax if no active tax
-        } else {
-            $taxes = $taxes->percentage;
-        }
         // Check if there are products available
         if ($products->isEmpty()) {
             return redirect()->back()->with('error', 'No products available.');

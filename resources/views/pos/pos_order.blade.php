@@ -219,19 +219,19 @@
                             <div id="printWrapper"  class="row">
                                 <div class="col-4">
                                     <button id="printReceiptBtn" class="action-btn print-btn"> <img src="{{ asset('img/icon/secure-payment.png') }}" alt="Barcode Icon" width="30" height="30"  style="filter: brightness(0) invert(1);">  
-                                        Payout Receipt
+                                        Payout Receipt (F1)
                                     </button>
                                 </div>
                                 <div class="col-4">
                                     <button id="printQuotationBtn" class="action-btn quotation-btn" style="margin-left: 10px;">
                                         <img src="{{ asset('img/icon/quotation.png') }}" alt="Quotation Icon" width="30" height="30">  
-                                        Make a Quotation
+                                        Make a Quotation (F2)
                                     </button>
                                 </div>
                                 <div class="col-4">
                                     <button id="printHoldBtn" class="action-btn hold-btn" style="margin-left: 10px;">
                                         <img src="{{ asset('img/icon/hold.png') }}" alt="Quotation Icon" width="30" height="30">  
-                                       Hold
+                                       Hold (F3)
                                     </button>
                                 </div>
                             </div>
@@ -1682,5 +1682,27 @@
             });
         });
         </script>
+
+        <script>
+            document.addEventListener('keydown', function (event) {
+                // Prevent browser default F1 help popup
+                if (event.key === "F1") {
+                    event.preventDefault();
+                    document.getElementById("printReceiptBtn").click();
+                }
+        
+                if (event.key === "F2") {
+                    event.preventDefault();
+                    document.getElementById("printQuotationBtn").click();
+                }
+        
+                if (event.key === "F3") {
+                    event.preventDefault();
+                    document.getElementById("printHoldBtn").click();
+                }
+            });
+        </script>
+        
+        
 </body>
 </html>

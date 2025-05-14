@@ -101,8 +101,13 @@
                         <td>{{ $food->name }}</td>
                         <td>{{ $food->category?->name ?? 'no category selected' }}</td>
                         <td>
-                            <span class="badge bg-{{ $food->is_available ? 'success' : 'danger' }}">
-                                {{ $food->is_available ? 'Available' : 'Unavailable' }}
+                            <span class="badge 
+                                bg-{{ 
+                                    $food->quantity == 0 ? 'danger' : ($food->quantity <= 5 ? 'warning' : 'success') 
+                                }}">
+                                {{ 
+                                    $food->quantity == 0 ? 'Unavailable' : ($food->quantity . ' Stock Available') 
+                                }}
                             </span>
                         </td>
                         <td>

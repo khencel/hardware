@@ -85,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-
+    // dashboard
     Route::get('/dashboard', function () {
 
         $items = Food::where('is_available', true)->count();
@@ -110,7 +110,7 @@ Route::middleware(['auth'])->group(function () {
         $chartData = $monthlySales->pluck('total')->toArray();
 
         // Still fetch low inventory items
-        $lowItemsInInventory = Food::where('quantity', '<', 5)->paginate(10);
+        $lowItemsInInventory = Food::with('category')->where('quantity', '<', 10)->paginate(10);
 
         //total sales
         $totalSales = Order::whereYear('created_at', now()->year)->sum('total');
@@ -128,6 +128,7 @@ Route::middleware(['auth'])->group(function () {
             'chartData'
         ));
     })->name('dashboard.index');
+    Route::post('/restock/{id}', [FoodController::class, 'restock']);
 
     Route::post('/logout', Logout::class)->name('auth.logout');
 

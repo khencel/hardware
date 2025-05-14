@@ -135,3 +135,5 @@ Route::post('/quotation', [OrderController::class, 'createQuotation']);
 
 //reports
 Route::post('/print-reports', [ReportController::class, 'printReport'])->name('reports.print');
+
+

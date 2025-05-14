@@ -151,4 +151,18 @@ class FoodController extends Controller
         $data = Food::where('category_id', $category_id)->get();
         return $data;
     }
+
+    public function restock(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $item = Food::findOrFail($id);
+        $item->quantity += $request->input('quantity');
+        $item->save();
+
+        return response()->json(['success' => true]);
+    }
+
 }

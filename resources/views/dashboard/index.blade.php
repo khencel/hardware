@@ -64,22 +64,34 @@
                                 <thead class="thead-light sticky-top bg-white">
                                     <tr>
                                         <th>Item</th>
-                                        <th>Qty</th>
+                                        <th>Category</th>
+                                        <th>Quantity</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                 
                                 <tbody>
                                     @forelse ($lowItemsInInventory as $item)
-                                        <tr>
-                                            <td>{{ $item->name }}</td>
-                                            <td>{{ $item->quantity }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="2" class="text-center">All items sufficiently stocked.</td>
-                                        </tr>
-                                    @endforelse
-                
+                                    <tr>
+                                        <td>{{ $item->name }}</td>
+                                        <td>{{ $item->category->name }}</td>
+                                        <td>{{ $item->quantity }}</td>
+                                        <td>
+                                            <button 
+                                                class="btn btn-sm btn-outline-primary restock-btn"
+                                                data-id="{{ $item->id }}"
+                                                data-name="{{ $item->name }}"
+                                            >
+                                                Restock
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center">All items sufficiently stocked.</td>
+                                    </tr>
+                                @endforelse
+                                
                                     @if ($lowItemsInInventory->hasPages())
                                         <tr>
                                             <td colspan="2" class="text-center">
@@ -138,5 +150,69 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Chart.js already here...
+    
+            // Restock button click handler
+            document.querySelectorAll('.restock-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const itemId = this.dataset.id;
+                    const itemName = this.dataset.name;
+    
+                    Swal.fire({
+                        title: `Restock ${itemName}`,
+                        input: 'number',
+                        inputLabel: 'Enter quantity to restock',
+                        inputAttributes: {
+                            min: 1,
+                            step: 1
+                        },
+                        inputValidator: (value) => {
+                            if (!value || value <= 0) {
+                                return 'You need to enter a valid quantity!';
+                            }
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Restock',
+                        showLoaderOnConfirm: true,
+                        preConfirm: (quantity) => {
+                            return fetch(`/restock/${itemId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                },
+                                body: JSON.stringify({ quantity })
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(response.statusText)
+                                }
+                                return response.json();
+                            })
+                            .catch(error => {
+                                Swal.showValidationMessage(
+                                    `Request failed: ${error}`
+                                );
+                            });
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Restocked!',
+                                text: `Item "${itemName}" has been restocked.`,
+                            }).then(() => {
+                                location.reload();
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
 @endsection
 

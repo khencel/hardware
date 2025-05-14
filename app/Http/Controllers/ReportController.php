@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Order;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ReportsExport;
-
+use Carbon\Carbon;
 class ReportController extends Controller
 {
     /**
@@ -31,9 +32,9 @@ class ReportController extends Controller
 
         // Add this if not already done
         $customers = Customer::latest()->get();
-
+        $users = User::latest()->get();
         
-        return view('report.index', compact('reports', 'customers'));
+        return view('report.index', compact('reports', 'customers','users'));
     }
 
     /**
@@ -118,54 +119,34 @@ class ReportController extends Controller
     
         return response()->stream($callback, 200, $headers);
     }
-    
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function printReport(request $request)
     {
-        //
-    }
+        $reports = Order::query()
+            ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                $startDate = Carbon::parse($request->start_date)->startOfDay(); // Set the time to the beginning of the day
+                $endDate = Carbon::parse($request->end_date)->endOfDay(); // Set the time to the end of the day
+        
+                $query->whereBetween('date', [$startDate, $endDate]);
+            })
+            ->when($request->user_id, function ($query) use ($request) {
+                $query->where('cashier_id', $request->user_id);
+            })
+            ->with('cashier', 'driver')
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+            if($request->has('user_id') && $request->user_id != null){
+                $users = User::where('id',$request->user_id)->first();
+            }else{
+                $users = null;
+            }
+            return response()->json([
+                'message' => 'Quotation created successfully!',
+                'reports' => $reports,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'user' =>   $users,
+            ], 200);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

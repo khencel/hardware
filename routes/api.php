@@ -5,8 +5,11 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FoodController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeisureController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ReportsController;
@@ -15,14 +18,12 @@ use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\RestoTableController;
 use App\Http\Controllers\Rooms\RoomController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\FoodCategoryController;
+
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\ReservationDetailsController;
 use App\Http\Controllers\Rooms\RoomCategoryController;
-
-use App\Http\Controllers\FoodCategoryController;
-use App\Http\Controllers\FoodController;
-use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,3 +132,6 @@ Route::post('/hold-orders', [OrderController::class, 'holdOrders']);
 
 //quotation
 Route::post('/quotation', [OrderController::class, 'createQuotation']);
+
+//reports
+Route::post('/print-reports', [ReportController::class, 'printReport'])->name('reports.print');

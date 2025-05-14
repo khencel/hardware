@@ -1332,7 +1332,6 @@
             }
 
             function saveOrderToBackend(orderDetails) {
-                console.log('Saving order to backend:', orderDetails);
                 fetch('/api/orders', {
                     method: 'POST',
                     headers: {

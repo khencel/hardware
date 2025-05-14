@@ -442,8 +442,9 @@
             id: product.dataset.id,
             name: product.dataset.name,
             price: parseFloat(product.dataset.price),
-            wholesale: parseFloat(product.dataset.wholesale),
-            retail: parseFloat(product.dataset.retail),
+            sellingPrice: parseFloat(product.dataset.price),
+            wholesalePrice: parseFloat(product.dataset.wholesale) || 0,
+            retailPrice: parseFloat(product.dataset.retail) || 0,
             barcode: product.dataset.barcode,
             category: product.dataset.category?.name,
             image: product.dataset.image
@@ -562,10 +563,9 @@
             
             if (barcode.length >= 4) {  // Assuming barcodes are at least 4 characters
                 const product = findProductByBarcode(barcode);
-                
                 if (product) {
                     // Product found - add to cart
-                    addToCart(product, product.price, null);
+                    addToCart(product, product.sellingPrice, 'Selling Price');
                     barcodeInput.value = '';
                     showMessage(`Added ${product.name} to cart`, 'success');
                     hideBarcodeAlert();
@@ -797,7 +797,7 @@
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${item.name}</td>
+                        <td>${item.name} ${item.price}</td>
                         <td>₱${item.price.toFixed(2)}</td>
                         <td class="quantity-cell">
                             <button class="quantity-btn minus" data-id="${item.id}">-</button>

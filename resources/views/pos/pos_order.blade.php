@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="{{ session('theme', 'light') }}">
     <div class="container-fluid" style="padding: 50px">
@@ -511,7 +512,19 @@
             if (entered === password) {
               removeItem(itemToRemoveId);
               closePasswordModal();
-             showMessage('Product void successfully', 'success');
+              Swal.fire({
+                toast: true,
+                position: 'top-end', // can be 'top', 'bottom-end', etc.
+                icon: 'success',
+                title: 'Product void successfully!',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
             } else {
               alert('Incorrect password.');
             }
@@ -981,7 +994,12 @@
             // Print receipt functionality
             printReceiptBtn.addEventListener('click', () => {
                 if (cart.length === 0) {
-                    showMessage('No items in cart to print receipt', 'error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'No items in cart to print receipt',
+                    });
+            
                     return;
                 }
             
@@ -1024,21 +1042,37 @@
                 const customerName = customerNameInput ? customerNameInput.value.trim() : '';
 
                 if (!selectedMethod) {
-                    alert('Please select a payment method');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Errors',
+                        text: 'Please select a payment method',
+                    });
                     return;
                 }
-            
+                
+             
+                const methodsRequiringRef = ['Bank Transfer', 'Bank Checks', 'Gcash', 'Other'];
 
-                if (selectedMethod == 'Credit' && !refNumber) {
-                    alert('Reference number is required for non-cash and credit payments');
+                if (methodsRequiringRef.includes(selectedMethod) && !refNumber) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Reference Required',
+                        text: 'Reference number is required for non-cash and credit payments',
+                    });
+                    return;
+                } 
+                
+                if(selectedMethod === 'Cash' && !customerName){
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Customer Name  Required',
+                        text: 'Please Input Customer name',
+                    });
                     return;
                 }
 
-                if (selectedMethod !== 'Credit' && !customerName) {
-                    alert('Customer name is required');
-                    return;
-                }
             
+    
                 const orderDetails = createOrderDetails();
                 orderDetails.payment_method = selectedMethod;
                 orderDetails.reference_number = selectedMethod === 'Cash' ? null : refNumber;
@@ -1062,7 +1096,11 @@
             // Print quotation functionality
             printQuotationBtn.addEventListener('click', () => {
                 if (cart.length === 0) {
-                    showMessage('No items in cart to make a quotation', 'error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'No items in cart to make a quotation',
+                    });
                     return;
                 }
         
@@ -1075,7 +1113,11 @@
    
             printHoldBtn.addEventListener('click', () => {
                 if (cart.length === 0) {
-                    showMessage('No items in cart to hold', 'error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'No items in cart to make a hold',
+                    });
                     return;
                 }
                 holdModal.style.display = 'block';
@@ -1092,17 +1134,29 @@
                 const customerName = document.getElementById('customerNameInput').value.trim(); // Get customer name
                 
                 if (cart.length === 0) {
-                    showMessage('No items in cart to hold', 'error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'No items in cart to make a hold',
+                    });
                     return;
                 }
             
                 if (reason === '') {
-                    alert('Please enter a reason for holding the order.', 'error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Reason Required',
+                        text: 'Please enter a reason for holding the order.',
+                    });
                     return;
                 }
             
                 if (customerName === '') {
-                    alert('Please enter the customer name.', 'error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Customer Name Required',
+                        text: 'Please enter the customer name.',
+                    });
                     return;
                 }
                 
@@ -1114,8 +1168,21 @@
                 orderDetails.order_number = cart[0].order_number;
               
                 saveHoldOrder(orderDetails);
-                showMessage('Order has been put on hold', 'success');
-            
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end', // can be 'top', 'bottom-end', etc.
+                    icon: 'success',
+                    title: 'Order has been put on hold!',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+                
+                // Reset the modal
                 holdModal.style.display = 'none';
                 holdReason.value = ''; 
                 document.getElementById('customerNameInput').value = ''; 
@@ -1302,10 +1369,20 @@
                 
                     const data = await response.json();
 
-                    showMessage(
-                        'Qoutation successfully Made!',
-                        'success'
-                    );
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end', // can be 'top', 'bottom-end', etc.
+                        icon: 'success',
+                        title: 'Qoutation successfully Made!',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                    
                     receiptModal.style.display = 'none';
                     selectedMethod = ''; 
                     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
@@ -1351,13 +1428,23 @@
                     }
                 
                     const data = await response.json();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.payment_method.toLowerCase() === 'credit' 
+                            ? `${data.message || 'Order successful!'}\n${data.order.customer_name} current balance was ${data.remaining_balance}`
+                            : 'Order placed successfully!',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer);
+                            toast.addEventListener('mouseleave', Swal.resumeTimer);
+                        }
+                    });
 
-                    showMessage(
-                        `${data.payment_method.toLowerCase() === 'credit' 
-                            ? `${data.message || 'Order successfully!'}\n${data.order.customer_name} current balance was ${data.remaining_balance}`
-                            : 'Order placed successfully!'}`,
-                        'success'
-                    );
+
                     receiptModal.style.display = 'none';
                     selectedMethod = ''; 
                     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));

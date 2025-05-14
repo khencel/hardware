@@ -11,13 +11,16 @@
         <a href="{{ route('foods.index') }}" class="btn btn-secondary mb-3">Back</a>
 
         @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        html: `{!! implode('<br>', $errors->all()) !!}`,
+                        confirmButtonColor: '#d33'
+                    });
+                });
+            </script>
         @endif
 
         <form action="{{ route('foods.store') }}" method="POST">

@@ -9,9 +9,20 @@
         </a>
 
         @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'success',
+                        title: @json(session('success')),
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                });
+            </script>
         @endif
-
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -28,12 +39,10 @@
                         <td>
                             <a href="{{ route('food-categories.edit', $category->id) }}" class="btn btn-warning btn-sm"> <i
                                     class="bx bx-pencil"></i> Edit</a>
-                            <form action="{{ route('food-categories.destroy', $category->id) }}" method="POST"
-                                style="display:inline;">
+                            <form action="{{ route('food-categories.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Are you sure you want to delete this category?');">
+                                <button type="button" class="btn btn-danger btn-sm delete-btn" data-name="{{ $category->name }}">
                                     <i class="bx bx-trash"></i> Delete
                                 </button>
                             </form>
@@ -50,3 +59,30 @@
         {{ $categories->links() }}
     </div>
 @endsection
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = this.closest('form');
+                    const itemName = this.dataset.name || 'this category';
+
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `You won't be able to revert deleting "${itemName}"!`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, delete it!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>

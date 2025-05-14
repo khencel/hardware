@@ -127,7 +127,7 @@ Route::middleware(['auth'])->group(function () {
             'chartLabels',
             'chartData'
         ));
-    });
+    })->name('dashboard.index');
 
     Route::post('/logout', Logout::class)->name('auth.logout');
 

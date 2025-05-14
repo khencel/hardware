@@ -130,8 +130,6 @@ class UserManagementController extends Controller
                     'updated_at' => now(),
                 ]);
             }
-
-            dd('Role assigned/updated successfully.');
         }
 
 

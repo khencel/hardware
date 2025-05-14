@@ -105,17 +105,22 @@ class OrderController extends Controller
         ]);
     
         // Check if order_number exists
-        $existingHoldOrder = Hold::where('order_number', $holdDetails['order_number'])->first();
-    
-        if ($existingHoldOrder) {
-            // Update the existing hold order
-            $existingHoldOrder->update($holdDetails);
-    
-            return response()->json([
-                'message' => 'Hold order updated successfully!',
-                'hold_order' => $existingHoldOrder,
-            ], 200);
+        if (!empty($holdDetails['order_number'])) {
+            $existingHoldOrder = Hold::where('order_number', $holdDetails['order_number'])->first();
+            if ($existingHoldOrder) {
+                // Update the existing hold order
+                $existingHoldOrder->update($holdDetails);
+        
+                return response()->json([
+                    'message' => 'Hold order updated successfully!',
+                    'hold_order' => $existingHoldOrder,
+                ], 200);
+            }
+        }else {
+            // Generate a new order number
+            $holdDetails['order_number'] = 'HOLD-' . time();
         }
+
     
         // Otherwise, create a new hold order
         $newHoldOrder = Hold::create($holdDetails);

@@ -6,10 +6,56 @@
 
 @section('content')
     <div class="container mt-5">
-
         @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'success',
+                        title: @json(session('success')),
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        background: '#f0fff0', // optional light green bg
+                        iconColor: '#28a745',
+                        customClass: {
+                            popup: 'colored-toast'
+                        },
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                });
+            </script>
         @endif
+
+        @if (session('error'))
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: @json(session('error')),
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        background: '#fff0f0', // optional light red bg
+                        iconColor: '#dc3545',
+                        customClass: {
+                            popup: 'colored-toast'
+                        },
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                });
+            </script>
+        @endif
+
 
         <div class="row">
             <div class="col-6">
@@ -78,12 +124,12 @@
                             <a href="{{ route('foods.edit', $food->id) }}" class="btn btn-warning btn-sm">
                                 <i class='bx bx-edit'></i> Edit
                             </a>
-                            <form action="{{ route('foods.destroy', $food->id) }}" method="POST" class="d-inline"
-                                onsubmit="return confirm('Are you sure?')">
+                            <form action="{{ route('foods.destroy', $food->id) }}" method="POST" class="d-inline delete-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm"><i class='bx bx-trash'></i>
-                                    Delete</button>
+                                <button type="button" class="btn btn-danger btn-sm delete-btn" data-name="{{ $food->name }}">
+                                    <i class='bx bx-trash'></i> Delete
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -146,4 +192,33 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+    
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = this.closest('form');
+                    const itemName = this.dataset.name || 'this item';
+    
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: `You won't be able to revert deleting "${itemName}"!`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, delete it!"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Submit the form first, then show success toast
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
+    
 @endsection

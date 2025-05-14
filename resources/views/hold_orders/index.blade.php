@@ -52,10 +52,10 @@
                                 <i class="bx bx-show"></i> View
                         </button>
 
-                        <form action="{{ route('hold.cancel', $report->id) }}" method="POST" style="display: inline;">
+                        <form action="{{ route('hold.cancel', $report->id) }}" method="POST" style="display: inline;" id="cancel-order-form-{{ $report->id }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this order?')">
+                            <button type="button" class="btn btn-danger btn-sm" id="cancel-order-{{ $report->id }}">
                                 <i class="bx bx-x-circle"></i> Cancel
                             </button>
                         </form>
@@ -153,7 +153,42 @@
                     itemsList.appendChild(listItem);
                 });
             });
-        });        
+        });     
+        document.querySelectorAll('.btn-danger').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent the form from submitting immediately
+                
+                const orderId = this.id.replace('cancel-order-', ''); // Extract order ID from button ID
+        
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, cancel it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Use the orderId to find the correct form and submit it
+                        const form = document.getElementById('cancel-order-form-' + orderId);
+                        if (form) {
+                            form.submit();
+                        } else {
+                            console.error('Form not found for order ID:', orderId);
+                        }
+        
+                        Swal.fire({
+                            title: 'Canceled!',
+                            text: 'The order has been canceled.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    }
+                });
+            });
+        });
+               
     </script>
 
 @endsection

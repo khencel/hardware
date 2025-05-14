@@ -13,9 +13,18 @@
             </a>
         </li>
         <li>
-            <a class="dropdown-item d-flex align-items-center gap-2"  href="{{ route('password.change') }}">
+            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('password.change') }}">
                 <i class="bi bi-shield-lock-fill"></i> Change Password
             </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <form action="{{ route('auth.logout') }}" method="POST" id="logoutForm">
+                @csrf
+                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger w-100">
+                    <i class='bx bx-log-out'></i> Log out
+                </button>
+            </form>
         </li>
     </ul>
 </div>

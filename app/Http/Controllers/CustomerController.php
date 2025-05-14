@@ -9,7 +9,7 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        return view('customers.index', ['customers' => Customer::latest()->paginate(5)]);
+        return view('customers.index', ['customers' => Customer::latest()->paginate(10)]);
     }
 
     public function create()

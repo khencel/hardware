@@ -10,19 +10,20 @@ class Login extends Controller
     public function __invoke(Request $request)
     {
         $credentials = $request->validate([
-            'username' => 'required', // Only accept username
-            'password' => 'required', // Password is still required
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
         ]);
-
-        // Attempt to authenticate using the username and password
-        if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
+    
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('food-categories.index')
-                ->withSuccess('You have successfully logged in!');
+    
+            return redirect()
+                ->route('dashboard.index')
+                ->with('success', 'You have successfully logged in!');
         }
-
+    
         return back()->withErrors([
-            'username' => 'Your provided credentials do not match our records.',
+            'username' => 'These credentials do not match our records.',
         ])->onlyInput('username');
     }
 }

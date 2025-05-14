@@ -10,7 +10,16 @@
                     <h1>Welcome {{ $user->firstname.' '.$user->lastname }}</h1>
                 </div>
             </div>
-
+            @if(session('success'))
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Welcome Back!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#3085d6',
+                });
+            </script>
+            @endif
             <div class="row">
                 <div class="col-3">
                     <div class="card text-white bg-primary mb-3">

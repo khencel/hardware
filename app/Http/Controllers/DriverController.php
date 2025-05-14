@@ -67,6 +67,6 @@ class DriverController extends Controller
     public function destroy(Driver $driver)
     {
         $driver->delete();
-        return redirect()->route('drivers.index')->with('success', 'Food deleted successfully.');
+        return redirect()->route('drivers.index')->with('success', 'Driver deleted successfully.');
     }
 }

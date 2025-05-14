@@ -148,16 +148,4 @@
             </li>
         @endif
     @endforeach
-
-    {{-- Logout --}}
-    <form action="{{ route('auth.logout') }}" method="POST" id="logoutForm">
-        @csrf
-        @method('POST')
-        <li class="log_out">
-            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                <i class='bx bx-log-out'></i>
-                <span class="links_name">Log out</span>
-            </a>
-        </li>
-    </form>
 </ul>

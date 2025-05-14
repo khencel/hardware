@@ -90,7 +90,6 @@ ol, ul {
 .has-submenu > .menu-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .bx-chevron-down.arrow {

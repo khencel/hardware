@@ -11,36 +11,6 @@
                 'roles' => [],
             ],
             [
-                'url' => '/items',
-                'name' => 'item',
-                'label' => 'Item Details',
-                'icon' => 'bx bx-food-menu',
-                'roles' => [],
-                'children' => [
-                    [
-                        'url' => '/food-categories',
-                        'name' => 'food-categories',
-                        'label' => 'Categories',
-                        'icon' => 'bx bx-food-menu',
-                        'roles' => [],
-                    ],
-                    [
-                        'url' => '/foods',
-                        'name' => 'foods',
-                        'label' => 'Item',
-                        'icon' => 'bx bx-food-menu',
-                        'roles' => [],
-                    ],
-                ]
-            ],
-            [
-                'url' => '/customers',
-                'name' => 'customers',
-                'label' => 'Customers',
-                'icon' => 'bx bx-user',
-                'roles' => [12],
-            ],
-            [
                 'url' => '/pos',
                 'name' => 'POS',
                 'label' => 'Point of Sale',
@@ -48,25 +18,87 @@
                 'roles' => [],
             ],
             [
-                'url' => '/hold-orders',
-                'name' => 'hold-orders',
-                'label' => 'Hold Orders',
-                'icon' => 'bx bx-purchase-tag-alt',
-                'roles' => [12],
+                'url' => '/items',
+                'name' => 'item',
+                'label' => 'Item',
+                'icon' => 'bx bx-shopping-bag',
+                'roles' => [],
+                'children' => [
+                    [
+                        'url' => '/food-categories',
+                        'name' => 'food-categories',
+                        'label' => 'Categories',
+                        'icon' => 'bx bxs-area',
+                        'roles' => [],
+                    ],
+                    [
+                        'url' => '/foods',
+                        'name' => 'foods',
+                        'label' => 'List',
+                        'icon' => 'bx bx-list-ol',
+                        'roles' => [],
+                    ],
+                ]
             ],
             [
-                'url' => '/quotation-orders',
-                'name' => 'quotation-orders',
-                'label' => 'Quotation',
-                'icon' => 'bx bx-purchase-tag-alt',
-                'roles' => [12],
+                'url' => '/Orders',
+                'name' => 'Orders',
+                'label' => 'Orders',
+                'icon' => 'bx bx-food-menu',
+                'roles' => [],
+                'children' => [
+                    [
+                        'url' => '/hold-orders',
+                        'name' => 'hold-orders',
+                        'label' => 'Hold',
+                        'icon' => 'bx bx-purchase-tag-alt',
+                        'roles' => [12],
+                    ],
+                    [
+                        'url' => '/quotation-orders',
+                        'name' => 'quotation-orders',
+                        'label' => 'Quotation',
+                        'icon' => 'bx bxs-quote-right',
+                        'roles' => [12],
+                    ],
+                    [
+                        'url' => '/reports',
+                        'name' => 'reports',
+                        'label' => 'Reports',
+                        'icon' => 'bx bxs-report',
+                        'roles' => [],
+                    ],
+                ]
             ],
             [
                 'url' => '/users',
                 'name' => 'user-management',
-                'label' => 'User Management',
-                'icon' => 'bx bx-user-circle',
+                'label' => 'User Control',
+                'icon' => 'bx bx-group',
                 'roles' => [12],
+                'children' => [
+                    [
+                        'url' => '/users',
+                        'name' => 'user-management',
+                        'label' => 'User ',
+                        'icon' => 'bx bx-user-circle',
+                        'roles' => [12],
+                    ],
+                    [
+                        'url' => '/customers',
+                        'name' => 'customers',
+                        'label' => 'Customers',
+                        'icon' => 'bx bx-user',
+                        'roles' => [12],
+                    ],
+                    [
+                        'url' => '/drivers',
+                        'name' => 'drivers',
+                        'label' => 'Drivers',
+                        'icon' => 'bx bx-smile',
+                        'roles' => [12],
+                    ],
+                ]
             ],
             [
                 'url' => '/settings',
@@ -75,13 +107,7 @@
                 'icon' => 'bx bx-cog',
                 'roles' => [12],
                 'children' => [
-                    [
-                        'url' => '/drivers',
-                        'name' => 'drivers',
-                        'label' => 'Drivers',
-                        'icon' => 'bx bx-smile',
-                        'roles' => [],
-                    ],
+                   
                     [
                         'url' => '/discounts',
                         'name' => 'discounts',
@@ -94,13 +120,6 @@
                         'name' => 'taxes',
                         'label' => 'Tax',
                         'icon' => 'bx bx-infinite',
-                        'roles' => [],
-                    ],
-                    [
-                        'url' => '/reports',
-                        'name' => 'reports',
-                        'label' => 'Reports',
-                        'icon' => 'bx bxs-report',
                         'roles' => [],
                     ],
                     [

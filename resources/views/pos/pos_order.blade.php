@@ -1069,11 +1069,20 @@
                 const refNumber = document.getElementById('refNumber').value.trim();
                 const customerName = customerNameInput ? customerNameInput.value.trim() : '';
 
-                if (!selectedMethod) {
+                if (!selectedMethod && !isQuotation ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Name is Required',
+                        text: 'Please select a payment method',
+                    });
+                    return;
+                }
+                
+                if (customerName === '') {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Errors',
-                        text: 'Please select a payment method',
+                        text: 'Please Enter Name',
                     });
                     return;
                 }
@@ -1136,6 +1145,10 @@
                 lastOrderDetails = orderDetails;
                 isQuotation = true;
                 document.getElementById('paymentModal').style.display = 'block';
+                const paymentOptions = document.querySelectorAll('.payment-option');
+                paymentOptions.forEach(option => {
+                  option.style.display = 'none';
+                });
             });
 
    

@@ -248,14 +248,19 @@
                 
                 // Assuming response is JSON and contains the order/payment information
                 const data = await response.json();
+                if (data.reports.length === 0) {
+                    Swal.fire({
+                      icon: 'info',
+                      title: 'No reports found',
+                      text: 'No reports found for the selected criteria.',
+                      confirmButtonText: 'Okay'
+                    });
+                    return;
+                  }
+
                 printContent(data.reports, formData);
                 $('#filterModal').modal('hide'); // Close modal after success
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('An error occurred while placing the order.', 'error');
-                $('#filterModal').modal('hide'); // Close modal on error
-            });
         });
         
         function printContent(content, formData) {
@@ -383,7 +388,6 @@
         
                         <!-- Grand Total -->
                         <div class="grand-total">
-                            ${formData.get('user_id') ? `<p>Cashier: ${formData.get('user_id')}</p>` : ''}
                             <h3>Overall Total Sales: ₱${
                                 content.reduce((sum, report) => sum + parseFloat(report.total), 0).toFixed(2)
                             }</h3>

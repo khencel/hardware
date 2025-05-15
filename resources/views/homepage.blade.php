@@ -348,18 +348,23 @@
         $(document).ready(updateDateTime);
     </script>
     <script>
-        document.getElementById('generate-barcode').addEventListener('click', function() {
-            var barcode = generateBarcode();
-            document.getElementById('food_barcode').value = barcode;
-        });
-    
-        function generateBarcode() {
-            var barcode = '';
-            for (var i = 0; i < 13; i++) {
-                barcode += Math.floor(Math.random() * 10); // Random digit
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('generate-barcode');
+            if (btn) {
+              btn.addEventListener('click', function() {
+                var barcode = generateBarcode();
+                document.getElementById('food_barcode').value = barcode;
+              });
+            }
+          });
+          
+          function generateBarcode() {
+            let barcode = '';
+            for (let i = 0; i < 13; i++) {
+              barcode += Math.floor(Math.random() * 10);
             }
             return barcode;
-        }
+          }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

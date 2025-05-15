@@ -37,7 +37,7 @@
      
         <div class="row" style="display: flex; height: 100vh; gap: 1rem; margin: 0;">
             <div id="statusMessage" class="status-message"></div>
-            <div class="col-7" style="flex: 7; display: flex; flex-direction: column; ">
+            <div class="col-6" style="flex: 6; display: flex; flex-direction: column; ">
               
                 <div class="products-section" style="height: 100vh; display: flex; flex-direction: column;">
                     <!-- Barcode Section -->
@@ -61,7 +61,7 @@
                     <div style="display: flex; gap: 2rem; font-family: sans-serif; flex: 1; overflow: hidden;">
                         <!-- Categories -->
                         <div style="flex: 1; overflow-x: hidden; overflow-y: auto; padding-right: 1rem; max-height: 100%;">
-                            <h4 class="text-dark">Categories</h4>
+                            <h4 class="text-dark fs-6 fs-sm-5 fs-md-4 fs-lg-3">Categories</h4>
                             <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
                                 @foreach($categories as $category)
                                     <button 
@@ -76,7 +76,7 @@
                     
                         <!-- Product / Order List Panel -->
                         <div style="flex: 4; display: flex; flex-direction: column; overflow: hidden;">
-                            <h4 class="text-dark" style="flex-shrink: 0;">Products</h4>
+                            <h4 class="text-dark fs-6 fs-sm-5 fs-md-4 fs-lg-3" style="flex-shrink: 0;">Products</h4>
                         
                             <div style="flex: 1; overflow-y: auto;">
                                 <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
@@ -131,7 +131,7 @@
                 
                 
             </div>
-            <div class="col-5" style="flex: 5; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">            
+            <div class="col-6" style="flex: 6; display: flex; flex-direction: column; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">            
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
                         <div class="row mb-3">
@@ -149,7 +149,7 @@
                             </div>
                         </div>
 
-                        <div class="row text-dark">
+                        <div class="row text-dark ">
                             <div class="col-6">
                                 <h2 for="rateTypeSelect" class="form-label text-dark">
                                     <img src="{{ asset('img/icon/delivery-man.png') }}" alt="Price Tag Icon" width="30" height="30"> Delivery Option
@@ -175,8 +175,8 @@
                         </div>
 
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
-                        <table id="cartTable">
-                            <thead class="table-header text-center">
+                        <table id="cartTable" class="fs-6 fs-sm-5 fs-md-4 fs-lg-3">
+                            <thead class="table-header text-center ">
                                 <tr>
                                     <th>Item</th>
                                     <th>Price</th>
@@ -186,13 +186,15 @@
                                     <th>Type</th>
                                 </tr>
                             </thead>
-                            <div id="cartScrollWrapper" style="max-height: 300px; overflow-y: auto;">
-                                <table>
-                                  <tbody id="cartItems">
-                                    <!-- Cart items will be added here -->
-                                  </tbody>
-                                </table>
-                              </div>
+                            <div id="cartScrollWrapper" class="cart-scroll-wrapper">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <tbody id="cartItems">
+                                            <!-- Cart items will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </table>
                         
                         <div class="cart-summary">

@@ -1051,3 +1051,44 @@ button:disabled {
     background-color: #d0e8ff;
     font-weight: bold;
   }
+
+  .category-wrapper {
+    flex: 1 1 auto; /* allows shrinking */
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 1rem;
+    max-height: 100%;
+    min-width: 0; /* prevent overflow weirdness in flexbox */
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
+}
+
+/* Style the category buttons */
+.category-button {
+    background-color: #2196F3;
+    color: white;
+    padding: 0.5rem;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive enhancements */
+@media (max-width: 576px) {
+    .category-button {
+        font-size: 13px;
+        padding: 0.4rem;
+    }
+
+
+}

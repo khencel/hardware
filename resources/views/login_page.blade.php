@@ -1,21 +1,17 @@
 <!DOCTYPE html>
-<!-- Coding By CodingNepal - www.codingnepalweb.com -->
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hardware</title>
+
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
     <script src="{{ asset('js/bootstrap.js') }}"></script>
-    <style>
-        .error-message {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-    </style>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -33,7 +29,6 @@
             <div class="input-field">
                 <input type="text" name="username" value="{{ old('username') }}" required>
                 <label>Enter your username</label>
-                
             </div>
 
             <!-- Password Field -->
@@ -42,27 +37,33 @@
                 <label>Enter your password</label>
             </div>
 
-            @error('username')
-                    <div class="error-message">{{ $message }}</div>
-            @enderror
-            @error('password')
-                <div class="error-message">{{ $message }}</div>
-            @enderror
-
             <!-- Remember Me and Forgot Password Section -->
             <div class="forget">
                 <label for="remember">
                     <input type="checkbox" id="remember" name="remember">
                     <p>Remember me</p>
                 </label>
-                <a href="#">Forgot password?</a>
+                {{--  <a href="#">Forgot password?</a>  --}}
             </div>
 
             <!-- Submit Button -->
             <button type="submit">Log In</button>
         </form>
-
     </div>
+
+    <!-- Show SweetAlert errors -->
+    @if ($errors->any())
+        <script>
+            let errorMessages = `{!! implode('<br>', $errors->all()) !!}`;
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                html: errorMessages,
+                confirmButtonText: 'OK'
+            });
+        </script>
+    @endif
+
 </body>
 
 </html>

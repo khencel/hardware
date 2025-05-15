@@ -1081,6 +1081,14 @@
             document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
                 const refNumber = document.getElementById('refNumber').value.trim();
                 const customerName = customerNameInput ? customerNameInput.value.trim() : '';
+                const cart_order_number = cart.length
+                ? {
+                    ...cart[0],
+                    customer_name: cart[0].customerName,
+                    order_number: cart[0].order_number,
+                }
+                : null;
+            
 
                 if (!selectedMethod && !isQuotation ) {
                     Swal.fire({
@@ -1121,17 +1129,16 @@
                     return;
                 }
 
-            
-    
+
                 const orderDetails = createOrderDetails();
                 orderDetails.payment_method = selectedMethod;
+                orderDetails.order_number = cart_order_number?.order_number || generateOrderNumber();
                 orderDetails.reference_number = selectedMethod === 'Cash' ? null : refNumber;
-                orderDetails.customer_name = selectedMethod === 'Credit' ? 
-                document.getElementById('customerSelect').options[document.getElementById('customerSelect').selectedIndex].text : 
-                customerName;
+                orderDetails.customer_name = selectedMethod === 'Credit'
+                ? document.getElementById('customerSelect').options[document.getElementById('customerSelect').selectedIndex].text
+                : (cart_order_number?.customer_name || customerName);
                 customerNameInputed = customerName;
                 lastOrderDetails = orderDetails;
-
                 if(isQuotation){
                     generateQuotation(orderDetails) ;
                 }else{
@@ -1219,8 +1226,8 @@
                 orderDetails.reason = reason;
                 orderDetails.customer_name = customerName;  // Add customer name to orderDetails
                 lastOrderDetails = orderDetails;
-                orderDetails.order_number = cart[0].order_number;
-              
+                orderDetails.order_number = generateOrderNumber();
+            
                 saveHoldOrder(orderDetails);
                 Swal.fire({
                     toast: true,
@@ -1289,7 +1296,7 @@
             actualPrintBtn.addEventListener('click', () => {
                 const receiptContent = document.getElementById('receiptContent');
                 const orderDetails = createOrderDetails();
-                
+                console.log('Order Details:', orderDetails);
                 // Check if receiptContent is valid
                 if (!receiptContent) {
                     showMessage('No receipt content found', 'error');
@@ -1548,7 +1555,15 @@
             const selectedCustomerId = customerSelect.value;
             const selectedOption = customerSelect.options[customerSelect.selectedIndex];
             const customerName = selectedOption?.dataset?.name || 'N/A';
-            
+
+            const cart_order_number = cart.length
+            ? {
+                ...cart[0],
+                customer_name: cart[0].customerName,
+                order_number: cart[0].order_number,
+            }
+            : null;
+
             //delivery 
             const deliveryOption = document.getElementById('deliveryOption')?.value || 'pickup';
             const subtotal = parseCurrency(subtotalEl.textContent);
@@ -1582,11 +1597,13 @@
 
             const referenceNumber = selectedMethod !== 'Cash' ? document.getElementById('refNumber').value.trim() : null;
             const customerNameX = selectedMethod === 'Credit' ? customerName :  customerNameInputed;
+
+            console.log('Customer Name:', cart_order_number);
             return {
                 customer_id: 1,
                 customer_name: customerNameX,
                 cashier_id: {{ $user->id }},
-                order_number: generateOrderNumber(),
+            order_number: cart_order_number?.order_number ?? generateOrderNumber(),
                 date: new Date().toISOString(),
                 items: itemsWithCategory,
                 subtotal: subtotal,
@@ -1779,7 +1796,7 @@
         
             fetchOrderData(`/api/quotation/${selectedQuotationOrderId}`, 'quotation');
         });
-        
+
         function fetchOrderData(url, orderType = 'order') {
             fetch(url)
                 .then(async (response) => {

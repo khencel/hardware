@@ -41,6 +41,7 @@ class OrderController extends Controller
                 'message' => 'Customer not found.',
             ], 404);
         }
+
     
         // Set rate_type to null (if needed, you can update this later)
         $orderDetails['rate_type'] = 'null';
@@ -60,7 +61,14 @@ class OrderController extends Controller
       
         // Save the order to the database
         $order = Order::create($orderDetails);
-    
+        
+        // Delete the quotation if it exists
+        if (!empty($orderDetails['order_number'])) {
+            DB::transaction(function () use ($orderDetails) {
+                Quotation::where('order_number', $orderDetails['order_number'])->delete();
+                Hold::where('order_number', $orderDetails['order_number'])->delete();
+            });
+        }
         // Reduce food stock based on the order items
         foreach ($orderDetails['items'] as $item) {
             $food = Food::find($item['id']);
@@ -88,6 +96,7 @@ class OrderController extends Controller
     
     public function holdOrders(Request $request)
     {
+        
         $holdDetails = $request->only([
             'customer_id',
             'cashier_id',
@@ -116,9 +125,6 @@ class OrderController extends Controller
                     'hold_order' => $existingHoldOrder,
                 ], 200);
             }
-        }else {
-            // Generate a new order number
-            $holdDetails['order_number'] = 'HOLD-' . time();
         }
 
     
@@ -174,7 +180,7 @@ class OrderController extends Controller
     private function getOrderById($modelClass, $id)
     {
         $order = $modelClass::with(['cashier', 'driver'])->find($id);
-        
+
         if (!$order) {
             return response()->json([
                 'message' => 'Order not found.',

@@ -135,11 +135,23 @@
                 <div class="cart-table-container">
                     <div class="cart-section cart-scroll">
                         <div class="row mb-3">
-                            <div class="col-12">
+                            <div class="col-6">
                                 <h2 for="HoldOderSelect" class="form-label text-dark"><img src="{{ asset('img/icon/hold.png') }}" alt="Barcode Icon" width="30" height="30"> Hold Order</h2>
                                 <select id="HoldOderSelect" class="form-select" style="width: 100%;">
                                     <option value="">Choose order Number</option>
                                     @foreach($holdOrder as $order)
+                                        <option value="{{ $order->id }}"
+                                                data-name="{{ $order->customer_name }}">
+                                            {{ $order->customer_name}} (order no : {{ $order->order_number }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <h2 for="QuotationSelect" class="form-label text-dark"><img src="{{ asset('img/icon/quotation.png') }}" alt="Barcode Icon" width="30" height="30">Quotation</h2>
+                                <select id="QuotationSelect" class="form-select" style="width: 100%;">
+                                    <option value="">Choose Quotation Number</option>
+                                    @foreach($quotationOrder as $order)
                                         <option value="{{ $order->id }}"
                                                 data-name="{{ $order->customer_name }}">
                                             {{ $order->customer_name}} (order no : {{ $order->order_number }})
@@ -433,6 +445,7 @@
         let driverId = null;
         let driverName = null;
         let selectedHoldOrderId = null;
+        let selectedQuotationOrderId = null;
         let isQuotation = false;
         let isHold = false;
         let selectedMethod = "";
@@ -1232,6 +1245,8 @@
                 if (holdOrderSelect) {
                     holdOrderSelect.selectedIndex = 0; // Reset to default "Choose order Number"
                 }
+
+                
             });
             // Function to save hold order
             function saveHoldOrder(orderDetails) {
@@ -1746,30 +1761,43 @@
 
 
         document.getElementById('HoldOderSelect').addEventListener('change', function () {
-            selectedHoldOrderId = this.value;
-
-            getHoldOrderById(selectedHoldOrderId);
+            const selectedHoldOrderId = this.value;
+        
+            // Reset QuotationSelect
+            const quotationSelect = document.getElementById('QuotationSelect');
+            if (quotationSelect) quotationSelect.value = '';
+        
+            fetchOrderData(`/api/hold-orders/${selectedHoldOrderId}`, 'hold order');
         });
-
-        function getHoldOrderById(orderId) {
-            fetch(`/api/hold-orders/${orderId}`)
+        
+        document.getElementById('QuotationSelect').addEventListener('change', function () {
+            const selectedQuotationOrderId = this.value;
+        
+            // Reset HoldOderSelect
+            const holdSelect = document.getElementById('HoldOderSelect');
+            if (holdSelect) holdSelect.value = '';
+        
+            fetchOrderData(`/api/quotation/${selectedQuotationOrderId}`, 'quotation');
+        });
+        
+        function fetchOrderData(url, orderType = 'order') {
+            fetch(url)
                 .then(async (response) => {
                     if (!response.ok) {
-                        showMessage('Could not retrieve hold order', 'error');
+                        showMessage(`Could not retrieve ${orderType}`, 'error');
                         return;
                     }
         
                     const data = await response.json();
-
+        
                     const customerSelect = document.getElementById('customerSelect');
                     if (customerSelect && data.customer_id) {
                         customerSelect.value = data.customer_id;
-                        // Optional: trigger change event if needed
                         customerSelect.dispatchEvent(new Event('change'));
                     }
         
                     cart = [];
-              
+        
                     data.items.forEach(item => {
                         cart.push({
                             id: item.id,
@@ -1781,13 +1809,12 @@
                             order_number: data.order_number,
                         });
                     });
-
-                    updateCart(); 
         
+                    updateCart();
                 })
                 .catch(error => {
-                    console.error('GET hold order failed:', error);
-                    showMessage('Error fetching hold order', 'error');
+                    console.error(`GET ${orderType} failed:`, error);
+                    showMessage(`Error fetching ${orderType}`, 'error');
                 });
         }
     </script>

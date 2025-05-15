@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Driver;
 use App\Models\Customer;
 use App\Models\Discount;
+use App\Models\Quotation;
 use App\Models\FoodCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GetRoles;
@@ -72,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
         $categories = FoodCategory::latest()->get();
         $customers = Customer::latest()->get();
         $holdOrder = Hold::latest()->get();
+        $quotationOrder = Quotation::latest()->get();
         // if no tax is set, set default tax to 12%
         $taxes = optional(Tax::where('is_active', true)->first())->percentage ?? 12;
         $discounts = Discount::latest()->get();
@@ -81,7 +83,8 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->back()->with('error', 'No products available.');
         }
 
-        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts','drivers','holdOrder'));
+        $quotationOrder = Quotation::latest()->get();
+        return view('pos.pos_order', compact('products', 'user', 'categories', 'customers', 'taxes','discounts','drivers','holdOrder','quotationOrder'));
     });
 
 

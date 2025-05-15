@@ -132,6 +132,7 @@ Route::post('/hold-orders', [OrderController::class, 'holdOrders']);
 
 //quotation
 Route::post('/quotation', [OrderController::class, 'createQuotation']);
+Route::get('/quotation/{id}', [OrderController::class, 'getQuotationOrderById']);
 
 //reports
 Route::post('/print-reports', [ReportController::class, 'printReport'])->name('reports.print');

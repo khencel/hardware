@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Quotation extends Model
 {
     use HasFactory;
+
     protected $guarded = [];
 
     protected $casts = [
@@ -30,4 +31,5 @@ class Quotation extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
 }

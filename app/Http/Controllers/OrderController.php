@@ -163,16 +163,25 @@ class OrderController extends Controller
 
     public function getHoldOrderById($id)
     {
-        $holdOrder = Hold::with(['cashier', 'driver'])->find($id);
+        return $this->getOrderById(Hold::class, $id);
+    }
 
-        if (!$holdOrder) {
+    public function getQuotationOrderById($id)
+    {
+        return $this->getOrderById(Quotation::class, $id);
+    }
+
+    private function getOrderById($modelClass, $id)
+    {
+        $order = $modelClass::with(['cashier', 'driver'])->find($id);
+        
+        if (!$order) {
             return response()->json([
-                'message' => 'Hold order not found.',
+                'message' => 'Order not found.',
             ], 404);
         }
 
-       
-        return response()->json($holdOrder);
+        return response()->json($order);
     }
 
 

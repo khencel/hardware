@@ -149,31 +149,6 @@
                             </div>
                         </div>
 
-                        <div class="row text-dark ">
-                            <div class="col-6">
-                                <h2 for="rateTypeSelect" class="form-label text-dark">
-                                    <img src="{{ asset('img/icon/delivery-man.png') }}" alt="Price Tag Icon" width="30" height="30"> Delivery Option
-                                </h2>
-                                <select id="deliveryOption" class="form-select" aria-label="Select  Option">
-                                    <option value="pickup">Pickup</option>
-                                    <option value="delivery">Delivery</option>
-                                </select>
-                            </div>
-                            <div class="col-6" id="driverSelectionContainer" style="display: none;">
-                                <h2 for="rateTypeSelect" class="form-label text-dark">
-                                    <img src="{{ asset('img/icon/fast-delivery.png') }}" alt="Price Tag Icon" width="30" height="30"> Choose a Driver
-                                </h2>
-                                <select id="driverSelect" class="form-select" aria-label="Select Driver">
-                                    <option value="">Select Driver</option>
-                                    @foreach($drivers as $driver)
-                                    <option value="{{ $driver->id }}" data-name="{{ $driver->name }}">
-                                        {{ $driver->name }}
-                                    </option>
-                                @endforeach
-                                </select>
-                            </div>
-                        </div>
-
                         <h2><img src="{{ asset('img/icon/shopping-cart.png') }}" alt="Barcode Icon" width="30" height="30"> Shopping Cart</h2>
                         <table id="cartTable" class="fs-6 fs-sm-5 fs-md-4 fs-lg-3">
                             <thead class="table-header text-center ">
@@ -327,8 +302,7 @@
           <button id="changeProductType" class="apply-discount-btn mt-4">🔁 Update This Item</button>
         </div>
       </div>
-      
-      {{--  hold modal  --}}
+
       {{-- Hold Modal --}}
         <div id="holdModal" class="modal">
             <div class="modal-content">
@@ -401,6 +375,35 @@
                     </select>
                     <h4 id="balanceDisplay" style="display: none; color: black;">Remaining Balance: 0</h4>
                 </div>
+
+                <!-- Delivery Option -->
+                <div class="row mt-3">
+                  <div class="col-6 mb-3">
+                    <label for="deliveryOption" class="form-label fw-bold text-dark d-flex align-items-center gap-2">
+                      <img src="{{ asset('img/icon/delivery-man.png') }}" alt="Delivery Icon" width="30" height="30">
+                      Delivery Option
+                    </label>
+                    <select id="deliveryOption" class="form-select">
+                      <option value="pickup">Pickup</option>
+                      <option value="delivery">Delivery</option>
+                    </select>
+                  </div>
+            
+                  <!-- Driver Selection -->
+                  <div class="col-6 mb-3" id="driverSelectionContainer" style="display: none;">
+                    <label for="driverSelect" class="form-label fw-bold text-dark d-flex align-items-center gap-2">
+                      <img src="{{ asset('img/icon/fast-delivery.png') }}" alt="Driver Icon" width="30" height="30">
+                      Choose a Driver
+                    </label>
+                    <select id="driverSelect" class="form-select">
+                      <option value="">Select Driver</option>
+                      @foreach($drivers as $driver)
+                        <option value="{{ $driver->id }}" data-name="{{ $driver->name }}">{{ $driver->name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+              
         
                 <!-- Confirm Button -->
                 <div class="mt-4">
@@ -460,6 +463,8 @@
         const totalEl = document.getElementById('total');
         const checkoutBtn = document.getElementById('checkoutBtn');
         const printReceiptBtn = document.getElementById('printReceiptBtn');
+        const printQuotationBtn  = document.getElementById("printQuotationBtn");
+        const printHoldBtn = document.getElementById('printHoldBtn');
         const statusMessage = document.getElementById('statusMessage');
         const receiptModal = document.getElementById('receiptModal');
         const receiptContent = document.getElementById('receiptContent');
@@ -468,6 +473,7 @@
         const customer = document.getElementById('customerSelect');
         const rateType = document.getElementById('rateTypeSelect');
         const taxPercentage = {{ $taxes }};
+        const functionbuttons = [printReceiptBtn, printQuotationBtn, printHoldBtn];
 
         const paymentOptions = document.querySelectorAll('.payment-option');
         const customerNameInput = document.getElementById('customerName');
@@ -487,10 +493,16 @@
         function init() {
             setupBarcodeInput();
             setupReceiptFunctionality();
-    
+            setButtonsDisabledState(functionbuttons, true);      // disable
         }
         
-
+   
+        function setButtonsDisabledState(buttons, isDisabled) {
+            functionbuttons.forEach(btn => {
+              if (btn) btn.disabled = isDisabled;
+            });
+          }
+          
         document.addEventListener('DOMContentLoaded', () => {
             updateCart();
             
@@ -529,7 +541,12 @@
                 }
             });
             } else {
-              alert('Incorrect password.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Incorrect password.',
+                });
+                return;
             }
           });
           
@@ -620,6 +637,7 @@
 
                 // Auto-add to cart with Selling Price on click
                 addToCart(product, product.sellingPrice, 'Selling Price');
+                setButtonsDisabledState(functionbuttons, false); // enable
             });
         });
 
@@ -741,7 +759,11 @@
             const productCard = document.querySelector(`.product-card[data-id="${product.id}"]`);
             let currentStock = parseInt(productCard.getAttribute('data-quantity'));
             if (currentStock <= 0) {
-                alert('This product is out of stock.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'This product is out of stock.',
+                });
                 return;
             }
         
@@ -773,7 +795,7 @@
             }
 
             
-        
+            setButtonsDisabledState(functionbuttons, false); // enable
             updateCart();
             closeModal();
         }
@@ -792,8 +814,10 @@
 
 
             if (cart.length === 0) {
+                setButtonsDisabledState(functionbuttons, true);
                 cartItems.innerHTML = `<tr><td colspan="5" style="text-align: center;">🛒 Your cart is empty</td></tr>`;
             } else {
+                setButtonsDisabledState(functionbuttons, false);
                 cart.forEach(item => {
                     const total = item.price * item.quantity;
 
@@ -910,7 +934,6 @@
                 }
             }
 
-            if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
 
         // Remove item from cart
@@ -920,13 +943,12 @@
             if (itemToRemove) {
                 cart.push(itemToRemove);
             }
+
             const itemToRemoveIndex = cart.findIndex(item => item.id === itemId);
             if (itemToRemoveIndex !== -1) {
                 cart.splice(itemToRemoveIndex, 1);
             }
             updateCart();
-
-            if (printReceiptBtn) printReceiptBtn.disabled = true;
         }
         
         // Discount Checkbox
@@ -956,7 +978,11 @@
                 // Validate: Check if the discount is greater than the subtotal
                 const subtotal = parseCurrency(subtotalEl.textContent); 
                 if (selectedDiscountValue > subtotal) {
-                    alert('Discount cannot be greater than the subtotal price.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Discount cannot be greater than the subtotal price.',
+                    });
                     selectedDiscountType = 'none'; 
                     selectedDiscountValue = 0; 
                     updateTotals();

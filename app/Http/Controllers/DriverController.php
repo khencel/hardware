@@ -2,8 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tax;
+use App\Models\Food;
+use App\Models\Hold;
+use App\Models\Order;
 use App\Models\Driver;
+use App\Models\Customer;
+use App\Models\Discount;
+use App\Models\Quotation;
+use App\Models\FoodCategory;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\User;
 
 class DriverController extends Controller
 {
@@ -68,5 +78,26 @@ class DriverController extends Controller
     {
         $driver->delete();
         return redirect()->route('drivers.index')->with('success', 'Driver deleted successfully.');
+    }
+
+    public function counts()
+    {
+        $data = [
+            'countHold' => Hold::count(),
+            'countQuotation' => Quotation::count(),
+            'countCustomer' => Customer::count(),
+            'countDriver' => Driver::count(),
+            'countFood' => Food::count(),
+            'countCategory' => FoodCategory::count(),
+            'countDiscount' => Discount::count(),
+            'countTax' => Tax::count(),
+            'countOrder' => Order::count(),
+            'countUser' => User::count(),
+        ];
+    
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+        ]);
     }
 }

@@ -140,7 +140,7 @@
         @if (empty($route['roles']) || collect($userRoles)->intersect($route['roles'])->isNotEmpty())
             <li class="{{ !empty($route['children']) ? 'has-submenu' : '' }}">
                 <a href="{{ empty($route['children']) ? url($route['url']) : '#' }}" 
-                   class="menu-link {{ request()->is(ltrim($route['url'], '/')) ? 'active' : '' }}">
+                class="menu-link {{ request()->is(ltrim($route['url'], '/')) ? 'active' : '' }}">
                     <i class="{{ $route['icon'] }}"></i>
                     <span class="links_name">{{ $route['label'] }}</span>
                     @if (!empty($route['children']))
@@ -156,15 +156,75 @@
                                     <a href="{{ url($child['url']) }}" 
                                     class="{{ request()->is(ltrim($child['url'], '/')) ? 'active' : '' }}">
                                         <i class="{{ $child['icon'] ?? 'bx bx-dot' }}"></i>
-                                        <span class="links_name">{{ $child['label'] }}</span>
+                                        <span class="links_name">
+                                            {{ $child['label'] }}
+
+                                            @php
+                                                $badgeMap = [
+                                                    'hold-orders' => 'hold-count',
+                                                    'quotation-orders' => 'quotation-count',
+                                                    'foods' => 'list-count',
+                                                    'food-categories' => 'list-categories',
+                                                    'customers' => 'customer-count',
+                                                    'user-management' => 'user-count',
+                                                    'drivers' => 'driver-count',
+                                                    'discounts' => 'discount-count',
+                                                    'taxes' => 'tax-count',
+                                                ];
+                                            @endphp
+
+                                            @if (isset($badgeMap[$child['name']]))
+                                                <span class="badge {{ $badgeMap[$child['name']] }}" style="display:none;">0</span>
+                                            @endif
+                                        </span>
                                     </a>
                                 </li>
                             @endif
                         @endforeach
                     </ul>
                 @endif
-            
             </li>
         @endif
     @endforeach
+
 </ul>
+
+    <script>
+        async function fetchCountsAndUpdateBadges() {
+        try {
+            const response = await fetch('/api/counts');
+            if (!response.ok) throw new Error('Failed to fetch counts');
+    
+            const result = await response.json();
+            if (!result.status) throw new Error('API returned an error');
+    
+            const counts = result.data;
+    
+            // Map badge classes to their count keys
+            const badgeMapping = {
+                'hold-count': counts.countHold,
+                'quotation-count': counts.countQuotation,
+                'list-count': counts.countFood,
+                'list-categories': counts.countCategory,
+                'customer-count': counts.countCustomer,
+                'driver-count': counts.countDriver,
+                'discount-count': counts.countDiscount,
+                'tax-count': counts.countTax,
+                'user-count': counts.countUser,
+            };
+    
+            Object.entries(badgeMapping).forEach(([className, count]) => {
+            document.querySelectorAll(`.badge.${className}`).forEach(span => {
+                span.textContent = count ?? 0;
+                span.style.display = count > 0 ? 'inline-block' : 'none';
+            });
+            });
+        } catch (error) {
+            console.error('Error fetching counts:', error);
+        }
+        }
+    
+        document.addEventListener('DOMContentLoaded', fetchCountsAndUpdateBadges);
+    </script>
+  
+    

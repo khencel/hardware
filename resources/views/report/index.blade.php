@@ -88,6 +88,10 @@
                                 @if(isset($report->discount))
                                     data-discount="₱{{ $report->discount }}"
                                 @endif
+
+                                data-payment_method="{{ $report->payment_method }}"
+                                data-subtotal="{{ $report->subtotal }}"
+                                data-tax="{{ $report->tax }}"
                             >
                                 <i class="bx bx-show"></i> View
                         </button>
@@ -125,11 +129,14 @@
                     <h6>Option: <span id="modal-delivery-option"></span></h6>
                     <h6>Driver Name: <span id="modal-driver"></span></h6>
                     <h6>Discount: <span id="modal-discount"></span></h6>
+                    <h6>Payment Method: <span id="modal-payment-method"></span></h6>
+                    <h6>Subtotal: <span id="modal-subtotal"></span></h6>
+                    <h6>Tax: <span id="modal-tax"></span></h6>
                     <h6>Total: <span id="modal-total"></span></h6>
                     <h6>Date: <span id="modal-date"></span></h6>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="reprintBtn">🖨️ Reprint</button>
                 </div>
             </div>
         </div>
@@ -175,6 +182,8 @@
     <iframe id="printFrame" style="display: none;"></iframe>
 
     <script>
+        let currentReportData = null;
+        let isReprint = false;
         document.querySelectorAll('.view-report-btn').forEach(button => {
             button.addEventListener('click', function() {
                 // Get data attributes from the clicked button
@@ -186,10 +195,13 @@
                 const category = JSON.parse(this.getAttribute('data-category')); // Parse category
                 const total = this.getAttribute('data-total');
                 const date = this.getAttribute('data-date');
-                const driver = this.getAttribute('data-driver') || 'N/A';  // Handle missing driver
-                const discount = this.getAttribute('data-discount') || 'N/A';  // Handle missing discount
-                const deliveryOption = this.getAttribute('data-delivery-option') || 'N/A';  // Handle missing delivery option
-                
+                const driver = this.getAttribute('data-driver') || 'N/A'; 
+                const discount = this.getAttribute('data-discount') || 'N/A'; 
+                const deliveryOption = this.getAttribute('data-delivery-option') || 'N/A'; 
+                const paymentMethod = this.getAttribute('data-payment_method') || 'N/A'; 
+                const subtotal = this.getAttribute('data-subtotal') || 'N/A'; 
+                const tax = this.getAttribute('data-tax') || 'N/A'; 
+
                 // Set values in the modal
                 document.getElementById('modal-customer').innerText = customer;
                 document.getElementById('modal-cashier').innerText = cashier;
@@ -200,6 +212,9 @@
                 document.getElementById('modal-driver').innerText = driver;
                 document.getElementById('modal-discount').innerText = discount;
                 document.getElementById('modal-delivery-option').innerText = deliveryOption;
+                document.getElementById('modal-payment-method').innerText = paymentMethod;
+                document.getElementById('modal-subtotal').innerText = subtotal;
+                document.getElementById('modal-tax').innerText = tax;
         
                 // Populate item categories
                 const itemCategoryElement = document.getElementById('modal-itemcategory');
@@ -222,10 +237,39 @@
                     }
                     itemsList.appendChild(listItem);
                 });
+
+                currentReportData = {
+                    customer_name: customer,
+                    cashier: { firstname: cashier.split(' ')[0], lastname: cashier.split(' ')[1] },
+                    order_number: order,
+                    rate_type: rateType,
+                    items: items,
+                    category: category,
+                    total: total.replace('₱', ''),
+                    date: new Date(date),
+                    delivery_option: deliveryOption,
+                    driver: driver !== 'N/A' ? { name: driver } : null,
+                    discount: discount !== 'N/A' ? discount.replace('₱', '') : null,
+                    payment_method: paymentMethod,
+                    subtotal: subtotal.replace('₱', ''),
+                    tax: tax.replace('₱', '')
+                };
             });
-        });        
-    </script>
-    <script>
+        });       
+        
+        document.getElementById('reprintBtn').addEventListener('click', function () {
+            if (currentReportData) {
+                printContent([currentReportData], null, true);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No report data available for reprinting.',
+                    confirmButtonText: 'Okay'
+                });
+            }
+        });
+
         document.getElementById('applyFilterButton').addEventListener('click', function () {
             // Get form data
             let formData = new FormData(document.getElementById('filterForm'));
@@ -257,13 +301,14 @@
                     });
                     return;
                   }
+                  
 
-                printContent(data.reports, formData);
+                printContent(data.reports, formData, false);
                 $('#filterModal').modal('hide'); // Close modal after success
             })
         });
         
-        function printContent(content, formData) {
+        function printContent(content, formData, rePrint) {
             // Get the start and end dates from the content
             const startDate = new Date(content[0].date).toLocaleString(); // Assuming first report has start date
             const endDate = new Date(content[content.length - 1].date).toLocaleString(); // Assuming last report has end date
@@ -272,7 +317,7 @@
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             document.body.appendChild(iframe);
-        
+   
             const doc = iframe.contentWindow.document;
             doc.open();
             doc.write(`
@@ -352,53 +397,112 @@
                     </style>
                 </head>
                 <body>
-                    <div class="receipt">
-                        ${content.map(report => `
+                   <body>
+                        <div class="receipt-container">
+                            ${content.map(report => `
                             <div class="receipt">
                                 <div class="receipt-header">
+                                ${rePrint ? `
+                                    <h2>STORE NAME</h2>
+                                    <p>123 Main Street</p>
+                                    <p>City, State 12345</p>
+                                    <p>Tel: (123) 456-7890</p>
+                                    <p>--------------------------------</p>
+                                    <p>${report.order_number}</p>
+                                    <p>Date: ${new Date(report.date).toLocaleDateString()}</p>
+                                    <p>Time: ${new Date(report.date).toLocaleTimeString()}</p>
+                                    <p>Option: ${report.delivery_option}</p>
+                                    ${report.delivery_option === 'delivery' ? `<p>Driver Name: ${report.driver_name || (report.driver?.name || 'N/A')}</p>` : ''}
+                                    <p>--------------------------------</p>
+                                ` : `
                                     <p>Order Number: ${report.order_number}</p>
                                     <p>Date: ${new Date(report.date).toLocaleString()}</p>
+                                `}
                                 </div>
-                                <div class="order-info">
-                                    <p>Customer: ${report.customer_name}</p>
-                                    <p>Cashier: ${report.cashier.firstname} ${report.cashier.lastname}</p>
-                                    ${report.delivery_option === 'delivery' ? `
-                                        <p>Delivery Option: ${report.delivery_option}</p>
-                                        <p>Driver Name: ${report.driver ? report.driver.name : 'N/A'}</p>
-                                    ` : ''}
-                                    
-                                    <div class="items">
-                                        <h4>Items:</h4>
+
+                                ${rePrint ? `
+                                <div class="receipt-items">
+                                    <div class="receipt-item text-dark">
+                                    <div class="item-details">
                                         ${report.items.map(item => `
-                                            <div class="item-row">
-                                                <span>${item.name}</span> - <span>₱${item.price}</span>
-                                            </div>
+                                        <div class="item-row">
+                                            <span class="item-quantity">${item.quantity}x</span>
+                                            <span>${item.name}</span>
+                                        </div>
+                                        <div class="item-total">(₱${(item.price * item.quantity).toFixed(2)})</div>
                                         `).join('')}
                                     </div>
-                                    
-                                    <div class="items">
-                                        <h4>Transaction Process</h4>
-                                        ${report.discount && report.discount !== '0' ? `<p>Discount: ₱${report.discount}</p>` : ''}
-                                        <p>Payment Method: ${report.payment_method}</p>
-                                        <p>Total: ₱${report.total}</p>
                                     </div>
                                 </div>
+
+                                <div class="receipt-summary">
+                                    <div class="summary-row">
+                                        <span>Subtotal:</span>
+                                        <span>₱${parseFloat(report.subtotal).toFixed(2)}</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Tax (7%):</span>
+                                        <span>₱${parseFloat(report.tax).toFixed(2)}</span>
+                                    </div>
+                                    <div class="receipt-total text-left">
+                                        <span>Total:</span>
+                                        <span>₱${parseFloat(report.total).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                ` : `
+                                <div class="order-info">
+                                    <p>Customer: ${report.customer_name}</p>
+                                    <p>Cashier: ${report.cashier?.firstname || ''} ${report.cashier?.lastname || ''}</p>
+                                    ${report.delivery_option === 'delivery' ? `
+                                    <p>Delivery Option: ${report.delivery_option}</p>
+                                    <p>Driver Name: ${report.driver?.name || 'N/A'}</p>
+                                    ` : ''}
+
+                                    <div class="items">
+                                    <h4>Items:</h4>
+                                    ${report.items.map(item => `
+                                        <div class="item-row">
+                                        <span>${item.name}</span> - <span>₱${item.price.toFixed(2)}</span>
+                                        </div>
+                                    `).join('')}
+                                    </div>
+
+                                    <div class="items">
+                                    <h4>Transaction Process</h4>
+                                    ${report.discount && report.discount !== '0' ? `<p>Discount: ₱${parseFloat(report.discount).toFixed(2)}</p>` : ''}
+                                    <p>Payment Method: ${report.payment_method || 'N/A'}</p>
+                                    <p>Total: ₱${parseFloat(report.total).toFixed(2)}</p>
+                                    </div>
+                                </div>
+                                `}
                             </div>
-                        `).join('')}
-        
-                        <!-- Grand Total -->
-                        <div class="grand-total">
-                            <h3>Overall Total Sales: ₱${
-                                content.reduce((sum, report) => sum + parseFloat(report.total), 0).toFixed(2)
-                            }</h3>
+                            `).join('')}
+
+                            ${rePrint === false ? `
+                            <div class="grand-total">
+                                <h3>Overall Total Sales: ₱${content.reduce((sum, report) => sum + parseFloat(report.total), 0).toFixed(2)}</h3>
+                            </div>
+                            ` : ''}
+
+                            ${rePrint ? `
+                            ${content.map(report => `
+                                <div class="receipt-footer text-dark">
+                                <p>Thank you, ${report.customer_name}!</p>
+                                <p>For your order of ${report.items.length} item${report.items.length > 1 ? 's' : ''}</p>
+                                <p>--------------------------------</p>
+                                <p>Payment Method: ${report.payment_method || 'N/A'}</p>
+                                <p>--------------------------------</p>
+                                <p>Please come again</p>
+                                </div>
+                            `).join('')}
+                            ` : `
+                            <!-- Footer with Date Range -->
+                            <div class="receipt-footer">
+                                <p>This includes sales from ${startDate} to ${endDate}</p>
+                            </div>
+                            `}
                         </div>
-                    </div>
-        
-                    <!-- Footer with Date Range -->
-                    <div class="receipt-footer">
-                        <p>This includes sales from ${startDate} to ${endDate}</p>
-                    </div>
-                </body>
+                    </body>
                 </html>
             `);
             doc.close();
@@ -414,9 +518,6 @@
                 }, 1000);
             };
         }
-        
-        
-        
         
     </script>
 @endsection

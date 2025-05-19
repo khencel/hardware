@@ -1598,12 +1598,11 @@
             const referenceNumber = selectedMethod !== 'Cash' ? document.getElementById('refNumber').value.trim() : null;
             const customerNameX = selectedMethod === 'Credit' ? customerName :  customerNameInputed;
 
-            console.log('Customer Name:', cart_order_number);
             return {
                 customer_id: 1,
                 customer_name: customerNameX,
                 cashier_id: {{ $user->id }},
-            order_number: cart_order_number?.order_number ?? generateOrderNumber(),
+                order_number: cart_order_number?.order_number ?? generateOrderNumber(),
                 date: new Date().toISOString(),
                 items: itemsWithCategory,
                 subtotal: subtotal,

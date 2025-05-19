@@ -9,6 +9,7 @@ use App\Http\Controllers\FoodController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeisureController;
 use App\Http\Controllers\PackageController;
@@ -18,8 +19,8 @@ use App\Http\Controllers\HistoryLogController;
 use App\Http\Controllers\RestoTableController;
 use App\Http\Controllers\Rooms\RoomController;
 use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\FoodCategoryController;
 
+use App\Http\Controllers\FoodCategoryController;
 use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\ReservationDetailsController;
@@ -50,6 +51,7 @@ Route::prefix('users')->group(function () {
     Route::post('/restore/{id}', [UserController::class, 'restore']); // Restore a soft-deleted user
 });
 
+Route::get('/counts', [DriverController::class, 'counts'])->name('counts');
 
 Route::get('/roles', GetRoles::class)->name('role.index');
 

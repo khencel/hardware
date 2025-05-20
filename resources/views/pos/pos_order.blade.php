@@ -1043,7 +1043,7 @@
             
                     return;
                 }
-            
+
                 // Show the payment method modal
                 document.getElementById('paymentModal').style.display = 'block';
             });
@@ -1597,7 +1597,7 @@
 
             const referenceNumber = selectedMethod !== 'Cash' ? document.getElementById('refNumber').value.trim() : null;
             const customerNameX = selectedMethod === 'Credit' ? customerName :  customerNameInputed;
-
+        
             return {
                 customer_id: 1,
                 customer_name: customerNameX,
@@ -1811,9 +1811,12 @@
                         customerSelect.value = data.customer_id;
                         customerSelect.dispatchEvent(new Event('change'));
                     }
-        
+                    const customerNameInput = document.getElementById('customerName');
+                    if (customerNameInput) {
+                        customerNameInput.value = data.customer_name || '';
+                    }
                     cart = [];
-        
+                    
                     data.items.forEach(item => {
                         cart.push({
                             id: item.id,

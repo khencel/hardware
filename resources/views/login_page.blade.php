@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hardware</title>
+    <title>{{ $globalOptions['company_name'] ?? 'Hardware' }}</title>
 
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
@@ -16,9 +16,11 @@
 
 <body>
     <div class="wrapper">
-        <div class="row justify-content-center">
-            <div class="col-8">
-                {{-- <img class="img-fluid" src="pantukan_logo.png" alt=""> --}}
+       <div class="row justify-content-center mt-5 mb-4">
+            <div class="col-8 text-center">
+                <h1 class="company-name">
+                    {{ $globalOptions['company_name'] ?? 'Hardware' }}
+                </h1>
             </div>
         </div>
         <form action="{{ route('auth.login') }}" method="POST">

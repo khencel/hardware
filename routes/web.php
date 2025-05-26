@@ -22,6 +22,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\OptionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LeisureController;
 use App\Http\Controllers\PackageController;
@@ -147,7 +148,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('taxes', TaxController::class);
     Route::resource('users', UserManagementController::class);
     Route::resource('purchase-orders', PurchaseOrderController::class);
-    
+    Route::resource('option', OptionController::class);
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity.logs');
     Route::get('/profile', [UserController::class, 'edit'])->name('profile.view'); //edit profile
     Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('users.profile');

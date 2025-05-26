@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title> Hardware </title>
+    <title>{{ $globalOptions['company_name'] ?? 'Fallback Co.' }} </title>
     <link rel="stylesheet" href="{{ asset('css/homepage_view.css') }}">
     <!-- Boxicons CDN Link -->
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
@@ -131,7 +131,7 @@
     <div class="sidebar {{ request()->is('booking') ? 'active' : '' }}">
         <div class="logo-details">
             {{-- <img src="{{ asset('img/pantukan_logo.png') }}" style="width: 50px;" alt=""> --}}
-            <span class="logo_name">Hardware</span>
+            <span class="logo_name">{{ $globalOptions['company_name'] ?? 'Hardware' }}</span>
         </div>
         {{-- navigation  --}}
         @include('navigation')

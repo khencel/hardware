@@ -403,7 +403,7 @@
                             <div class="receipt">
                                 <div class="receipt-header">
                                 ${rePrint ? `
-                                    <h2>STORE NAME</h2>
+                                    <h2>{{ $globalOptions['company_name'] ?? 'Hardware' }}</h2>
                                     <p>123 Main Street</p>
                                     <p>City, State 12345</p>
                                     <p>Tel: (123) 456-7890</p>

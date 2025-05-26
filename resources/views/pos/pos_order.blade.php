@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple POS System</title>
+    <title>{{ $globalOptions['company_name'] ?? 'Hardware' }}</title>
     <link rel="stylesheet" href="{{ asset('css/pos.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1181,6 +1181,7 @@
                     });
                     return;
                 }
+                
                 holdModal.style.display = 'block';
             });
             
@@ -1678,7 +1679,7 @@
             const { date, time } = formatDateTime(orderDetails.date);
             return `
                 <div class="receipt-header">
-                    <h2>STORE NAME</h2>
+                    <h2>{{ $globalOptions['company_name'] ?? 'Fallback Co.' }}</h2>
                     <p>123 Main Street</p>
                     <p>City, State 12345</p>
                     <p>Tel: (123) 456-7890</p>

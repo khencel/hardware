@@ -58,7 +58,6 @@
                     </td>
                 @endforeach
                 <td class="text-center">
-
                     <div class="d-flex justify-content-center flex-wrap gap-1">
                         @if (Route::currentRouteName() === 'customers.index')
                             <a href="javascript:void(0);" 

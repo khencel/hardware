@@ -129,6 +129,13 @@
                         'icon' => 'bx bx-history',
                         'roles' => [],
                     ],
+                    [
+                        'url' => '/option',
+                        'name' => 'option',
+                        'label' => 'options',
+                        'icon' => 'bx bx-cog',
+                        'roles' => [12],
+                    ],
                 ],
             ],
         ];

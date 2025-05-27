@@ -3,10 +3,12 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\TaxSeeder;
 use Illuminate\Database\Seeder;
 use Database\Seeders\FoodSeeder;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\RoomSeeder;
+use Database\Seeders\OptionSeeder;
 use Database\Seeders\DiscountSeeder;
 use Database\Seeders\AdminUserSeeder;
 use Database\Seeders\InventorySeeder;
@@ -29,6 +31,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             // RoomSeeder::class,
             SupervisorUserSeeder::class,
+            TaxSeeder::class,
+            OptionSeeder::class,
             // Add your other seeders here
         ]);
     }
